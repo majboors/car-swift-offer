@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Bell } from "lucide-react";
@@ -10,9 +11,9 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center">
               <img 
-                src="https://www.carsales.com.au/wwwroot/images/logos/carsales-logo.svg" 
+                src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg" 
                 alt="Snap My Car" 
-                className="h-8 w-auto"
+                className="h-12 w-auto object-contain"
               />
             </Link>
             <div className="hidden md:block ml-10">

@@ -15,16 +15,16 @@ const CategoryStrip = () => {
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex overflow-x-auto space-x-8 pb-4 scrollbar-hide">
         {categories.map((category) => (
-          <div key={category.name} className="flex flex-col items-center min-w-[100px]">
-            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-2 hover:bg-gray-200 transition-colors">
-              <img src={category.image} alt={category.name} className="w-12 h-12 object-contain" />
+          <div key={category.name} className="flex flex-col items-center min-w-[140px]">
+            <div className="w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center mb-3 hover:bg-gray-200 transition-colors">
+              <img src={category.image} alt={category.name} className="w-24 h-24 object-contain" />
             </div>
-            <span className="text-sm text-gray-700">{category.name}</span>
+            <span className="text-base text-gray-700 font-medium">{category.name}</span>
           </div>
         ))}
       </div>
       <div className="text-center mt-4">
-        <a href="#" className="text-[#007ac8] hover:text-[#0069b4]">
+        <a href="#" className="text-[#007ac8] hover:text-[#0069b4] font-semibold">
           New: Quiz for a car match
         </a>
       </div>
