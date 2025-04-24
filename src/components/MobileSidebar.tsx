@@ -6,9 +6,13 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarSeparator,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
 import { ChevronRight, Home, LogIn, CarFront, ShoppingBag, Bell, User, Search, CircleHelp } from "lucide-react";
+import { useState } from "react";
 
 const buyDropdownItems = [
   { title: "All cars for sale", href: "/" },
@@ -50,7 +54,12 @@ const showroomDropdownItems = [
 
 export function MobileSidebar() {
   const location = useLocation();
+  const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
   const isCurrentPath = (path: string) => location.pathname === path;
+
+  const toggleMenu = (menuName: string) => {
+    setExpandedMenu(expandedMenu === menuName ? null : menuName);
+  };
 
   return (
     <Sidebar>
@@ -90,51 +99,99 @@ export function MobileSidebar() {
           </SidebarMenuItem>
 
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link to="/" className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-3">
-                  <ShoppingBag className="h-5 w-5" />
-                  <span className="text-base">Buy</span>
-                </div>
-                <ChevronRight className="h-5 w-5" />
-              </Link>
+            <SidebarMenuButton 
+              onClick={() => toggleMenu('buy')} 
+              className="flex items-center justify-between w-full"
+            >
+              <div className="flex items-center gap-3">
+                <ShoppingBag className="h-5 w-5" />
+                <span className="text-base">Buy</span>
+              </div>
+              <ChevronRight className={`h-5 w-5 transform transition-transform ${expandedMenu === 'buy' ? 'rotate-90' : ''}`} />
             </SidebarMenuButton>
+            {expandedMenu === 'buy' && (
+              <SidebarMenuSub>
+                {buyDropdownItems.map((item) => (
+                  <SidebarMenuSubItem key={item.title}>
+                    <SidebarMenuSubButton asChild>
+                      <Link to={item.href}>{item.title}</Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                ))}
+              </SidebarMenuSub>
+            )}
           </SidebarMenuItem>
 
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link to="/" className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-3">
-                  <Bell className="h-5 w-5" />
-                  <span className="text-base">Sell</span>
-                </div>
-                <ChevronRight className="h-5 w-5" />
-              </Link>
+            <SidebarMenuButton 
+              onClick={() => toggleMenu('sell')} 
+              className="flex items-center justify-between w-full"
+            >
+              <div className="flex items-center gap-3">
+                <Bell className="h-5 w-5" />
+                <span className="text-base">Sell</span>
+              </div>
+              <ChevronRight className={`h-5 w-5 transform transition-transform ${expandedMenu === 'sell' ? 'rotate-90' : ''}`} />
             </SidebarMenuButton>
+            {expandedMenu === 'sell' && (
+              <SidebarMenuSub>
+                {sellDropdownItems.map((item) => (
+                  <SidebarMenuSubItem key={item.title}>
+                    <SidebarMenuSubButton asChild>
+                      <Link to={item.href}>{item.title}</Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                ))}
+              </SidebarMenuSub>
+            )}
           </SidebarMenuItem>
 
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link to="/" className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-3">
-                  <Search className="h-5 w-5" />
-                  <span className="text-base">Research</span>
-                </div>
-                <ChevronRight className="h-5 w-5" />
-              </Link>
+            <SidebarMenuButton 
+              onClick={() => toggleMenu('research')} 
+              className="flex items-center justify-between w-full"
+            >
+              <div className="flex items-center gap-3">
+                <Search className="h-5 w-5" />
+                <span className="text-base">Research</span>
+              </div>
+              <ChevronRight className={`h-5 w-5 transform transition-transform ${expandedMenu === 'research' ? 'rotate-90' : ''}`} />
             </SidebarMenuButton>
+            {expandedMenu === 'research' && (
+              <SidebarMenuSub>
+                {researchDropdownItems.map((item) => (
+                  <SidebarMenuSubItem key={item.title}>
+                    <SidebarMenuSubButton asChild>
+                      <Link to={item.href}>{item.title}</Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                ))}
+              </SidebarMenuSub>
+            )}
           </SidebarMenuItem>
 
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link to="/" className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-3">
-                  <Bell className="h-5 w-5" />
-                  <span className="text-base">Showroom</span>
-                </div>
-                <ChevronRight className="h-5 w-5" />
-              </Link>
+            <SidebarMenuButton 
+              onClick={() => toggleMenu('showroom')} 
+              className="flex items-center justify-between w-full"
+            >
+              <div className="flex items-center gap-3">
+                <Bell className="h-5 w-5" />
+                <span className="text-base">Showroom</span>
+              </div>
+              <ChevronRight className={`h-5 w-5 transform transition-transform ${expandedMenu === 'showroom' ? 'rotate-90' : ''}`} />
             </SidebarMenuButton>
+            {expandedMenu === 'showroom' && (
+              <SidebarMenuSub>
+                {showroomDropdownItems.map((item) => (
+                  <SidebarMenuSubItem key={item.title}>
+                    <SidebarMenuSubButton asChild>
+                      <Link to={item.href}>{item.title}</Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                ))}
+              </SidebarMenuSub>
+            )}
           </SidebarMenuItem>
 
           <SidebarMenuItem>
