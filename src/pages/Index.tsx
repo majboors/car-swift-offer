@@ -16,9 +16,11 @@ const Index = () => {
       <TrustedBanner />
       <Navbar />
       <main className="flex-grow">
-        <HeroSection />
-        <div className="container mx-auto px-4 -mt-16 relative z-10">
-          <SearchForm />
+        <div className="mt-0"> {/* Removed top margin */}
+          <HeroSection />
+          <div className="container mx-auto px-4 -mt-16 relative z-10">
+            <SearchForm />
+          </div>
         </div>
         <CategoryStrip />
         <SaveSearchPrompt />

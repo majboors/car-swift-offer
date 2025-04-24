@@ -12,9 +12,11 @@ const ValueMyCar = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-grow">
-        <InstantOfferHero />
-        <div className="container mx-auto px-4">
+      <main className="flex-grow mt-0"> {/* Added mt-0 to remove margin */}
+        <div className="pt-0"> {/* Removed top padding */}
+          <InstantOfferHero />
+        </div>
+        <div className="container mx-auto px-4 mt-0"> {/* Added mt-0 to remove margin */}
           <InstantOfferFeatures />
           <InstantOfferSteps />
           <InstantOfferFAQ />
