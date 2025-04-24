@@ -17,7 +17,9 @@ const Index = () => {
       <Navbar />
       <main className="flex-grow">
         <HeroSection />
-        <SearchForm />
+        <div className="container mx-auto px-4 -mt-16 relative z-10">
+          <SearchForm />
+        </div>
         <CategoryStrip />
         <SaveSearchPrompt />
         <CarValuationSection />

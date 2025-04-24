@@ -12,10 +12,14 @@ const ValueMyCar = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <InstantOfferHero />
-      <InstantOfferFeatures />
-      <InstantOfferSteps />
-      <InstantOfferFAQ />
+      <main className="flex-grow">
+        <InstantOfferHero />
+        <div className="container mx-auto px-4">
+          <InstantOfferFeatures />
+          <InstantOfferSteps />
+          <InstantOfferFAQ />
+        </div>
+      </main>
       <Footer />
     </div>
   );
