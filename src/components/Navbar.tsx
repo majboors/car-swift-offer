@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Bell, Menu } from "lucide-react";
@@ -70,17 +71,17 @@ const Navbar = () => {
 
   return (
     <SidebarProvider defaultOpen={false}>
-      <div className="w-full border-b-0">
-        <nav className="border-b-0">
+      <div className="w-full">
+        <nav className="py-0">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-12">
+            <div className="flex justify-between items-center h-10">
               <div className="flex items-center">
                 {isMobile && <SidebarTrigger />}
                 <Link to="/" className="flex items-center">
                   <img
                     src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg"
                     alt="Snap My Car"
-                    className="h-8 w-auto max-w-full object-contain"
+                    className="h-7 w-auto max-w-full object-contain"
                   />
                 </Link>
                 <div className="hidden md:block ml-10">
@@ -232,11 +233,11 @@ const Navbar = () => {
                 </div>
               </div>
               <div className="flex items-center space-x-4">
-                <Button variant="ghost" size="icon">
-                  <Bell className="w-5 h-5" />
+                <Button variant="ghost" size="icon" className="h-7 w-7">
+                  <Bell className="w-4 h-4" />
                 </Button>
-                <Button variant="ghost">Sign up/Log in</Button>
-                <Button className="bg-[#007ac8] hover:bg-[#0069b4]">
+                <Button variant="ghost" className="h-7 py-0">Sign up/Log in</Button>
+                <Button className="bg-[#007ac8] hover:bg-[#0069b4] h-7 py-0">
                   Sell my car
                 </Button>
               </div>
