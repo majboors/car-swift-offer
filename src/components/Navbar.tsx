@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Bell, Menu } from "lucide-react";
@@ -71,84 +70,27 @@ const Navbar = () => {
 
   return (
     <SidebarProvider defaultOpen={false}>
-      <div className="w-full border-0">
-        <nav className="py-0 m-0">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-8">
-              <div className="flex items-center">
-                {isMobile && <SidebarTrigger className="h-6 w-6" />}
-                <Link to="/" className="flex items-center">
-                  <img
-                    src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg"
-                    alt="Snap My Car"
-                    className="h-6 w-auto max-w-full object-contain"
-                  />
-                </Link>
-                <div className="hidden md:block ml-6">
-                  <NavigationMenu className="h-auto">
-                    <NavigationMenuList className="h-auto">
-                      <NavigationMenuItem>
-                        <NavigationMenuTrigger className="h-7 py-0">Buy</NavigationMenuTrigger>
-                        <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md">
-                          <div className="grid grid-cols-3 gap-4 p-4 w-[800px]">
-                            <div>
-                              {buyDropdownItems.map((item) => (
-                                <Link
-                                  key={item.title}
-                                  to={item.href}
-                                  className="block py-2 text-sm hover:text-[#007ac8]"
-                                >
-                                  {item.title}
-                                </Link>
-                              ))}
-                            </div>
-                            <div>
-                              <h3 className="font-medium mb-2">Popular makes</h3>
-                              {popularMakes.map((make) => (
-                                <Link
-                                  key={make}
-                                  to="/"
-                                  className="block py-1 text-sm hover:text-[#007ac8]"
-                                >
-                                  {make}
-                                </Link>
-                              ))}
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <h3 className="font-medium mb-2">Body types</h3>
-                                {bodyTypes.map((type) => (
-                                  <Link
-                                    key={type}
-                                    to="/"
-                                    className="block py-1 text-sm hover:text-[#007ac8]"
-                                  >
-                                    {type}
-                                  </Link>
-                                ))}
-                              </div>
-                              <div>
-                                <h3 className="font-medium mb-2">Location</h3>
-                                {locations.map((location) => (
-                                  <Link
-                                    key={location}
-                                    to="/"
-                                    className="block py-1 text-sm hover:text-[#007ac8]"
-                                  >
-                                    {location}
-                                  </Link>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        </NavigationMenuContent>
-                      </NavigationMenuItem>
-
-                      <NavigationMenuItem>
-                        <NavigationMenuTrigger className="h-7 py-0">Sell</NavigationMenuTrigger>
-                        <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md p-4">
-                          <div className="w-48">
-                            {sellDropdownItems.map((item) => (
+      <div className="w-full">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-8">
+          <div className="flex justify-between items-center h-8">
+            <div className="flex items-center">
+              {isMobile && <SidebarTrigger className="h-5 w-5" />}
+              <Link to="/" className="flex items-center">
+                <img
+                  src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg"
+                  alt="Snap My Car"
+                  className="h-5 w-auto max-w-full object-contain"
+                />
+              </Link>
+              <div className="hidden md:block ml-4">
+                <NavigationMenu className="h-auto">
+                  <NavigationMenuList className="h-auto">
+                    <NavigationMenuItem>
+                      <NavigationMenuTrigger className="h-6 py-0 text-xs">Buy</NavigationMenuTrigger>
+                      <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md">
+                        <div className="grid grid-cols-3 gap-4 p-4 w-[800px]">
+                          <div>
+                            {buyDropdownItems.map((item) => (
                               <Link
                                 key={item.title}
                                 to={item.href}
@@ -158,57 +100,21 @@ const Navbar = () => {
                               </Link>
                             ))}
                           </div>
-                        </NavigationMenuContent>
-                      </NavigationMenuItem>
-
-                      <NavigationMenuItem>
-                        <NavigationMenuTrigger className="h-7 py-0">Research</NavigationMenuTrigger>
-                        <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md">
-                          <div className="grid grid-cols-2 gap-4 p-4 w-[600px]">
-                            <div>
-                              {researchDropdownItems.map((item) => (
-                                <Link
-                                  key={item.title}
-                                  to={item.href}
-                                  className="block py-2 text-sm hover:text-[#007ac8]"
-                                >
-                                  {item.title}
-                                </Link>
-                              ))}
-                            </div>
-                            <div>
-                              <h3 className="font-medium mb-2">Popular makes</h3>
-                              {popularMakes.map((make) => (
-                                <Link
-                                  key={make}
-                                  to="/"
-                                  className="block py-1 text-sm hover:text-[#007ac8]"
-                                >
-                                  {make}
-                                </Link>
-                              ))}
-                            </div>
+                          <div>
+                            <h3 className="font-medium mb-2">Popular makes</h3>
+                            {popularMakes.map((make) => (
+                              <Link
+                                key={make}
+                                to="/"
+                                className="block py-1 text-sm hover:text-[#007ac8]"
+                              >
+                                {make}
+                              </Link>
+                            ))}
                           </div>
-                        </NavigationMenuContent>
-                      </NavigationMenuItem>
-
-                      <NavigationMenuItem>
-                        <NavigationMenuTrigger className="h-7 py-0">Showroom</NavigationMenuTrigger>
-                        <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md">
-                          <div className="grid grid-cols-2 gap-4 p-4 w-[600px]">
+                          <div className="grid grid-cols-2 gap-4">
                             <div>
-                              {showroomDropdownItems.map((item) => (
-                                <Link
-                                  key={item.title}
-                                  to={item.href}
-                                  className="block py-2 text-sm hover:text-[#007ac8]"
-                                >
-                                  {item.title}
-                                </Link>
-                              ))}
-                            </div>
-                            <div>
-                              <h3 className="font-medium mb-2">Popular body types</h3>
+                              <h3 className="font-medium mb-2">Body types</h3>
                               {bodyTypes.map((type) => (
                                 <Link
                                   key={type}
@@ -219,28 +125,119 @@ const Navbar = () => {
                                 </Link>
                               ))}
                             </div>
+                            <div>
+                              <h3 className="font-medium mb-2">Location</h3>
+                              {locations.map((location) => (
+                                <Link
+                                  key={location}
+                                  to="/"
+                                  className="block py-1 text-sm hover:text-[#007ac8]"
+                                >
+                                  {location}
+                                </Link>
+                              ))}
+                            </div>
                           </div>
-                        </NavigationMenuContent>
-                      </NavigationMenuItem>
+                        </div>
+                      </NavigationMenuContent>
+                    </NavigationMenuItem>
 
-                      <NavigationMenuItem>
-                        <Link to="/value-my-car" className="text-gray-700 hover:text-[#007ac8] py-0 px-4 block text-sm">
-                          Value my car
-                        </Link>
-                      </NavigationMenuItem>
-                    </NavigationMenuList>
-                  </NavigationMenu>
-                </div>
+                    <NavigationMenuItem>
+                      <NavigationMenuTrigger className="h-6 py-0 text-xs">Sell</NavigationMenuTrigger>
+                      <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md p-4">
+                        <div className="w-48">
+                          {sellDropdownItems.map((item) => (
+                            <Link
+                              key={item.title}
+                              to={item.href}
+                              className="block py-2 text-sm hover:text-[#007ac8]"
+                            >
+                              {item.title}
+                            </Link>
+                          ))}
+                        </div>
+                      </NavigationMenuContent>
+                    </NavigationMenuItem>
+
+                    <NavigationMenuItem>
+                      <NavigationMenuTrigger className="h-6 py-0 text-xs">Research</NavigationMenuTrigger>
+                      <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md">
+                        <div className="grid grid-cols-2 gap-4 p-4 w-[600px]">
+                          <div>
+                            {researchDropdownItems.map((item) => (
+                              <Link
+                                key={item.title}
+                                to={item.href}
+                                className="block py-2 text-sm hover:text-[#007ac8]"
+                              >
+                                {item.title}
+                              </Link>
+                            ))}
+                          </div>
+                          <div>
+                            <h3 className="font-medium mb-2">Popular makes</h3>
+                            {popularMakes.map((make) => (
+                              <Link
+                                key={make}
+                                to="/"
+                                className="block py-1 text-sm hover:text-[#007ac8]"
+                              >
+                                {make}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      </NavigationMenuContent>
+                    </NavigationMenuItem>
+
+                    <NavigationMenuItem>
+                      <NavigationMenuTrigger className="h-6 py-0 text-xs">Showroom</NavigationMenuTrigger>
+                      <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md">
+                        <div className="grid grid-cols-2 gap-4 p-4 w-[600px]">
+                          <div>
+                            {showroomDropdownItems.map((item) => (
+                              <Link
+                                key={item.title}
+                                to={item.href}
+                                className="block py-2 text-sm hover:text-[#007ac8]"
+                              >
+                                {item.title}
+                              </Link>
+                            ))}
+                          </div>
+                          <div>
+                            <h3 className="font-medium mb-2">Popular body types</h3>
+                            {bodyTypes.map((type) => (
+                              <Link
+                                key={type}
+                                to="/"
+                                className="block py-1 text-sm hover:text-[#007ac8]"
+                              >
+                                {type}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      </NavigationMenuContent>
+                    </NavigationMenuItem>
+
+                    <NavigationMenuItem>
+                      <Link to="/value-my-car" className="text-gray-700 hover:text-[#007ac8] py-0 px-3 block text-xs">
+                        Value my car
+                      </Link>
+                    </NavigationMenuItem>
+                  </NavigationMenuList>
+                </NavigationMenu>
               </div>
-              <div className="flex items-center space-x-2">
-                <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
-                  <Bell className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" className="h-6 py-0 text-sm px-2">Sign up/Log in</Button>
-                <Button className="bg-[#007ac8] hover:bg-[#0069b4] h-6 py-0 text-sm px-2">
-                  Sell my car
-                </Button>
-              </div>
+            </div>
+            <div className="flex items-center space-x-1">
+              <Button variant="ghost" size="icon" className="h-5 w-5 p-0">
+                <Bell className="w-3 h-3" />
+              </Button>
+              <Button variant="ghost" className="h-5 py-0 text-xs px-1">Sign up/Log in</Button>
+              <Button className="bg-[#007ac8] hover:bg-[#0069b4] h-5 py-0 text-xs px-1">
+                Sell my car
+              </Button>
             </div>
           </div>
         </nav>
