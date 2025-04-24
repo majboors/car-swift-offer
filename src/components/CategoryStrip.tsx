@@ -1,4 +1,6 @@
 
+import { ScrollArea } from "@/components/ui/scroll-area";
+
 const categories = [
   { name: "Family", image: "https://resource.csnstatic.com/mobile/carsales/api/home-categories/Family.png" },
   { name: "First Car", image: "https://resource.csnstatic.com/mobile/carsales/api/home-categories/First.png" },
@@ -13,16 +15,18 @@ const categories = [
 const CategoryStrip = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex overflow-x-auto space-x-8 pb-4 no-scrollbar">
-        {categories.map((category) => (
-          <div key={category.name} className="flex flex-col items-center min-w-[140px] cursor-pointer">
-            <div className="w-36 h-36 bg-gray-100 rounded-full flex items-center justify-center mb-3 hover:bg-gray-200 transition-colors">
-              <img src={category.image} alt={category.name} className="w-28 h-28 object-contain" />
+      <ScrollArea className="w-full">
+        <div className="flex space-x-8 pb-4 pr-8" style={{ minWidth: "max-content" }}>
+          {categories.map((category) => (
+            <div key={category.name} className="flex flex-col items-center min-w-[160px] cursor-pointer">
+              <div className="w-40 h-40 bg-gray-100 rounded-full flex items-center justify-center mb-3 hover:bg-gray-200 transition-colors">
+                <img src={category.image} alt={category.name} className="w-32 h-32 object-contain" />
+              </div>
+              <span className="text-base text-gray-700 font-medium">{category.name}</span>
             </div>
-            <span className="text-base text-gray-700 font-medium">{category.name}</span>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </ScrollArea>
       <div className="text-center mt-4">
         <a href="#" className="text-[#007ac8] hover:text-[#0069b4] font-semibold">
           New: Quiz for a car match
