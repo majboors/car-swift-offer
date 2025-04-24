@@ -1,7 +1,9 @@
-
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Bell } from "lucide-react";
+import { Bell, Menu } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { MobileSidebar } from "./MobileSidebar";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -64,176 +66,186 @@ const locations = [
 ];
 
 const Navbar = () => {
+  const isMobile = useIsMobile();
+
   return (
-    <nav className="border-b">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center">
-              <img
-                src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg"
-                alt="Snap My Car"
-                className="h-14 w-auto max-w-full object-contain"
-              />
-            </Link>
-            <div className="hidden md:block ml-10">
-              <NavigationMenu>
-                <NavigationMenuList>
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger>Buy</NavigationMenuTrigger>
-                    <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md">
-                      <div className="grid grid-cols-3 gap-4 p-4 w-[800px]">
-                        <div>
-                          {buyDropdownItems.map((item) => (
-                            <Link
-                              key={item.title}
-                              to={item.href}
-                              className="block py-2 text-sm hover:text-[#007ac8]"
-                            >
-                              {item.title}
-                            </Link>
-                          ))}
-                        </div>
-                        <div>
-                          <h3 className="font-medium mb-2">Popular makes</h3>
-                          {popularMakes.map((make) => (
-                            <Link
-                              key={make}
-                              to="/"
-                              className="block py-1 text-sm hover:text-[#007ac8]"
-                            >
-                              {make}
-                            </Link>
-                          ))}
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <h3 className="font-medium mb-2">Body types</h3>
-                            {bodyTypes.map((type) => (
+    <SidebarProvider defaultOpen={false}>
+      <div className="w-full">
+        <nav className="border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center">
+                {isMobile && <SidebarTrigger />}
+                <Link to="/" className="flex items-center">
+                  <img
+                    src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg"
+                    alt="Snap My Car"
+                    className="h-14 w-auto max-w-full object-contain"
+                  />
+                </Link>
+                <div className="hidden md:block ml-10">
+                  <NavigationMenu>
+                    <NavigationMenuList>
+                      <NavigationMenuItem>
+                        <NavigationMenuTrigger>Buy</NavigationMenuTrigger>
+                        <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md">
+                          <div className="grid grid-cols-3 gap-4 p-4 w-[800px]">
+                            <div>
+                              {buyDropdownItems.map((item) => (
+                                <Link
+                                  key={item.title}
+                                  to={item.href}
+                                  className="block py-2 text-sm hover:text-[#007ac8]"
+                                >
+                                  {item.title}
+                                </Link>
+                              ))}
+                            </div>
+                            <div>
+                              <h3 className="font-medium mb-2">Popular makes</h3>
+                              {popularMakes.map((make) => (
+                                <Link
+                                  key={make}
+                                  to="/"
+                                  className="block py-1 text-sm hover:text-[#007ac8]"
+                                >
+                                  {make}
+                                </Link>
+                              ))}
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <h3 className="font-medium mb-2">Body types</h3>
+                                {bodyTypes.map((type) => (
+                                  <Link
+                                    key={type}
+                                    to="/"
+                                    className="block py-1 text-sm hover:text-[#007ac8]"
+                                  >
+                                    {type}
+                                  </Link>
+                                ))}
+                              </div>
+                              <div>
+                                <h3 className="font-medium mb-2">Location</h3>
+                                {locations.map((location) => (
+                                  <Link
+                                    key={location}
+                                    to="/"
+                                    className="block py-1 text-sm hover:text-[#007ac8]"
+                                  >
+                                    {location}
+                                  </Link>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </NavigationMenuContent>
+                      </NavigationMenuItem>
+
+                      <NavigationMenuItem>
+                        <NavigationMenuTrigger>Sell</NavigationMenuTrigger>
+                        <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md p-4">
+                          <div className="w-48">
+                            {sellDropdownItems.map((item) => (
                               <Link
-                                key={type}
-                                to="/"
-                                className="block py-1 text-sm hover:text-[#007ac8]"
+                                key={item.title}
+                                to={item.href}
+                                className="block py-2 text-sm hover:text-[#007ac8]"
                               >
-                                {type}
+                                {item.title}
                               </Link>
                             ))}
                           </div>
-                          <div>
-                            <h3 className="font-medium mb-2">Location</h3>
-                            {locations.map((location) => (
-                              <Link
-                                key={location}
-                                to="/"
-                                className="block py-1 text-sm hover:text-[#007ac8]"
-                              >
-                                {location}
-                              </Link>
-                            ))}
+                        </NavigationMenuContent>
+                      </NavigationMenuItem>
+
+                      <NavigationMenuItem>
+                        <NavigationMenuTrigger>Research</NavigationMenuTrigger>
+                        <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md">
+                          <div className="grid grid-cols-2 gap-4 p-4 w-[600px]">
+                            <div>
+                              {researchDropdownItems.map((item) => (
+                                <Link
+                                  key={item.title}
+                                  to={item.href}
+                                  className="block py-2 text-sm hover:text-[#007ac8]"
+                                >
+                                  {item.title}
+                                </Link>
+                              ))}
+                            </div>
+                            <div>
+                              <h3 className="font-medium mb-2">Popular makes</h3>
+                              {popularMakes.map((make) => (
+                                <Link
+                                  key={make}
+                                  to="/"
+                                  className="block py-1 text-sm hover:text-[#007ac8]"
+                                >
+                                  {make}
+                                </Link>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
+                        </NavigationMenuContent>
+                      </NavigationMenuItem>
 
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger>Sell</NavigationMenuTrigger>
-                    <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md p-4">
-                      <div className="w-48">
-                        {sellDropdownItems.map((item) => (
-                          <Link
-                            key={item.title}
-                            to={item.href}
-                            className="block py-2 text-sm hover:text-[#007ac8]"
-                          >
-                            {item.title}
-                          </Link>
-                        ))}
-                      </div>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
+                      <NavigationMenuItem>
+                        <NavigationMenuTrigger>Showroom</NavigationMenuTrigger>
+                        <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md">
+                          <div className="grid grid-cols-2 gap-4 p-4 w-[600px]">
+                            <div>
+                              {showroomDropdownItems.map((item) => (
+                                <Link
+                                  key={item.title}
+                                  to={item.href}
+                                  className="block py-2 text-sm hover:text-[#007ac8]"
+                                >
+                                  {item.title}
+                                </Link>
+                              ))}
+                            </div>
+                            <div>
+                              <h3 className="font-medium mb-2">Popular body types</h3>
+                              {bodyTypes.map((type) => (
+                                <Link
+                                  key={type}
+                                  to="/"
+                                  className="block py-1 text-sm hover:text-[#007ac8]"
+                                >
+                                  {type}
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        </NavigationMenuContent>
+                      </NavigationMenuItem>
 
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger>Research</NavigationMenuTrigger>
-                    <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md">
-                      <div className="grid grid-cols-2 gap-4 p-4 w-[600px]">
-                        <div>
-                          {researchDropdownItems.map((item) => (
-                            <Link
-                              key={item.title}
-                              to={item.href}
-                              className="block py-2 text-sm hover:text-[#007ac8]"
-                            >
-                              {item.title}
-                            </Link>
-                          ))}
-                        </div>
-                        <div>
-                          <h3 className="font-medium mb-2">Popular makes</h3>
-                          {popularMakes.map((make) => (
-                            <Link
-                              key={make}
-                              to="/"
-                              className="block py-1 text-sm hover:text-[#007ac8]"
-                            >
-                              {make}
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger>Showroom</NavigationMenuTrigger>
-                    <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md">
-                      <div className="grid grid-cols-2 gap-4 p-4 w-[600px]">
-                        <div>
-                          {showroomDropdownItems.map((item) => (
-                            <Link
-                              key={item.title}
-                              to={item.href}
-                              className="block py-2 text-sm hover:text-[#007ac8]"
-                            >
-                              {item.title}
-                            </Link>
-                          ))}
-                        </div>
-                        <div>
-                          <h3 className="font-medium mb-2">Popular body types</h3>
-                          {bodyTypes.map((type) => (
-                            <Link
-                              key={type}
-                              to="/"
-                              className="block py-1 text-sm hover:text-[#007ac8]"
-                            >
-                              {type}
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-
-                  <NavigationMenuItem>
-                    <Link to="/value-my-car" className="text-gray-700 hover:text-[#007ac8] py-2 px-4 block">
-                      Value my car
-                    </Link>
-                  </NavigationMenuItem>
-                </NavigationMenuList>
-              </NavigationMenu>
+                      <NavigationMenuItem>
+                        <Link to="/value-my-car" className="text-gray-700 hover:text-[#007ac8] py-2 px-4 block">
+                          Value my car
+                        </Link>
+                      </NavigationMenuItem>
+                    </NavigationMenuList>
+                  </NavigationMenu>
+                </div>
+              </div>
+              <div className="flex items-center space-x-4">
+                <Button variant="ghost" size="icon">
+                  <Bell className="w-5 h-5" />
+                </Button>
+                <Button variant="ghost">Sign up/Log in</Button>
+                <Button className="bg-[#007ac8] hover:bg-[#0069b4]">
+                  Sell my car
+                </Button>
+              </div>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon">
-              <Bell className="w-5 h-5" />
-            </Button>
-            <Button variant="ghost">Sign up/Log in</Button>
-            <Button className="bg-[#007ac8] hover:bg-[#0069b4]">Sell my car</Button>
-          </div>
-        </div>
+        </nav>
+        {isMobile && <MobileSidebar />}
       </div>
-    </nav>
+    </SidebarProvider>
   );
 };
 
