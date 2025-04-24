@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Bell, Menu } from "lucide-react";
@@ -71,17 +70,17 @@ const Navbar = () => {
 
   return (
     <SidebarProvider defaultOpen={false}>
-      <div className="w-full border-b">
+      <div className="w-full border-b-0">
         <nav className="border-b-0">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-14">
+            <div className="flex justify-between items-center h-12">
               <div className="flex items-center">
                 {isMobile && <SidebarTrigger />}
                 <Link to="/" className="flex items-center">
                   <img
                     src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg"
                     alt="Snap My Car"
-                    className="h-10 w-auto max-w-full object-contain"
+                    className="h-8 w-auto max-w-full object-contain"
                   />
                 </Link>
                 <div className="hidden md:block ml-10">
