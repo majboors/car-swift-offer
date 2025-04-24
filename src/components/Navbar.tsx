@@ -71,24 +71,24 @@ const Navbar = () => {
 
   return (
     <SidebarProvider defaultOpen={false}>
-      <div className="w-full">
-        <nav className="py-0">
+      <div className="w-full border-0">
+        <nav className="py-0 m-0">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-10">
+            <div className="flex justify-between items-center h-8">
               <div className="flex items-center">
-                {isMobile && <SidebarTrigger />}
+                {isMobile && <SidebarTrigger className="h-6 w-6" />}
                 <Link to="/" className="flex items-center">
                   <img
                     src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg"
                     alt="Snap My Car"
-                    className="h-7 w-auto max-w-full object-contain"
+                    className="h-6 w-auto max-w-full object-contain"
                   />
                 </Link>
-                <div className="hidden md:block ml-10">
-                  <NavigationMenu>
-                    <NavigationMenuList>
+                <div className="hidden md:block ml-6">
+                  <NavigationMenu className="h-auto">
+                    <NavigationMenuList className="h-auto">
                       <NavigationMenuItem>
-                        <NavigationMenuTrigger>Buy</NavigationMenuTrigger>
+                        <NavigationMenuTrigger className="h-7 py-0">Buy</NavigationMenuTrigger>
                         <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md">
                           <div className="grid grid-cols-3 gap-4 p-4 w-[800px]">
                             <div>
@@ -145,7 +145,7 @@ const Navbar = () => {
                       </NavigationMenuItem>
 
                       <NavigationMenuItem>
-                        <NavigationMenuTrigger>Sell</NavigationMenuTrigger>
+                        <NavigationMenuTrigger className="h-7 py-0">Sell</NavigationMenuTrigger>
                         <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md p-4">
                           <div className="w-48">
                             {sellDropdownItems.map((item) => (
@@ -162,7 +162,7 @@ const Navbar = () => {
                       </NavigationMenuItem>
 
                       <NavigationMenuItem>
-                        <NavigationMenuTrigger>Research</NavigationMenuTrigger>
+                        <NavigationMenuTrigger className="h-7 py-0">Research</NavigationMenuTrigger>
                         <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md">
                           <div className="grid grid-cols-2 gap-4 p-4 w-[600px]">
                             <div>
@@ -193,7 +193,7 @@ const Navbar = () => {
                       </NavigationMenuItem>
 
                       <NavigationMenuItem>
-                        <NavigationMenuTrigger>Showroom</NavigationMenuTrigger>
+                        <NavigationMenuTrigger className="h-7 py-0">Showroom</NavigationMenuTrigger>
                         <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md">
                           <div className="grid grid-cols-2 gap-4 p-4 w-[600px]">
                             <div>
@@ -224,7 +224,7 @@ const Navbar = () => {
                       </NavigationMenuItem>
 
                       <NavigationMenuItem>
-                        <Link to="/value-my-car" className="text-gray-700 hover:text-[#007ac8] py-2 px-4 block">
+                        <Link to="/value-my-car" className="text-gray-700 hover:text-[#007ac8] py-0 px-4 block text-sm">
                           Value my car
                         </Link>
                       </NavigationMenuItem>
@@ -232,12 +232,12 @@ const Navbar = () => {
                   </NavigationMenu>
                 </div>
               </div>
-              <div className="flex items-center space-x-4">
-                <Button variant="ghost" size="icon" className="h-7 w-7">
+              <div className="flex items-center space-x-2">
+                <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
                   <Bell className="w-4 h-4" />
                 </Button>
-                <Button variant="ghost" className="h-7 py-0">Sign up/Log in</Button>
-                <Button className="bg-[#007ac8] hover:bg-[#0069b4] h-7 py-0">
+                <Button variant="ghost" className="h-6 py-0 text-sm px-2">Sign up/Log in</Button>
+                <Button className="bg-[#007ac8] hover:bg-[#0069b4] h-6 py-0 text-sm px-2">
                   Sell my car
                 </Button>
               </div>
