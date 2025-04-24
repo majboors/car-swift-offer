@@ -1,4 +1,5 @@
 
+import React from "react";
 import Navbar from "@/components/Navbar";
 import TrustedBanner from "@/components/TrustedBanner";
 import HeroSection from "@/components/HeroSection";
@@ -16,11 +17,9 @@ const Index = () => {
       <TrustedBanner />
       <Navbar />
       <main className="flex-grow">
-        <div className="mt-0"> {/* Removed top margin */}
-          <HeroSection />
-          <div className="container mx-auto px-4 -mt-16 relative z-10">
-            <SearchForm />
-          </div>
+        <HeroSection />
+        <div className="container mx-auto px-4 -mt-12 relative z-10">
+          <SearchForm />
         </div>
         <CategoryStrip />
         <SaveSearchPrompt />
