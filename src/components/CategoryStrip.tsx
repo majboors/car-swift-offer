@@ -13,11 +13,11 @@ const categories = [
 const CategoryStrip = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex overflow-x-auto space-x-8 pb-4 scrollbar-hide">
+      <div className="flex overflow-x-auto space-x-8 pb-4 no-scrollbar">
         {categories.map((category) => (
-          <div key={category.name} className="flex flex-col items-center min-w-[140px]">
-            <div className="w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center mb-3 hover:bg-gray-200 transition-colors">
-              <img src={category.image} alt={category.name} className="w-24 h-24 object-contain" />
+          <div key={category.name} className="flex flex-col items-center min-w-[140px] cursor-pointer">
+            <div className="w-36 h-36 bg-gray-100 rounded-full flex items-center justify-center mb-3 hover:bg-gray-200 transition-colors">
+              <img src={category.image} alt={category.name} className="w-28 h-28 object-contain" />
             </div>
             <span className="text-base text-gray-700 font-medium">{category.name}</span>
           </div>
