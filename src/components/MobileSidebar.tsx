@@ -1,4 +1,3 @@
-
 import {
   Sidebar,
   SidebarContent,
@@ -6,8 +5,10 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { ChevronRight, Home, LogIn, CarFront, ShoppingBag, Bell, User, Search, Help } from "lucide-react";
 
 const buyDropdownItems = [
   { title: "All cars for sale", href: "/" },
@@ -48,6 +49,9 @@ const showroomDropdownItems = [
 ];
 
 export function MobileSidebar() {
+  const location = useLocation();
+  const isCurrentPath = (path: string) => location.pathname === path;
+
   return (
     <Sidebar>
       <SidebarHeader className="border-b p-4">
@@ -63,53 +67,111 @@ export function MobileSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link to="/value-my-car">Value my car</Link>
+              <Link to="/" className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-3">
+                  <LogIn className="h-5 w-5" />
+                  <span className="text-base">Sign up/Log in</span>
+                </div>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          <div className="px-3 py-2">
-            <h3 className="mb-2 px-4 text-sm font-medium">Buy</h3>
-            {buyDropdownItems.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild>
-                  <Link to={item.href}>{item.title}</Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </div>
+          <SidebarSeparator className="my-4" />
 
-          <div className="px-3 py-2">
-            <h3 className="mb-2 px-4 text-sm font-medium">Sell</h3>
-            {sellDropdownItems.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild>
-                  <Link to={item.href}>{item.title}</Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </div>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link to="/" className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-3">
+                  <Home className="h-5 w-5" />
+                  <span className="text-base">Home</span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
 
-          <div className="px-3 py-2">
-            <h3 className="mb-2 px-4 text-sm font-medium">Research</h3>
-            {researchDropdownItems.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild>
-                  <Link to={item.href}>{item.title}</Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </div>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link to="/" className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-3">
+                  <ShoppingBag className="h-5 w-5" />
+                  <span className="text-base">Buy</span>
+                </div>
+                <ChevronRight className="h-5 w-5" />
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
 
-          <div className="px-3 py-2">
-            <h3 className="mb-2 px-4 text-sm font-medium">Showroom</h3>
-            {showroomDropdownItems.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild>
-                  <Link to={item.href}>{item.title}</Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </div>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link to="/" className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-3">
+                  <Bell className="h-5 w-5" />
+                  <span className="text-base">Sell</span>
+                </div>
+                <ChevronRight className="h-5 w-5" />
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link to="/" className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-3">
+                  <Search className="h-5 w-5" />
+                  <span className="text-base">Research</span>
+                </div>
+                <ChevronRight className="h-5 w-5" />
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link to="/" className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-3">
+                  <Bell className="h-5 w-5" />
+                  <span className="text-base">Showroom</span>
+                </div>
+                <ChevronRight className="h-5 w-5" />
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link 
+                to="/value-my-car" 
+                className={`flex items-center gap-3 ${isCurrentPath('/value-my-car') ? 'text-[#007ac8] font-medium' : ''}`}
+              >
+                <CarFront className="h-5 w-5" />
+                <span className="text-base">Value my car</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link to="/" className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-3">
+                  <User className="h-5 w-5" />
+                  <span className="text-base">My account</span>
+                </div>
+                <ChevronRight className="h-5 w-5" />
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link to="/" className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-3">
+                  <Help className="h-5 w-5" />
+                  <span className="text-base">Help</span>
+                </div>
+                <ChevronRight className="h-5 w-5" />
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
     </Sidebar>
