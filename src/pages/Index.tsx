@@ -5,6 +5,7 @@ import HeroSection from "@/components/HeroSection";
 import SearchForm from "@/components/SearchForm";
 import CategoryStrip from "@/components/CategoryStrip";
 import SaveSearchPrompt from "@/components/SaveSearchPrompt";
+import ShowroomSection from "@/components/ShowroomSection";
 
 const Index = () => {
   return (
@@ -16,6 +17,7 @@ const Index = () => {
         <SearchForm />
         <CategoryStrip />
         <SaveSearchPrompt />
+        <ShowroomSection />
       </main>
     </div>
   );
