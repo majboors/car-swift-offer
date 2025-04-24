@@ -13,7 +13,7 @@ const Navbar = () => {
               <img 
                 src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg" 
                 alt="Snap My Car" 
-                className="h-16 w-auto object-contain"
+                className="h-20 w-auto object-contain" 
               />
             </Link>
             <div className="hidden md:block ml-10">
