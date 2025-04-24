@@ -8,13 +8,14 @@ import SaveSearchPrompt from "@/components/SaveSearchPrompt";
 import ShowroomSection from "@/components/ShowroomSection";
 import ReviewsSection from "@/components/ReviewsSection";
 import CarValuationSection from "@/components/CarValuationSection";
+import Footer from "@/components/Footer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <TrustedBanner />
       <Navbar />
-      <main>
+      <main className="flex-grow">
         <HeroSection />
         <SearchForm />
         <CategoryStrip />
@@ -23,6 +24,7 @@ const Index = () => {
         <ShowroomSection />
         <ReviewsSection />
       </main>
+      <Footer />
     </div>
   );
 };
