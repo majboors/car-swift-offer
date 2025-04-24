@@ -8,7 +8,7 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
-import { ChevronRight, Home, LogIn, CarFront, ShoppingBag, Bell, User, Search, Help } from "lucide-react";
+import { ChevronRight, Home, LogIn, CarFront, ShoppingBag, Bell, User, Search, CircleHelp } from "lucide-react";
 
 const buyDropdownItems = [
   { title: "All cars for sale", href: "/" },
@@ -165,7 +165,7 @@ export function MobileSidebar() {
             <SidebarMenuButton asChild>
               <Link to="/" className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-3">
-                  <Help className="h-5 w-5" />
+                  <CircleHelp className="h-5 w-5" />
                   <span className="text-base">Help</span>
                 </div>
                 <ChevronRight className="h-5 w-5" />
