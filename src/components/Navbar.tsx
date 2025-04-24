@@ -81,8 +81,8 @@ const Navbar = () => {
                 <NavigationMenuList>
                   <NavigationMenuItem>
                     <NavigationMenuTrigger>Buy</NavigationMenuTrigger>
-                    <NavigationMenuContent className="grid gap-2 p-4">
-                      <div className="grid grid-cols-3 gap-4">
+                    <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md">
+                      <div className="grid grid-cols-3 gap-4 p-4 w-[800px]">
                         <div>
                           {buyDropdownItems.map((item) => (
                             <Link
@@ -138,7 +138,7 @@ const Navbar = () => {
 
                   <NavigationMenuItem>
                     <NavigationMenuTrigger>Sell</NavigationMenuTrigger>
-                    <NavigationMenuContent className="p-4">
+                    <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md p-4">
                       <div className="w-48">
                         {sellDropdownItems.map((item) => (
                           <Link
@@ -155,8 +155,8 @@ const Navbar = () => {
 
                   <NavigationMenuItem>
                     <NavigationMenuTrigger>Research</NavigationMenuTrigger>
-                    <NavigationMenuContent className="grid gap-2 p-4">
-                      <div className="grid grid-cols-2 gap-4">
+                    <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md">
+                      <div className="grid grid-cols-2 gap-4 p-4 w-[600px]">
                         <div>
                           {researchDropdownItems.map((item) => (
                             <Link
@@ -186,8 +186,8 @@ const Navbar = () => {
 
                   <NavigationMenuItem>
                     <NavigationMenuTrigger>Showroom</NavigationMenuTrigger>
-                    <NavigationMenuContent className="grid gap-2 p-4">
-                      <div className="grid grid-cols-2 gap-4">
+                    <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md">
+                      <div className="grid grid-cols-2 gap-4 p-4 w-[600px]">
                         <div>
                           {showroomDropdownItems.map((item) => (
                             <Link
@@ -216,7 +216,7 @@ const Navbar = () => {
                   </NavigationMenuItem>
 
                   <NavigationMenuItem>
-                    <Link to="/value-my-car" className="text-gray-700 hover:text-[#007ac8]">
+                    <Link to="/value-my-car" className="text-gray-700 hover:text-[#007ac8] py-2 px-4 block">
                       Value my car
                     </Link>
                   </NavigationMenuItem>
