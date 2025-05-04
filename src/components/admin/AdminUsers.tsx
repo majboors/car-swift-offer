@@ -60,9 +60,9 @@ export const AdminUsers = () => {
       const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
       // Use the database functions to get all users via admin_get_all_users
-      // We're using `any` as a workaround for the RPC type issue
+      // We need to use record<string, never> to solve the RPC typing issue
       const { data, error } = await supabase
-        .rpc('get_all_users', {} as any);
+        .rpc('get_all_users', {} as Record<string, never>);
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -101,19 +101,19 @@ export const AdminUsers = () => {
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
-        // Call the remove_admin RPC function
+        // Call the remove_admin RPC function with proper typing
         const { error } = await supabase
           .rpc('remove_admin', { 
             user_id_input: userId 
-          } as any);
+          } as { user_id_input: string });
 
         if (error) throw error;
       } else {
-        // Call the add_admin RPC function
+        // Call the add_admin RPC function with proper typing
         const { error } = await supabase
           .rpc('add_admin', { 
             user_id_input: userId 
-          } as any);
+          } as { user_id_input: string });
 
         if (error) throw error;
       }
