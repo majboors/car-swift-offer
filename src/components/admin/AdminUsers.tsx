@@ -56,7 +56,7 @@ export const AdminUsers = () => {
       
       // Use the database functions to get all users via admin_get_all_users
       const { data, error: userError } = await supabase
-        .rpc('get_all_users', {});
+        .rpc('get_all_users', {} as EmptyParams);
 
       if (userError) {
         console.error("Error fetching users:", userError);
@@ -99,7 +99,7 @@ export const AdminUsers = () => {
         const { error } = await supabase
           .rpc('remove_admin', {
             user_id_input: userId
-          });
+          } as AdminUserIdParams);
 
         if (error) throw error;
       } else {
@@ -107,7 +107,7 @@ export const AdminUsers = () => {
         const { error } = await supabase
           .rpc('add_admin', {
             user_id_input: userId
-          });
+          } as AdminUserIdParams);
 
         if (error) throw error;
       }
