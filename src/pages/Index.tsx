@@ -14,24 +14,35 @@ import Footer from "@/components/Footer";
 
 const Index = () => {
   return (
-    <>
+    // A: Root wrapper
+    <div className="outline outline-red-500">
       <TrustedBanner />
-      <Navbar />
 
-      <main>
-        <HeroSection />
-        <div className="container mx-auto px-4 py-8">
-          <SearchForm />
-          <CategoryStrip />
-          <SaveSearchPrompt />
-          <CarValuationSection />
-          <ShowroomSection />
-          <ReviewsSection />
-        </div>
-      </main>
+      {/* B: Navbar + content wrapper */}
+      <div className="outline outline-blue-500">
+        <Navbar />
+
+        {/* C: Main content */}
+        <main className="outline outline-green-500">
+          {/* D: Hero */}
+          <div className="outline outline-yellow-500">
+            <HeroSection />
+          </div>
+
+          {/* E: Inner container */}
+          <div className="container mx-auto px-4 py-8 outline outline-purple-500">
+            <SearchForm />
+            <CategoryStrip />
+            <SaveSearchPrompt />
+            <CarValuationSection />
+            <ShowroomSection />
+            <ReviewsSection />
+          </div>
+        </main>
+      </div>
 
       <Footer />
-    </>
+    </div>
   );
 };
 
