@@ -46,7 +46,9 @@ interface RpcUser {
 }
 
 // Define the input parameter types
-type AdminUserIdParams = { user_id_input: string };
+interface AdminUserIdParams {
+  user_id_input: string;
+}
 
 export const AdminUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -81,7 +83,7 @@ export const AdminUsers = () => {
       
       // Use the database functions to get all users via admin_get_all_users
       const { data, error: userError } = await supabase
-        .rpc('get_all_users');
+        .rpc<RpcUser[]>('get_all_users');
 
       if (userError) {
         console.error("Error fetching users:", userError);
@@ -122,7 +124,7 @@ export const AdminUsers = () => {
       if (currentStatus) {
         // Call the remove_admin RPC function
         const { error } = await supabase
-          .rpc('remove_admin', {
+          .rpc<null, AdminUserIdParams>('remove_admin', {
             user_id_input: userId
           });
 
@@ -130,7 +132,7 @@ export const AdminUsers = () => {
       } else {
         // Call the add_admin RPC function
         const { error } = await supabase
-          .rpc('add_admin', {
+          .rpc<null, AdminUserIdParams>('add_admin', {
             user_id_input: userId
           });
 
