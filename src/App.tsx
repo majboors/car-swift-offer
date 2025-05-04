@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import CarListing from "./pages/CarListing";
 import AddListing from "./pages/AddListing";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/listing/:id" element={<CarListing />} />
             <Route path="/add-listing" element={<AddListing />} />
+            <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
