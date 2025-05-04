@@ -196,6 +196,17 @@ const AddListing = () => {
       return;
     }
     
+    // Validate price is not empty
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      toast({
+        title: "Price required",
+        description: "Please enter a valid price for your listing.",
+        variant: "destructive",
+      });
+      setActiveTab("details");
+      return;
+    }
+    
     setLoading(true);
     
     try {
@@ -367,6 +378,15 @@ const AddListing = () => {
       // Fetch placeholder images
       const testImages = await fetchPlaceholderImages();
       
+      // Make sure price is set properly
+      if (!formData.price || parseFloat(formData.price) <= 0) {
+        // If price isn't set in populateTestData, set a default price
+        setFormData(prev => ({
+          ...prev,
+          price: '49990'
+        }));
+      }
+      
       // Upload images
       const imageUrls = await uploadImages(testImages);
       
@@ -378,7 +398,7 @@ const AddListing = () => {
         return acc;
       }, {});
       
-      // Format the listing data
+      // Format the listing data with guaranteed price value
       const listingData = {
         user_id: user.id,
         title: formData.title || formData.car_name,
@@ -386,7 +406,7 @@ const AddListing = () => {
         make: formData.make,
         model: formData.model,
         year: parseInt(formData.year.toString()),
-        price: parseFloat(formData.price),
+        price: 49990, // Hard-coded price to ensure it's never null
         mileage: formData.mileage ? parseInt(formData.mileage) : null,
         color: formData.color || null,
         transmission: formData.transmission || null,
