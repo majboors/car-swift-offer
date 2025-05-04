@@ -16,13 +16,19 @@ serve(async (req) => {
   try {
     console.log("get_car_listings_with_users function called");
     
-    // Create admin client for direct admin operations
+    // Create admin client for direct admin operations with service role key
     const adminClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
     );
 
-    // Create auth client from request
+    // Create auth client from request for user verification
     const authClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -33,8 +39,10 @@ serve(async (req) => {
       }
     );
     
-    // Verify the user is authenticated
+    // First verify the user is authenticated
     const { data: { user }, error: authError } = await authClient.auth.getUser();
+    
+    console.log("Auth check result:", user ? "User authenticated" : "Auth failed", authError);
     
     if (authError || !user) {
       console.error("Authentication error:", authError);
@@ -46,7 +54,7 @@ serve(async (req) => {
     
     console.log("User authenticated:", user.id);
 
-    // Check if the user is an admin
+    // Then check if the user is an admin
     const { data: admins, error: adminsError } = await adminClient
       .from('admins')
       .select('*')
@@ -54,8 +62,16 @@ serve(async (req) => {
     
     console.log("Admin check data:", admins, "Admin check error:", adminsError);
 
-    if (adminsError || !admins || admins.length === 0) {
-      console.error("Admin check failed:", adminsError || "User is not an admin");
+    if (adminsError) {
+      console.error("Error checking admin status:", adminsError);
+      return new Response(
+        JSON.stringify({ error: "Error checking admin status" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    if (!admins || admins.length === 0) {
+      console.error("User is not an admin:", user.id);
       return new Response(
         JSON.stringify({ error: "Not authorized - admin access required" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -79,8 +95,8 @@ serve(async (req) => {
 
     console.log("Successfully fetched listings, count:", listings?.length || 0);
 
-    // Get all users for adding email
-    const { data: { users }, error: usersError } = await adminClient.auth.admin.listUsers();
+    // Get all users for adding email using admin.listUsers()
+    const { data, error: usersError } = await adminClient.auth.admin.listUsers();
     
     if (usersError) {
       console.error("Error fetching users for mapping:", usersError);
@@ -92,7 +108,7 @@ serve(async (req) => {
 
     // Create a map for quick user lookup
     const userMap = new Map();
-    users.forEach((user) => {
+    data.users.forEach((user) => {
       userMap.set(user.id, user.email);
     });
 
@@ -106,7 +122,7 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify(enhancedListings),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
     console.error("Error in get_car_listings_with_users function:", error);
