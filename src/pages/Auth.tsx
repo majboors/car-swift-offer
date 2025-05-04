@@ -14,6 +14,7 @@ const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   
   const handleAuth = async (e: React.FormEvent) => {
@@ -25,6 +26,11 @@ const Auth = () => {
         const { error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: {
+              username,
+            }
+          }
         });
         
         if (error) throw error;
@@ -89,6 +95,26 @@ const Auth = () => {
                   className="mb-2"
                 />
               </div>
+              
+              {isSignUp && (
+                <div className="mb-4">
+                  <label htmlFor="username" className="sr-only">
+                    Username
+                  </label>
+                  <Input
+                    id="username"
+                    name="username"
+                    type="text"
+                    autoComplete="username"
+                    required
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Username"
+                    className="mb-2"
+                  />
+                </div>
+              )}
+              
               <div>
                 <label htmlFor="password" className="sr-only">
                   Password

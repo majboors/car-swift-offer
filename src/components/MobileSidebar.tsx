@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Home, CarFront, Plus, LogOut, LogIn, ChevronDown, ChevronUp, Bell, ShoppingBag, Search, CircleHelp, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
+import { Avatar, AvatarFallback } from "./ui/avatar";
 import {
   Collapsible,
   CollapsibleContent,
@@ -13,7 +14,7 @@ import { Button } from "@/components/ui/button";
 
 export function MobileSidebar() {
   const location = useLocation();
-  const { user, signOut } = useAuth();
+  const { user, signOut, username } = useAuth();
   const isCurrentPath = (path: string) => location.pathname === path;
 
   // State to track which dropdowns are open
@@ -29,6 +30,14 @@ export function MobileSidebar() {
       ...prev,
       [dropdown]: !prev[dropdown],
     }));
+  };
+
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (username) {
+      return username.substring(0, 2).toUpperCase();
+    }
+    return user?.email ? user.email.substring(0, 2).toUpperCase() : 'U';
   };
 
   // Navigation items for dropdown menus
@@ -98,7 +107,7 @@ export function MobileSidebar() {
 
   return (
     <div className="h-full bg-white overflow-y-auto">
-      <div className="border-b p-4 flex items-center">
+      <div className="border-b p-4 flex items-center justify-between">
         <Link to="/">
           <img 
             src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg" 
@@ -106,6 +115,18 @@ export function MobileSidebar() {
             className="h-8 w-auto" 
           />
         </Link>
+        {user && (
+          <div className="flex items-center gap-2">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback className="bg-[#007ac8] text-white">
+                {getUserInitials()}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-sm font-medium">
+              {username || user.email?.split('@')[0]}
+            </span>
+          </div>
+        )}
       </div>
       <div className="p-4">
         <nav className="space-y-4">
@@ -357,4 +378,4 @@ export function MobileSidebar() {
       </div>
     </div>
   );
-}
+};

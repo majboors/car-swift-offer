@@ -1,12 +1,14 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from './ui/button';
 import { toast } from '@/hooks/use-toast';
-import { Menu, ChevronDown, Bell } from 'lucide-react';
+import { Menu, ChevronDown, Bell, User } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MobileSidebar } from './MobileSidebar';
+import { Avatar, AvatarFallback } from './ui/avatar';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -16,7 +18,7 @@ import {
 } from "./ui/navigation-menu";
 
 const Navbar: React.FC = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, username } = useAuth();
   const isMobile = useIsMobile();
 
   const handleSignOut = async () => {
@@ -33,6 +35,14 @@ const Navbar: React.FC = () => {
         variant: "destructive",
       });
     }
+  };
+
+  // Get user initials for avatar fallback
+  const getUserInitials = () => {
+    if (username) {
+      return username.substring(0, 2).toUpperCase();
+    }
+    return user?.email ? user.email.substring(0, 2).toUpperCase() : 'U';
   };
 
   // Navigation items for dropdown menus
@@ -274,6 +284,16 @@ const Navbar: React.FC = () => {
             </Button>
             {user ? (
               <>
+                <div className="flex items-center gap-2 mr-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-[#007ac8] text-white">
+                      {getUserInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm font-medium">
+                    {username || user.email?.split('@')[0]}
+                  </span>
+                </div>
                 <Link to="/add-listing">
                   <Button variant="outline" className="border-[#007ac8] text-[#007ac8] hover:bg-[#007ac8] hover:text-white">
                     Add Listing

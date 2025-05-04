@@ -8,6 +8,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  username: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -16,6 +17,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -23,6 +25,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        setUsername(session?.user?.user_metadata?.username ?? null);
         setLoading(false);
       }
     );
@@ -31,6 +34,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      setUsername(session?.user?.user_metadata?.username ?? null);
       setLoading(false);
     });
 
@@ -46,6 +50,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     session,
     loading,
     signOut,
+    username,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
