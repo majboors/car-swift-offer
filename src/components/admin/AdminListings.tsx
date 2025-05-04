@@ -71,9 +71,9 @@ export const AdminListings = () => {
       setFetchError(null);
       
       // Use the database function to get all listings with user emails
-      // Properly type the RPC return with both return type and params type (empty object since no params)
+      // Fix the generic type parameter to match Supabase expectations
       const { data: listingsData, error: listingsError } = await supabase
-        .rpc<RpcListing[], {}>('get_car_listings_with_users', {});
+        .rpc('get_car_listings_with_users');
 
       if (listingsError) {
         console.error("Error fetching listings:", listingsError);
@@ -82,7 +82,8 @@ export const AdminListings = () => {
         return;
       }
       
-      setListings(listingsData || []);
+      // Add type assertion to handle the unknown type
+      setListings(listingsData as Listing[] || []);
     } catch (error) {
       console.error("Error in fetchListings:", error);
       setFetchError("An unexpected error occurred");

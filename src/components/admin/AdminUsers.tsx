@@ -77,9 +77,9 @@ export const AdminUsers = () => {
       const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
       // Use the database functions to get all users via admin_get_all_users
-      // Properly type the RPC return with both return type and params type (empty object since no params)
+      // Fix the generic type parameter to match Supabase expectations
       const { data: userData, error: userError } = await supabase
-        .rpc<RpcUser[], {}>('get_all_users', {});
+        .rpc('get_all_users');
 
       if (userError) {
         console.error("Error fetching users:", userError);
@@ -95,7 +95,8 @@ export const AdminUsers = () => {
       }
 
       // Transform the data to match our User interface
-      const enhancedUsers: User[] = (userData || []).map(user => ({
+      // Add type assertion to handle the unknown type
+      const enhancedUsers: User[] = (userData as RpcUser[] || []).map(user => ({
         id: user.id,
         email: user.email,
         created_at: user.created_at,
@@ -115,15 +116,15 @@ export const AdminUsers = () => {
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
-        // Call the remove_admin RPC function
-        const { error } = await supabase.rpc<void, { user_id_input: string }>('remove_admin', {
+        // Call the remove_admin RPC function with proper typing
+        const { error } = await supabase.rpc('remove_admin', {
           user_id_input: userId
         });
 
         if (error) throw error;
       } else {
-        // Call the add_admin RPC function
-        const { error } = await supabase.rpc<void, { user_id_input: string }>('add_admin', {
+        // Call the add_admin RPC function with proper typing
+        const { error } = await supabase.rpc('add_admin', {
           user_id_input: userId
         });
 
