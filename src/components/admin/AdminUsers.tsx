@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -22,14 +23,11 @@ import {
 } from "@/components/ui/dialog";
 import { 
   RpcUser, 
-  User, 
-  EmptyParams,
-  AdminUserIdParams
+  User
 } from "@/types/admin";
 
-// Define types for our RPC functions
-type EmptyParams = Record<string, never>;
-type AdminUserIdParams = {
+// Define proper types for our RPC calls
+type AdminUserParams = {
   user_id_input: string;
 };
 
@@ -64,9 +62,9 @@ export const AdminUsers = () => {
       // Create a set of admin user IDs for faster lookups
       const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
-      // Use the database functions to get all users via admin_get_all_users
+      // Use the database functions to get all users via RPC
       const { data, error } = await supabase
-        .rpc('get_all_users');
+        .rpc('get_all_users', {});
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -109,7 +107,7 @@ export const AdminUsers = () => {
         const { error } = await supabase
           .rpc('remove_admin', { 
             user_id_input: userId 
-          } as AdminUserIdParams);
+          } as AdminUserParams);
 
         if (error) throw error;
       } else {
@@ -117,7 +115,7 @@ export const AdminUsers = () => {
         const { error } = await supabase
           .rpc('add_admin', { 
             user_id_input: userId 
-          } as AdminUserIdParams);
+          } as AdminUserParams);
 
         if (error) throw error;
       }
