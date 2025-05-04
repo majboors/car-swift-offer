@@ -1,18 +1,14 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from './ui/button';
 import { toast } from '@/hooks/use-toast';
-import { Menu, ChevronDown } from 'lucide-react';
-import { MobileSidebar } from './MobileSidebar';
+import { Menu, ChevronDown, Bell } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu';
+import { MobileSidebar } from './MobileSidebar';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -23,7 +19,7 @@ import {
 
 const Navbar: React.FC = () => {
   const { user, signOut } = useAuth();
-  const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const handleSignOut = async () => {
     try {
@@ -42,177 +38,284 @@ const Navbar: React.FC = () => {
   };
 
   // Navigation items for dropdown menus
-  const buyItems = [
-    { title: "All Cars", href: "/cars" },
-    { title: "New Cars", href: "/cars/new" },
-    { title: "Used Cars", href: "/cars/used" },
-    { title: "Certified Pre-Owned", href: "/cars/certified" },
+  const buyDropdownItems = [
+    { title: "All cars for sale", href: "/cars" },
+    { title: "New cars", href: "/cars/new" },
+    { title: "Used cars", href: "/cars/used" },
+    { title: "Dealer cars", href: "/cars/dealer" },
+    { title: "Private seller cars", href: "/cars/private" },
+    { title: "Electric cars", href: "/cars/electric" },
+    { title: "Finance", href: "/finance" },
+    { title: "Inspections", href: "/inspections" },
   ];
 
-  const sellItems = [
-    { title: "Sell Your Car", href: "/sell" },
-    { title: "Trade In", href: "/trade-in" },
-    { title: "Get Cash Offer", href: "/cash-offer" },
+  const sellDropdownItems = [
+    { title: "Create an ad", href: "/create-ad" },
+    { title: "Get an Instant Offer™", href: "/instant-offer" },
+    { title: "Manage my ad", href: "/manage-ad" },
+    { title: "Value my car", href: "/value-my-car" },
   ];
 
-  const researchItems = [
-    { title: "Compare Cars", href: "/compare" },
-    { title: "Car Reviews", href: "/reviews" },
-    { title: "Buying Guides", href: "/guides" },
+  const researchDropdownItems = [
+    { title: "Research all cars", href: "/research" },
+    { title: "All news and reviews", href: "/news-reviews" },
+    { title: "News", href: "/news" },
+    { title: "Reviews", href: "/reviews" },
+    { title: "Advice", href: "/advice" },
+    { title: "Best cars", href: "/best-cars" },
+    { title: "Owner reviews", href: "/owner-reviews" },
+    { title: "Compare cars", href: "/compare" },
+    { title: "Electric cars", href: "/electric" },
+    { title: "Car of the year", href: "/car-of-year" },
   ];
 
-  const showroomItems = [
-    { title: "Featured Models", href: "/showroom/featured" },
-    { title: "New Arrivals", href: "/showroom/new" },
-    { title: "Special Offers", href: "/showroom/offers" },
+  const showroomDropdownItems = [
+    { title: "Showroom", href: "/showroom" },
+    { title: "Electric cars", href: "/showroom/electric" },
+    { title: "Certified pre-owned", href: "/showroom/certified" },
+    { title: "New car calendar", href: "/showroom/calendar" },
+  ];
+
+  const popularMakes = [
+    "Audi", "BMW", "Ford", "Holden", "Hyundai", "Kia", "Mazda",
+    "Mercedes-Benz", "Mitsubishi", "Nissan", "Tesla", "Toyota"
+  ];
+
+  const bodyTypes = [
+    "Cab Chassis", "Convertible", "Coupe", "Hatch", "Sedan",
+    "SUV", "Ute", "Van", "Wagon"
+  ];
+
+  const locations = [
+    "ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA"
   ];
 
   return (
-    <nav className="bg-white shadow-md">
+    <div className="bg-white shadow-md">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between h-16">
-          {/* Logo and desktop navigation */}
-          <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
-              <Link to="/" className="text-2xl font-bold text-[#007ac8]">
-                Car Swift Offer
-              </Link>
+        <SidebarProvider defaultOpen={false}>
+          <div className="flex justify-between h-16">
+            {/* Logo and desktop navigation */}
+            <div className="flex">
+              <div className="flex-shrink-0 flex items-center">
+                <Link to="/" className="text-2xl font-bold text-[#007ac8]">
+                  Car Swift Offer
+                </Link>
+              </div>
+              
+              {/* Desktop nav links */}
+              <div className="hidden md:ml-6 md:flex md:items-center md:space-x-1">
+                <NavigationMenu>
+                  <NavigationMenuList>
+                    {/* Buy Dropdown */}
+                    <NavigationMenuItem>
+                      <NavigationMenuTrigger className="text-sm font-medium text-gray-700 hover:text-[#007ac8]">
+                        Buy
+                      </NavigationMenuTrigger>
+                      <NavigationMenuContent className="bg-white rounded-md shadow-lg">
+                        <div className="grid grid-cols-3 gap-4 p-4 w-[800px]">
+                          <div>
+                            {buyDropdownItems.map((item) => (
+                              <Link 
+                                key={item.title} 
+                                to={item.href}
+                                className="block py-2 text-sm hover:text-[#007ac8]"
+                              >
+                                {item.title}
+                              </Link>
+                            ))}
+                          </div>
+                          <div>
+                            <h3 className="font-medium mb-2">Popular makes</h3>
+                            {popularMakes.map((make) => (
+                              <Link
+                                key={make}
+                                to="/cars"
+                                className="block py-1 text-sm hover:text-[#007ac8]"
+                              >
+                                {make}
+                              </Link>
+                            ))}
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <h3 className="font-medium mb-2">Body types</h3>
+                              {bodyTypes.map((type) => (
+                                <Link
+                                  key={type}
+                                  to="/cars"
+                                  className="block py-1 text-sm hover:text-[#007ac8]"
+                                >
+                                  {type}
+                                </Link>
+                              ))}
+                            </div>
+                            <div>
+                              <h3 className="font-medium mb-2">Location</h3>
+                              {locations.map((location) => (
+                                <Link
+                                  key={location}
+                                  to="/cars"
+                                  className="block py-1 text-sm hover:text-[#007ac8]"
+                                >
+                                  {location}
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </NavigationMenuContent>
+                    </NavigationMenuItem>
+                    
+                    {/* Sell Dropdown */}
+                    <NavigationMenuItem>
+                      <NavigationMenuTrigger className="text-sm font-medium text-gray-700 hover:text-[#007ac8]">
+                        Sell
+                      </NavigationMenuTrigger>
+                      <NavigationMenuContent className="bg-white rounded-md shadow-lg">
+                        <div className="p-4 w-[200px]">
+                          {sellDropdownItems.map((item) => (
+                            <Link 
+                              key={item.title} 
+                              to={item.href}
+                              className="block py-2 text-sm hover:text-[#007ac8]"
+                            >
+                              {item.title}
+                            </Link>
+                          ))}
+                        </div>
+                      </NavigationMenuContent>
+                    </NavigationMenuItem>
+                    
+                    {/* Research Dropdown */}
+                    <NavigationMenuItem>
+                      <NavigationMenuTrigger className="text-sm font-medium text-gray-700 hover:text-[#007ac8]">
+                        Research
+                      </NavigationMenuTrigger>
+                      <NavigationMenuContent className="bg-white rounded-md shadow-lg">
+                        <div className="grid grid-cols-2 gap-4 p-4 w-[600px]">
+                          <div>
+                            {researchDropdownItems.map((item) => (
+                              <Link 
+                                key={item.title} 
+                                to={item.href}
+                                className="block py-2 text-sm hover:text-[#007ac8]"
+                              >
+                                {item.title}
+                              </Link>
+                            ))}
+                          </div>
+                          <div>
+                            <h3 className="font-medium mb-2">Popular makes</h3>
+                            {popularMakes.slice(0, 8).map((make) => (
+                              <Link
+                                key={make}
+                                to="/research"
+                                className="block py-1 text-sm hover:text-[#007ac8]"
+                              >
+                                {make}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      </NavigationMenuContent>
+                    </NavigationMenuItem>
+                    
+                    {/* Showroom Dropdown */}
+                    <NavigationMenuItem>
+                      <NavigationMenuTrigger className="text-sm font-medium text-gray-700 hover:text-[#007ac8]">
+                        Showroom
+                      </NavigationMenuTrigger>
+                      <NavigationMenuContent className="bg-white rounded-md shadow-lg">
+                        <div className="grid grid-cols-2 gap-4 p-4 w-[500px]">
+                          <div>
+                            {showroomDropdownItems.map((item) => (
+                              <Link 
+                                key={item.title} 
+                                to={item.href}
+                                className="block py-2 text-sm hover:text-[#007ac8]"
+                              >
+                                {item.title}
+                              </Link>
+                            ))}
+                          </div>
+                          <div>
+                            <h3 className="font-medium mb-2">Popular body types</h3>
+                            {bodyTypes.slice(0, 6).map((type) => (
+                              <Link
+                                key={type}
+                                to="/showroom"
+                                className="block py-1 text-sm hover:text-[#007ac8]"
+                              >
+                                {type}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      </NavigationMenuContent>
+                    </NavigationMenuItem>
+                    
+                    {/* Value My Car Link */}
+                    <NavigationMenuItem>
+                      <Link to="/value-my-car" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#007ac8] flex items-center">
+                        Value My Car
+                      </Link>
+                    </NavigationMenuItem>
+                  </NavigationMenuList>
+                </NavigationMenu>
+              </div>
             </div>
             
-            {/* Desktop nav links */}
-            <div className="hidden md:ml-6 md:flex md:items-center md:space-x-1">
-              <NavigationMenu>
-                <NavigationMenuList>
-                  {/* Buy Dropdown */}
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger className="text-sm font-medium text-gray-700 hover:text-[#007ac8]">
-                      Buy
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent className="bg-white rounded-md shadow-lg w-64">
-                      <div className="p-2">
-                        {buyItems.map((item) => (
-                          <Link 
-                            key={item.title} 
-                            to={item.href}
-                            className="block p-2 text-sm text-gray-700 hover:bg-[#f0f9ff] hover:text-[#007ac8] rounded-md"
-                          >
-                            {item.title}
-                          </Link>
-                        ))}
-                      </div>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                  
-                  {/* Sell Dropdown */}
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger className="text-sm font-medium text-gray-700 hover:text-[#007ac8]">
-                      Sell
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent className="bg-white rounded-md shadow-lg w-64">
-                      <div className="p-2">
-                        {sellItems.map((item) => (
-                          <Link 
-                            key={item.title} 
-                            to={item.href}
-                            className="block p-2 text-sm text-gray-700 hover:bg-[#f0f9ff] hover:text-[#007ac8] rounded-md"
-                          >
-                            {item.title}
-                          </Link>
-                        ))}
-                      </div>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                  
-                  {/* Research Dropdown */}
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger className="text-sm font-medium text-gray-700 hover:text-[#007ac8]">
-                      Research
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent className="bg-white rounded-md shadow-lg w-64">
-                      <div className="p-2">
-                        {researchItems.map((item) => (
-                          <Link 
-                            key={item.title} 
-                            to={item.href}
-                            className="block p-2 text-sm text-gray-700 hover:bg-[#f0f9ff] hover:text-[#007ac8] rounded-md"
-                          >
-                            {item.title}
-                          </Link>
-                        ))}
-                      </div>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                  
-                  {/* Showroom Dropdown */}
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger className="text-sm font-medium text-gray-700 hover:text-[#007ac8]">
-                      Showroom
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent className="bg-white rounded-md shadow-lg w-64">
-                      <div className="p-2">
-                        {showroomItems.map((item) => (
-                          <Link 
-                            key={item.title} 
-                            to={item.href}
-                            className="block p-2 text-sm text-gray-700 hover:bg-[#f0f9ff] hover:text-[#007ac8] rounded-md"
-                          >
-                            {item.title}
-                          </Link>
-                        ))}
-                      </div>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                  
-                  {/* Value My Car Link */}
-                  <NavigationMenuItem>
-                    <Link to="/value-my-car" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#007ac8] flex items-center">
-                      Value My Car
-                    </Link>
-                  </NavigationMenuItem>
-                </NavigationMenuList>
-              </NavigationMenu>
+            {/* Right side buttons */}
+            <div className="hidden md:flex md:items-center md:space-x-4">
+              <Button variant="ghost" size="icon" className="h-10 w-10">
+                <Bell className="h-5 w-5" />
+              </Button>
+              {user ? (
+                <>
+                  <Link to="/add-listing">
+                    <Button variant="outline" className="border-[#007ac8] text-[#007ac8] hover:bg-[#007ac8] hover:text-white">
+                      Add Listing
+                    </Button>
+                  </Link>
+                  <Button onClick={handleSignOut} variant="ghost">
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link to="/auth">
+                    <Button variant="ghost" className="h-10 py-2 text-sm">
+                      Sign In / Sign Up
+                    </Button>
+                  </Link>
+                  <Link to="/sell">
+                    <Button className="bg-[#007ac8] hover:bg-[#0069b4]">
+                      Sell My Car
+                    </Button>
+                  </Link>
+                </>
+              )}
+            </div>
+            
+            {/* Mobile menu button */}
+            <div className="flex md:hidden items-center">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="md:hidden">
+                    <Menu className="h-6 w-6" />
+                    <span className="sr-only">Toggle menu</span>
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="p-0 w-full sm:w-80">
+                  <MobileSidebar />
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
-          
-          {/* Right side buttons */}
-          <div className="hidden md:flex md:items-center md:space-x-4">
-            {user ? (
-              <>
-                <Link to="/add-listing">
-                  <Button variant="outline" className="border-[#007ac8] text-[#007ac8] hover:bg-[#007ac8] hover:text-white">
-                    Add Listing
-                  </Button>
-                </Link>
-                <Button onClick={handleSignOut} variant="ghost">
-                  Sign Out
-                </Button>
-              </>
-            ) : (
-              <Link to="/auth">
-                <Button className="bg-[#007ac8] hover:bg-[#0069b4]">
-                  Sign In
-                </Button>
-              </Link>
-            )}
-          </div>
-          
-          {/* Mobile menu button */}
-          <div className="flex md:hidden items-center">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden">
-                  <Menu className="h-6 w-6" />
-                  <span className="sr-only">Toggle menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-full sm:w-80">
-                <MobileSidebar />
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
+        </SidebarProvider>
       </div>
-    </nav>
+    </div>
   );
 };
 
