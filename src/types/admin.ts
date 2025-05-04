@@ -46,4 +46,6 @@ export interface AdminUserIdParams {
   user_id_input: string;
 }
 
+// Empty params type for RPC calls that don't require parameters
 export type EmptyParams = Record<string, never>;
+
