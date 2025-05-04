@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -66,7 +65,7 @@ export const AdminUsers = () => {
       
       // Use the database functions to get all users via RPC
       const { data, error } = await supabase
-        .rpc<RpcUser[], EmptyParams>('get_all_users', {} as EmptyParams);
+        .rpc('get_all_users', {});
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -107,17 +106,17 @@ export const AdminUsers = () => {
       if (currentStatus) {
         // Call the remove_admin RPC function
         const { error } = await supabase
-          .rpc<void, AdminUserIdParams>('remove_admin', { 
+          .rpc('remove_admin', { 
             user_id_input: userId 
-          } as AdminUserIdParams);
+          });
 
         if (error) throw error;
       } else {
         // Call the add_admin RPC function
         const { error } = await supabase
-          .rpc<void, AdminUserIdParams>('add_admin', { 
+          .rpc('add_admin', { 
             user_id_input: userId 
-          } as AdminUserIdParams);
+          });
 
         if (error) throw error;
       }
