@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -61,7 +60,7 @@ export const AdminUsers = () => {
       
       // Use the database functions to get all users via admin_get_all_users
       const result = await supabase
-        .rpc<any>('get_all_users');
+        .rpc<RpcUser[], EmptyParams>('get_all_users', {});
 
       if (result.error) {
         console.error("Error fetching users:", result.error);
@@ -100,17 +99,17 @@ export const AdminUsers = () => {
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
-        // Call the remove_admin RPC function with type assertion
+        // Call the remove_admin RPC function with proper type parameters
         const result = await supabase
-          .rpc<any>('remove_admin', { 
+          .rpc<null, AdminUserIdParams>('remove_admin', { 
             user_id_input: userId 
           });
 
         if (result.error) throw result.error;
       } else {
-        // Call the add_admin RPC function with type assertion
+        // Call the add_admin RPC function with proper type parameters
         const result = await supabase
-          .rpc<any>('add_admin', { 
+          .rpc<null, AdminUserIdParams>('add_admin', { 
             user_id_input: userId 
           });
 
