@@ -7,8 +7,8 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarMenuSub,
-  SidebarMenuSubButton,
   SidebarMenuSubItem,
+  SidebarMenuSubButton,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
@@ -111,7 +111,11 @@ export function MobileSidebar() {
     <Sidebar>
       <SidebarHeader className="border-b p-4 bg-white">
         <Link to="/">
-          <span className="text-xl font-bold text-[#007ac8]">Car Swift Offer</span>
+          <img 
+            src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg" 
+            alt="Car Swift Offer" 
+            className="h-8 w-auto" 
+          />
         </Link>
       </SidebarHeader>
       <SidebarContent className="bg-white">

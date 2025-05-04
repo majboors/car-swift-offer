@@ -99,7 +99,11 @@ const Navbar: React.FC = () => {
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
                 <Link to="/" className="text-2xl font-bold text-[#007ac8]">
-                  Car Swift Offer
+                  <img 
+                    src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg" 
+                    alt="Car Swift Offer" 
+                    className="h-10 w-auto" 
+                  />
                 </Link>
               </div>
               
