@@ -25,15 +25,6 @@ serve(async (req) => {
       }
     );
 
-    // Get user info for logging purposes
-    const { data: { user: authUser }, error: authError } = await supabaseClient.auth.getUser();
-    
-    console.log("Auth user check:", authUser?.id, "Auth error:", authError);
-    
-    if (authError) {
-      console.error("Authentication error:", authError);
-    }
-
     // Always use admin client for admins check - bypass RLS completely
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',

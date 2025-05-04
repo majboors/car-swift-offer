@@ -32,13 +32,16 @@ const Admin = () => {
       }
 
       try {
-        // First ensure default admin exists
+        console.log("Admin page - Checking for user:", user.id);
+        
+        // First create default admin if needed
         await createDefaultAdmin();
         
         // Then check admin status
         await checkAdminAccess();
       } catch (error) {
         console.error("Admin initialization error:", error);
+        setIsAdmin(false);
         setIsLoading(false);
       }
     };
@@ -80,12 +83,13 @@ const Admin = () => {
         });
         setIsAdmin(false);
         setIsLoading(false);
+        navigate("/");
         return;
       }
       
       // Check if current user is in the admin list
       const isUserAdmin = data ? data.some((admin) => admin.user_id === user.id) : false;
-      console.log("Is user admin:", isUserAdmin);
+      console.log("Is user admin:", isUserAdmin, "User ID:", user.id);
 
       if (!isUserAdmin) {
         toast({
@@ -96,6 +100,7 @@ const Admin = () => {
         setIsAdmin(false);
         navigate("/");
       } else {
+        console.log("Admin access granted");
         setIsAdmin(true);
       }
     } catch (error) {

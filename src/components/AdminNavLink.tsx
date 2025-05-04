@@ -21,7 +21,7 @@ export const AdminNavLink = () => {
 
       try {
         console.log("Checking admin status in navbar for user:", user.id);
-        // Using service role client for admin check to bypass RLS
+        
         const { data, error } = await supabase.functions.invoke<AdminUser[]>('get_all_admins', {
           method: 'POST',
         });
@@ -29,7 +29,8 @@ export const AdminNavLink = () => {
         if (!error && data) {
           // Check if current user is in the admin list
           const isUserAdmin = data.some((admin) => admin.user_id === user.id);
-          console.log("AdminNavLink - Is user admin:", isUserAdmin, "Admin data:", data);
+          console.log("AdminNavLink - Is user admin:", isUserAdmin, "User ID:", user.id);
+          console.log("Admin data:", data);
           setIsAdmin(isUserAdmin);
         } else {
           console.error("Error checking admin status in navbar:", error);
