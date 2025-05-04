@@ -38,10 +38,29 @@ const Admin = () => {
         await createDefaultAdmin();
         
         // Then check admin status
-        await checkAdminAccess();
+        const isUserAdmin = await checkAdminAccess();
+        
+        if (!isUserAdmin) {
+          toast({
+            title: "Access denied",
+            description: "You do not have permission to access the admin dashboard",
+            variant: "destructive",
+          });
+          navigate("/");
+        } else {
+          console.log("Admin access granted");
+          setIsAdmin(true);
+        }
       } catch (error) {
         console.error("Admin initialization error:", error);
+        toast({
+          title: "Error",
+          description: "An unexpected error occurred",
+          variant: "destructive",
+        });
         setIsAdmin(false);
+        navigate("/");
+      } finally {
         setIsLoading(false);
       }
     };
@@ -61,8 +80,8 @@ const Admin = () => {
     }
   };
 
-  const checkAdminAccess = async () => {
-    if (!user) return;
+  const checkAdminAccess = async (): Promise<boolean> => {
+    if (!user) return false;
 
     try {
       console.log("Checking admin status for user:", user.id);
@@ -76,44 +95,17 @@ const Admin = () => {
 
       if (error) {
         console.error("Error checking admin status:", error);
-        toast({
-          title: "Error",
-          description: "Failed to verify admin status",
-          variant: "destructive",
-        });
-        setIsAdmin(false);
-        setIsLoading(false);
-        navigate("/");
-        return;
+        return false;
       }
       
       // Check if current user is in the admin list
       const isUserAdmin = data ? data.some((admin) => admin.user_id === user.id) : false;
       console.log("Is user admin:", isUserAdmin, "User ID:", user.id);
-
-      if (!isUserAdmin) {
-        toast({
-          title: "Access denied",
-          description: "You do not have permission to access the admin dashboard",
-          variant: "destructive",
-        });
-        setIsAdmin(false);
-        navigate("/");
-      } else {
-        console.log("Admin access granted");
-        setIsAdmin(true);
-      }
+      
+      return isUserAdmin;
     } catch (error) {
       console.error("Error checking admin access:", error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive",
-      });
-      setIsAdmin(false);
-      navigate("/");
-    } finally {
-      setIsLoading(false);
+      return false;
     }
   };
 
@@ -127,9 +119,14 @@ const Admin = () => {
     );
   }
 
-  // If not admin or not logged in, will redirect in useEffect
+  // If not admin, will redirect in useEffect
   if (!isAdmin) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Checking admin privileges...</span>
+      </div>
+    );
   }
 
   return (

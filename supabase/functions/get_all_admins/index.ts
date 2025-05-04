@@ -16,15 +16,6 @@ serve(async (req) => {
   try {
     console.log("get_all_admins function called");
     
-    // Create Supabase client using the auth header from the request
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: { headers: { Authorization: req.headers.get('Authorization')! } },
-      }
-    );
-
     // Always use admin client for admins check - bypass RLS completely
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
