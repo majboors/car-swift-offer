@@ -36,6 +36,15 @@ interface AdminUser {
   created_at: string;
 }
 
+// Define proper types for the RPC function returns
+interface RpcUser {
+  id: string;
+  email: string;
+  created_at: string;
+  last_sign_in_at: string | null;
+  [key: string]: any; // For any additional properties
+}
+
 export const AdminUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,8 +77,9 @@ export const AdminUsers = () => {
       const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
       // Use the database functions to get all users via admin_get_all_users
+      // Properly type the RPC return
       const { data: userData, error: userError } = await supabase
-        .rpc('get_all_users');
+        .rpc<RpcUser[]>('get_all_users');
 
       if (userError) {
         console.error("Error fetching users:", userError);

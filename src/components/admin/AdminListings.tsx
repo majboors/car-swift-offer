@@ -29,6 +29,21 @@ interface Listing {
   description?: string;
 }
 
+// Define proper types for the RPC function returns
+interface RpcListing {
+  id: string;
+  title: string;
+  make: string;
+  model: string;
+  year: number;
+  price: number;
+  created_at: string;
+  user_id: string;
+  user_email?: string;
+  description?: string;
+  [key: string]: any; // For any additional properties
+}
+
 export const AdminListings = () => {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,8 +71,9 @@ export const AdminListings = () => {
       setFetchError(null);
       
       // Use the database function to get all listings with user emails
+      // Properly type the RPC return
       const { data: listingsData, error: listingsError } = await supabase
-        .rpc('get_car_listings_with_users');
+        .rpc<RpcListing[]>('get_car_listings_with_users');
 
       if (listingsError) {
         console.error("Error fetching listings:", listingsError);
