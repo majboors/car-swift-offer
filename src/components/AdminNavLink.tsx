@@ -15,8 +15,10 @@ export const AdminNavLink = () => {
       if (!user) return;
 
       try {
-        // Use the RPC function with explicit type casting
-        const { data, error } = await supabase.rpc('get_all_admins', {}) as unknown as { 
+        // Use a more direct type casting approach
+        const { data, error } = await supabase.functions.invoke('get_all_admins', {
+          method: 'POST',
+        }) as unknown as { 
           data: AdminUser[] | null, 
           error: Error | null 
         };

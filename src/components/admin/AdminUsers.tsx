@@ -49,12 +49,13 @@ export const AdminUsers = () => {
     try {
       setLoading(true);
       
-      // Fix type assertion for RPC call to get_all_users
-      const { data: usersData, error: usersError } = await supabase
-        .rpc('get_all_users', {}) as unknown as { 
-          data: SupabaseUser[] | null, 
-          error: Error | null 
-        };
+      // Use a more direct type casting approach
+      const { data: usersData, error: usersError } = await supabase.functions.invoke('get_all_users', {
+        method: 'POST',
+      }) as unknown as { 
+        data: SupabaseUser[] | null, 
+        error: Error | null 
+      };
 
       if (usersError) {
         throw usersError;
@@ -65,12 +66,13 @@ export const AdminUsers = () => {
         return;
       }
 
-      // Fix type assertion for RPC call to get_all_admins
-      const { data: adminsData, error: adminsError } = await supabase
-        .rpc('get_all_admins', {}) as unknown as { 
-          data: AdminUser[] | null, 
-          error: Error | null 
-        };
+      // Use the same approach for get_all_admins
+      const { data: adminsData, error: adminsError } = await supabase.functions.invoke('get_all_admins', {
+        method: 'POST',
+      }) as unknown as { 
+        data: AdminUser[] | null, 
+        error: Error | null 
+      };
 
       if (adminsError) {
         throw adminsError;
@@ -104,21 +106,25 @@ export const AdminUsers = () => {
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
-        // Fix type assertion for RPC call to remove_admin
-        const { error } = await supabase
-          .rpc('remove_admin', { user_id_input: userId }) as unknown as {
-            data: null,
-            error: Error | null
-          };
+        // Use updated type casting approach for remove_admin
+        const { error } = await supabase.functions.invoke('remove_admin', {
+          method: 'POST',
+          body: { user_id_input: userId }
+        }) as unknown as {
+          data: null,
+          error: Error | null
+        };
 
         if (error) throw error;
       } else {
-        // Fix type assertion for RPC call to add_admin
-        const { error } = await supabase
-          .rpc('add_admin', { user_id_input: userId }) as unknown as {
-            data: null,
-            error: Error | null
-          };
+        // Use updated type casting approach for add_admin
+        const { error } = await supabase.functions.invoke('add_admin', {
+          method: 'POST',
+          body: { user_id_input: userId }
+        }) as unknown as {
+          data: null,
+          error: Error | null
+        };
 
         if (error) throw error;
       }
