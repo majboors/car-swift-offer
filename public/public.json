@@ -1,0 +1,2606 @@
+[
+    {
+      "car": "Abarth",
+      "model": "500",
+      "body_type": ["Hatch"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000"]
+    },
+    {
+      "car": "Abarth",
+      "model": "595",
+      "body_type": ["Hatch", "Convertible"],
+      "price_max": ["$25,000", "$30,000", "$35,000", "$40,000", "$45,000"]
+    },
+    {
+      "car": "Abarth",
+      "model": "695",
+      "body_type": ["Hatch", "Convertible"],
+      "price_max": ["$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Alfa Romeo",
+      "model": "Giulia",
+      "body_type": ["Sedan"],
+      "price_max": ["$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Alfa Romeo",
+      "model": "Stelvio",
+      "body_type": ["SUV"],
+      "price_max": ["$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Alfa Romeo",
+      "model": "Tonale",
+      "body_type": ["SUV"],
+      "price_max": ["$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Alfa Romeo",
+      "model": "Giulietta",
+      "body_type": ["Hatch"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000"]
+    },
+    {
+      "car": "Alpine",
+      "model": "A110",
+      "body_type": ["Coupe"],
+      "price_max": ["$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Aston Martin",
+      "model": "DB11",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$300,000", "$500,000"]
+    },
+    {
+      "car": "Aston Martin",
+      "model": "DB12",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$500,000"]
+    },
+    {
+      "car": "Aston Martin",
+      "model": "DBS",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$500,000"]
+    },
+    {
+      "car": "Aston Martin",
+      "model": "DBX",
+      "body_type": ["SUV"],
+      "price_max": ["$300,000", "$500,000"]
+    },
+    {
+      "car": "Aston Martin",
+      "model": "Vantage",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$200,000", "$300,000", "$500,000"]
+    },
+    {
+      "car": "Audi",
+      "model": "A1",
+      "body_type": ["Hatch"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000"]
+    },
+    {
+      "car": "Audi",
+      "model": "A3",
+      "body_type": ["Sedan", "Hatch"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Audi",
+      "model": "A4",
+      "body_type": ["Sedan", "Wagon"],
+      "price_max": ["$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000"]
+    },
+    {
+      "car": "Audi",
+      "model": "A5",
+      "body_type": ["Coupe", "Convertible", "Hatch"],
+      "price_max": ["$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "Audi",
+      "model": "A6",
+      "body_type": ["Sedan", "Wagon"],
+      "price_max": ["$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+      {
+      "car": "Audi",
+      "model": "A7",
+      "body_type": ["Hatch"],
+      "price_max": ["$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Audi",
+      "model": "A8",
+      "body_type": ["Sedan"],
+      "price_max": ["$100,000", "$150,000", "$200,000"]
+    },
+    {
+      "car": "Audi",
+      "model": "Q2",
+      "body_type": ["SUV"],
+      "price_max": ["$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Audi",
+      "model": "Q3",
+      "body_type": ["SUV"],
+      "price_max": ["$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Audi",
+      "model": "Q5",
+      "body_type": ["SUV"],
+      "price_max": ["$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "Audi",
+      "model": "Q7",
+      "body_type": ["SUV"],
+      "price_max": ["$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Audi",
+      "model": "Q8",
+      "body_type": ["SUV"],
+      "price_max": ["$100,000", "$150,000", "$200,000"]
+    },
+    {
+      "car": "Audi",
+      "model": "e-tron GT",
+      "body_type": ["Sedan"],
+      "price_max": ["$150,000", "$200,000", "$300,000"]
+    },
+      {
+      "car": "Audi",
+      "model": "Q4 e-tron",
+      "body_type": ["SUV"],
+      "price_max": ["$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "Audi",
+      "model": "Q8 e-tron",
+      "body_type": ["SUV"],
+      "price_max": ["$100,000", "$150,000", "$200,000"]
+    },
+    {
+      "car": "Audi",
+      "model": "R8",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$200,000", "$300,000", "$500,000"]
+    },
+    {
+      "car": "Audi",
+      "model": "TT",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "Bentley",
+      "model": "Bentayga",
+      "body_type": ["SUV"],
+      "price_max": ["$300,000", "$500,000"]
+    },
+    {
+      "car": "Bentley",
+      "model": "Continental GT",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$300,000", "$500,000"]
+    },
+    {
+      "car": "Bentley",
+      "model": "Flying Spur",
+      "body_type": ["Sedan"],
+      "price_max": ["$300,000", "$500,000"]
+    },
+    {
+      "car": "BMW",
+      "model": "1 Series",
+      "body_type": ["Hatch"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "BMW",
+      "model": "2 Series",
+      "body_type": ["Coupe", "Convertible", "Sedan"],
+      "price_max": ["$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000"]
+    },
+    {
+      "car": "BMW",
+      "model": "3 Series",
+      "body_type": ["Sedan", "Wagon"],
+      "price_max": ["$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "BMW",
+      "model": "4 Series",
+      "body_type": ["Coupe", "Convertible", "Hatch"],
+      "price_max": ["$60,000", "$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "BMW",
+      "model": "5 Series",
+      "body_type": ["Sedan", "Wagon"],
+      "price_max": ["$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "BMW",
+      "model": "7 Series",
+      "body_type": ["Sedan"],
+      "price_max": ["$100,000", "$150,000", "$200,000", "$300,000"]
+    },
+      {
+      "car": "BMW",
+      "model": "8 Series",
+      "body_type": ["Coupe", "Convertible", "Sedan"],
+      "price_max": ["$150,000", "$200,000", "$300,000"]
+    },
+    {
+      "car": "BMW",
+      "model": "X1",
+      "body_type": ["SUV"],
+      "price_max": ["$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "BMW",
+      "model": "X2",
+      "body_type": ["SUV"],
+      "price_max": ["$45,000", "$50,000", "$60,000", "$70,000", "$80,000"]
+    },
+    {
+      "car": "BMW",
+      "model": "X3",
+      "body_type": ["SUV"],
+      "price_max": ["$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "BMW",
+      "model": "X4",
+      "body_type": ["SUV"],
+      "price_max": ["$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "BMW",
+      "model": "X5",
+      "body_type": ["SUV"],
+      "price_max": ["$80,000", "$90,000", "$100,000", "$150,000", "$200,000"]
+    },
+    {
+      "car": "BMW",
+      "model": "X6",
+      "body_type": ["SUV"],
+      "price_max": ["$100,000", "$150,000", "$200,000"]
+    },
+    {
+      "car": "BMW",
+      "model": "X7",
+      "body_type": ["SUV"],
+      "price_max": ["$150,000", "$200,000", "$300,000"]
+    },
+    {
+      "car": "BMW",
+      "model": "Z4",
+      "body_type": ["Convertible"],
+      "price_max": ["$60,000", "$70,000", "$80,000", "$90,000", "$100,000"]
+    },
+      {
+      "car": "BMW",
+      "model": "i4",
+      "body_type": ["Hatch"],
+      "price_max": ["$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "BMW",
+      "model": "i5",
+      "body_type": ["Sedan"],
+      "price_max": ["$100,000", "$150,000", "$200,000"]
+    },
+    {
+      "car": "BMW",
+      "model": "i7",
+      "body_type": ["Sedan"],
+      "price_max": ["$200,000", "$300,000", "$500,000"]
+    },
+    {
+      "car": "BMW",
+      "model": "iX",
+      "body_type": ["SUV"],
+      "price_max": ["$100,000", "$150,000", "$200,000"]
+    },
+    {
+      "car": "BMW",
+      "model": "iX1",
+      "body_type": ["SUV"],
+      "price_max": ["$70,000", "$80,000", "$90,000"]
+    },
+    {
+      "car": "BMW",
+      "model": "iX3",
+      "body_type": ["SUV"],
+      "price_max": ["$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "BYD",
+      "model": "Atto 3",
+      "body_type": ["SUV"],
+      "price_max": ["$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "BYD",
+      "model": "Dolphin",
+      "body_type": ["Hatch"],
+      "price_max": ["$35,000", "$40,000", "$45,000"]
+    },
+    {
+      "car": "BYD",
+      "model": "Seal",
+      "body_type": ["Sedan"],
+      "price_max": ["$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "BYD",
+      "model": "Sealion 6",
+      "body_type": ["SUV"],
+      "price_max": ["$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Chery",
+      "model": "Omoda 5",
+      "body_type": ["SUV"],
+      "price_max": ["$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+    {
+      "car": "Chery",
+      "model": "Tiggo 7 Pro",
+      "body_type": ["SUV"],
+      "price_max": ["$35,000", "$40,000", "$45,000"]
+    },
+    {
+      "car": "Chery",
+      "model": "Tiggo 8 Pro Max",
+      "body_type": ["SUV"],
+      "price_max": ["$40,000", "$45,000", "$50,000"]
+    },
+    {
+      "car": "Chevrolet",
+      "model": "Corvette",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$150,000", "$200,000", "$300,000"]
+    },
+    {
+      "car": "Chevrolet",
+      "model": "Silverado",
+      "body_type": ["Ute"],
+      "price_max": ["$100,000", "$150,000", "$200,000"]
+    },
+    {
+      "car": "Chevrolet",
+      "model": "Camaro",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Chrysler",
+      "model": "300",
+      "body_type": ["Sedan"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Citroen",
+      "model": "C3",
+      "body_type": ["Hatch"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000"]
+    },
+    {
+      "car": "Citroen",
+      "model": "C4",
+      "body_type": ["Hatch", "SUV"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000"]
+    },
+    {
+      "car": "Citroen",
+      "model": "C5 Aircross",
+      "body_type": ["SUV"],
+      "price_max": ["$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Citroen",
+      "model": "C5 X",
+      "body_type": ["Wagon"],
+      "price_max": ["$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "CUPRA",
+      "model": "Ateca",
+      "body_type": ["SUV"],
+      "price_max": ["$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "CUPRA",
+      "model": "Born",
+      "body_type": ["Hatch"],
+      "price_max": ["$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "CUPRA",
+      "model": "Formentor",
+      "body_type": ["SUV"],
+      "price_max": ["$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "CUPRA",
+      "model": "Leon",
+      "body_type": ["Hatch"],
+      "price_max": ["$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Daihatsu",
+      "model": "Charade",
+      "body_type": ["Hatch"],
+      "price_max": ["$3,000", "$5,000", "$7,500"]
+    },
+    {
+      "car": "Daihatsu",
+      "model": "Sirion",
+      "body_type": ["Hatch"],
+      "price_max": ["$3,000", "$5,000", "$7,500", "$10,000"]
+    },
+    {
+      "car": "Daihatsu",
+      "model": "Terios",
+      "body_type": ["SUV"],
+      "price_max": ["$3,000", "$5,000", "$7,500", "$10,000"]
+    },
+    {
+      "car": "Daihatsu",
+      "model": "Copen",
+      "body_type": ["Convertible"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000"]
+    },
+    {
+      "car": "Dodge",
+      "model": "Journey",
+      "body_type": ["SUV"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000", "$25,000"]
+    },
+    {
+      "car": "Dodge",
+      "model": "Nitro",
+      "body_type": ["SUV"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000"]
+    },
+    {
+      "car": "Ferrari",
+      "model": "296 GTB/GTS",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$500,000"]
+    },
+      {
+      "car": "Ferrari",
+      "model": "812 Superfast/GTS",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$500,000"]
+    },
+    {
+      "car": "Ferrari",
+      "model": "SF90 Stradale/Spider",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$500,000"]
+    },
+      {
+      "car": "Ferrari",
+      "model": "Roma",
+      "body_type": ["Coupe"],
+      "price_max": ["$300,000", "$500,000"]
+    },
+    {
+      "car": "Ferrari",
+      "model": "Purosangue",
+      "body_type": ["SUV"],
+      "price_max": ["$500,000"]
+    },
+    {
+      "car": "Fiat",
+      "model": "500",
+      "body_type": ["Hatch", "Convertible"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000"]
+    },
+    {
+      "car": "Fiat",
+      "model": "500e",
+      "body_type": ["Hatch"],
+      "price_max": ["$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Fiat",
+      "model": "500X",
+      "body_type": ["SUV"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000"]
+    },
+    {
+      "car": "Fiat",
+      "model": "Ducato",
+      "body_type": ["Van", "Cab Chassis"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Ford",
+      "model": "Everest",
+      "body_type": ["SUV"],
+      "price_max": ["$45,000", "$50,000", "$60,000", "$70,000", "$80,000"]
+    },
+    {
+      "car": "Ford",
+      "model": "Explorer",
+      "body_type": ["SUV"],
+      "price_max": ["$5,000", "$7,500", "$10,000", "$15,000", "$20,000"]
+    },
+    {
+      "car": "Ford",
+      "model": "Falcon",
+      "body_type": ["Sedan", "Wagon", "Ute"],
+      "price_max": ["$3,000", "$5,000", "$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000"]
+    },
+    {
+      "car": "Ford",
+      "model": "Fiesta",
+      "body_type": ["Hatch"],
+      "price_max": ["$5,000", "$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000"]
+    },
+    {
+      "car": "Ford",
+      "model": "Focus",
+      "body_type": ["Hatch", "Sedan", "Wagon"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000"]
+    },
+    {
+      "car": "Ford",
+      "model": "Mustang",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "Ford",
+      "model": "Mustang Mach-E",
+      "body_type": ["SUV"],
+      "price_max": ["$60,000", "$70,000", "$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "Ford",
+      "model": "Puma",
+      "body_type": ["SUV"],
+      "price_max": ["$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+    {
+      "car": "Ford",
+      "model": "Ranger",
+      "body_type": ["Ute", "Cab Chassis"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000"]
+    },
+    {
+      "car": "Ford",
+      "model": "Territory",
+      "body_type": ["SUV"],
+      "price_max": ["$3,000", "$5,000", "$7,500", "$10,000", "$15,000", "$20,000", "$25,000"]
+    },
+    {
+      "car": "Ford",
+      "model": "Transit",
+      "body_type": ["Van", "Bus", "Cab Chassis"],
+      "price_max": ["$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Foton",
+      "model": "Tunland",
+      "body_type": ["Ute"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000"]
+    },
+    {
+      "car": "Genesis",
+      "model": "G70",
+      "body_type": ["Sedan", "Wagon"],
+      "price_max": ["$50,000", "$60,000", "$70,000", "$80,000", "$90,000"]
+    },
+    {
+      "car": "Genesis",
+      "model": "G80",
+      "body_type": ["Sedan"],
+      "price_max": ["$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Genesis",
+      "model": "GV60",
+      "body_type": ["SUV"],
+      "price_max": ["$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Genesis",
+      "model": "GV70",
+      "body_type": ["SUV"],
+      "price_max": ["$60,000", "$70,000", "$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "Genesis",
+      "model": "GV80",
+      "body_type": ["SUV"],
+      "price_max": ["$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "GWM",
+      "model": "Cannon",
+      "body_type": ["Ute", "Cab Chassis"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000"]
+    },
+    {
+      "car": "GWM",
+      "model": "Ora",
+      "body_type": ["Hatch"],
+      "price_max": ["$35,000", "$40,000", "$45,000", "$50,000"]
+    },
+    {
+      "car": "GWM",
+      "model": "Tank 300",
+      "body_type": ["SUV"],
+      "price_max": ["$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "GWM",
+      "model": "Tank 500",
+      "body_type": ["SUV"],
+      "price_max": ["$60,000", "$70,000", "$80,000"]
+    },
+    {
+      "car": "Haval",
+      "model": "H6",
+      "body_type": ["SUV"],
+      "price_max": ["$25,000", "$30,000", "$35,000", "$40,000", "$45,000"]
+    },
+      {
+      "car": "Haval",
+      "model": "H9",
+      "body_type": ["SUV"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+    {
+      "car": "Haval",
+      "model": "Jolion",
+      "body_type": ["SUV"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000"]
+    },
+    {
+      "car": "Holden",
+      "model": "Commodore",
+      "body_type": ["Sedan", "Wagon", "Ute"],
+      "price_max": ["$3,000", "$5,000", "$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Holden",
+      "model": "Astra",
+      "body_type": ["Hatch", "Sedan", "Wagon"],
+      "price_max": ["$3,000", "$5,000", "$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000"]
+    },
+    {
+      "car": "Holden",
+      "model": "Barina",
+      "body_type": ["Hatch", "Sedan"],
+      "price_max": ["$3,000", "$5,000", "$7,500", "$10,000", "$15,000"]
+    },
+      {
+      "car": "Holden",
+      "model": "Captiva",
+      "body_type": ["SUV"],
+      "price_max": ["$5,000", "$7,500", "$10,000", "$15,000", "$20,000", "$25,000"]
+    },
+    {
+      "car": "Holden",
+      "model": "Colorado",
+      "body_type": ["Ute", "Cab Chassis"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000"]
+    },
+    {
+      "car": "Holden",
+      "model": "Cruze",
+      "body_type": ["Sedan", "Hatch", "Wagon"],
+      "price_max": ["$5,000", "$7,500", "$10,000", "$15,000", "$20,000"]
+    },
+      {
+      "car": "Holden",
+      "model": "Equinox",
+      "body_type": ["SUV"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000"]
+    },
+    {
+      "car": "Holden",
+      "model": "Monaro",
+      "body_type": ["Coupe"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "Holden",
+      "model": "Trailblazer",
+      "body_type": ["SUV"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000"]
+    },
+    {
+      "car": "Holden",
+      "model": "Trax",
+      "body_type": ["SUV"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000"]
+    },
+    {
+      "car": "Honda",
+      "model": "Accord",
+      "body_type": ["Sedan"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Honda",
+      "model": "Civic",
+      "body_type": ["Sedan", "Hatch"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Honda",
+      "model": "CR-V",
+      "body_type": ["SUV"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Honda",
+      "model": "HR-V",
+      "body_type": ["SUV"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+    {
+      "car": "Honda",
+      "model": "Jazz",
+      "body_type": ["Hatch"],
+      "price_max": ["$5,000", "$7,500", "$10,000", "$15,000", "$20,000", "$25,000"]
+    },
+    {
+      "car": "Honda",
+      "model": "Odyssey",
+      "body_type": ["People Mover"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000"]
+    },
+    {
+      "car": "Honda",
+      "model": "ZR-V",
+      "body_type": ["SUV"],
+      "price_max": ["$35,000", "$40,000", "$45,000", "$50,000"]
+    },
+    {
+      "car": "Hummer",
+      "model": "H3",
+      "body_type": ["SUV", "Ute"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+    {
+      "car": "Hyundai",
+      "model": "Accent",
+      "body_type": ["Hatch", "Sedan"],
+      "price_max": ["$5,000", "$7,500", "$10,000", "$15,000", "$20,000"]
+    },
+      {
+      "car": "Hyundai",
+      "model": "Elantra",
+      "body_type": ["Sedan"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000"]
+    },
+    {
+      "car": "Hyundai",
+      "model": "Getz",
+      "body_type": ["Hatch"],
+      "price_max": ["$3,000", "$5,000", "$7,500", "$10,000"]
+    },
+    {
+      "car": "Hyundai",
+      "model": "i20",
+      "body_type": ["Hatch"],
+      "price_max": ["$5,000", "$7,500", "$10,000", "$15,000", "$20,000", "$30,000", "$35,000"]
+    },
+    {
+      "car": "Hyundai",
+      "model": "i30",
+      "body_type": ["Hatch", "Sedan"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000"]
+    },
+      {
+      "car": "Hyundai",
+      "model": "iLoad",
+      "body_type": ["Van"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+    {
+      "car": "Hyundai",
+      "model": "IONIQ",
+      "body_type": ["Hatch", "Sedan"],
+      "price_max": ["$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000"]
+    },
+    {
+      "car": "Hyundai",
+      "model": "IONIQ 5",
+      "body_type": ["SUV"],
+      "price_max": ["$60,000", "$70,000", "$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "Hyundai",
+      "model": "IONIQ 6",
+      "body_type": ["Sedan"],
+      "price_max": ["$60,000", "$70,000", "$80,000", "$90,000"]
+    },
+    {
+      "car": "Hyundai",
+      "model": "Kona",
+      "body_type": ["SUV"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Hyundai",
+      "model": "Nexo",
+      "body_type": ["SUV"],
+      "price_max": ["$100,000", "$150,000"]
+    },
+    {
+      "car": "Hyundai",
+      "model": "Palisade",
+      "body_type": ["SUV"],
+      "price_max": ["$50,000", "$60,000", "$70,000", "$80,000"]
+    },
+    {
+      "car": "Hyundai",
+      "model": "Santa Fe",
+      "body_type": ["SUV"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Hyundai",
+      "model": "Sonata",
+      "body_type": ["Sedan"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Hyundai",
+      "model": "Staria",
+      "body_type": ["Van", "People Mover"],
+      "price_max": ["$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Hyundai",
+      "model": "Tucson",
+      "body_type": ["SUV"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000"]
+    },
+    {
+      "car": "Hyundai",
+      "model": "Venue",
+      "body_type": ["SUV"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000"]
+    },
+    {
+      "car": "INEOS",
+      "model": "Grenadier",
+      "body_type": ["SUV", "Cab Chassis", "Ute"],
+      "price_max": ["$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Isuzu",
+      "model": "D-MAX",
+      "body_type": ["Ute", "Cab Chassis"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Isuzu",
+      "model": "MU-X",
+      "body_type": ["SUV"],
+      "price_max": ["$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Iveco",
+      "model": "Daily",
+      "body_type": ["Van", "Cab Chassis", "Bus"],
+      "price_max": ["$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000"]
+    },
+    {
+      "car": "Jaguar",
+      "model": "E-PACE",
+      "body_type": ["SUV"],
+      "price_max": ["$45,000", "$50,000", "$60,000", "$70,000", "$80,000"]
+    },
+    {
+      "car": "Jaguar",
+      "model": "F-PACE",
+      "body_type": ["SUV"],
+      "price_max": ["$60,000", "$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Jaguar",
+      "model": "F-TYPE",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$90,000", "$100,000", "$150,000", "$200,000", "$300,000"]
+    },
+    {
+      "car": "Jaguar",
+      "model": "I-PACE",
+      "body_type": ["SUV"],
+      "price_max": ["$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+      {
+      "car": "Jaguar",
+      "model": "XE",
+      "body_type": ["Sedan"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Jaguar",
+      "model": "XF",
+      "body_type": ["Sedan", "Wagon"],
+      "price_max": ["$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "Jeep",
+      "model": "Cherokee",
+      "body_type": ["SUV"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000"]
+    },
+    {
+      "car": "Jeep",
+      "model": "Compass",
+      "body_type": ["SUV"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000"]
+    },
+    {
+      "car": "Jeep",
+      "model": "Gladiator",
+      "body_type": ["Ute"],
+      "price_max": ["$60,000", "$70,000", "$80,000", "$90,000"]
+    },
+    {
+      "car": "Jeep",
+      "model": "Grand Cherokee",
+      "body_type": ["SUV"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Jeep",
+      "model": "Renegade",
+      "body_type": ["SUV"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000"]
+    },
+    {
+      "car": "Jeep",
+      "model": "Wrangler",
+      "body_type": ["SUV"],
+      "price_max": ["$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000"]
+    },
+    {
+      "car": "Kia",
+      "model": "Carnival",
+      "body_type": ["People Mover"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Kia",
+      "model": "Cerato",
+      "body_type": ["Sedan", "Hatch"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000"]
+    },
+    {
+      "car": "Kia",
+      "model": "EV6",
+      "body_type": ["SUV"],
+      "price_max": ["$60,000", "$70,000", "$80,000", "$90,000", "$100,000"]
+    },
+      {
+      "car": "Kia",
+      "model": "EV9",
+      "body_type": ["SUV"],
+      "price_max": ["$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Kia",
+      "model": "Niro",
+      "body_type": ["SUV"],
+      "price_max": ["$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Kia",
+      "model": "Picanto",
+      "body_type": ["Hatch"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000"]
+    },
+    {
+      "car": "Kia",
+      "model": "Rio",
+      "body_type": ["Hatch"],
+      "price_max": ["$5,000", "$7,500", "$10,000", "$15,000", "$20,000", "$25,000"]
+    },
+    {
+      "car": "Kia",
+      "model": "Seltos",
+      "body_type": ["SUV"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000"]
+    },
+    {
+      "car": "Kia",
+      "model": "Sorento",
+      "body_type": ["SUV"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Kia",
+      "model": "Sportage",
+      "body_type": ["SUV"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Kia",
+      "model": "Stinger",
+      "body_type": ["Sedan"],
+      "price_max": ["$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Kia",
+      "model": "Stonic",
+      "body_type": ["SUV"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000"]
+    },
+    {
+      "car": "Lamborghini",
+      "model": "Aventador",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$500,000"]
+    },
+    {
+      "car": "Lamborghini",
+      "model": "Huracan",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$300,000", "$500,000"]
+    },
+    {
+      "car": "Lamborghini",
+      "model": "Urus",
+      "body_type": ["SUV"],
+      "price_max": ["$300,000", "$500,000"]
+    },
+      {
+      "car": "Lamborghini",
+      "model": "Revuelto",
+      "body_type": ["Coupe"],
+      "price_max": ["$500,000"]
+    },
+    {
+      "car": "Land Rover",
+      "model": "Defender",
+      "body_type": ["SUV"],
+      "price_max": ["$60,000", "$70,000", "$80,000", "$90,000", "$100,000", "$150,000", "$200,000"]
+    },
+    {
+      "car": "Land Rover",
+      "model": "Discovery",
+      "body_type": ["SUV"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Land Rover",
+      "model": "Discovery Sport",
+      "body_type": ["SUV"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000"]
+    },
+    {
+      "car": "Land Rover",
+      "model": "Range Rover",
+      "body_type": ["SUV"],
+      "price_max": ["$100,000", "$150,000", "$200,000", "$300,000", "$500,000"]
+    },
+    {
+      "car": "Land Rover",
+      "model": "Range Rover Evoque",
+      "body_type": ["SUV", "Convertible"],
+      "price_max": ["$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000"]
+    },
+    {
+      "car": "Land Rover",
+      "model": "Range Rover Sport",
+      "body_type": ["SUV"],
+      "price_max": ["$60,000", "$70,000", "$80,000", "$90,000", "$100,000", "$150,000", "$200,000", "$300,000"]
+    },
+    {
+      "car": "Land Rover",
+      "model": "Range Rover Velar",
+      "body_type": ["SUV"],
+      "price_max": ["$60,000", "$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "LDV",
+      "model": "Deliver 9",
+      "body_type": ["Van", "Cab Chassis", "Bus"],
+      "price_max": ["$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "LDV",
+      "model": "D90",
+      "body_type": ["SUV"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000"]
+    },
+      {
+      "car": "LDV",
+      "model": "eDeliver 9",
+      "body_type": ["Van"],
+      "price_max": ["$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "LDV",
+      "model": "G10",
+      "body_type": ["Van", "People Mover"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+    {
+      "car": "LDV",
+      "model": "MIFA",
+      "body_type": ["People Mover"],
+      "price_max": ["$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+      {
+      "car": "LDV",
+      "model": "MIFA 9",
+      "body_type": ["People Mover"],
+      "price_max": ["$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "LDV",
+      "model": "T60",
+      "body_type": ["Ute"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000"]
+    },
+    {
+      "car": "Lexus",
+      "model": "CT",
+      "body_type": ["Hatch"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+    {
+      "car": "Lexus",
+      "model": "ES",
+      "body_type": ["Sedan"],
+      "price_max": ["$45,000", "$50,000", "$60,000", "$70,000", "$80,000"]
+    },
+    {
+      "car": "Lexus",
+      "model": "GS",
+      "body_type": ["Sedan"],
+      "price_max": ["$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Lexus",
+      "model": "IS",
+      "body_type": ["Sedan", "Convertible"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Lexus",
+      "model": "LC",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$150,000", "$200,000"]
+    },
+    {
+      "car": "Lexus",
+      "model": "LM",
+      "body_type": ["People Mover"],
+      "price_max": ["$150,000", "$200,000", "$300,000"]
+    },
+    {
+      "car": "Lexus",
+      "model": "LS",
+      "body_type": ["Sedan"],
+      "price_max": ["$80,000", "$90,000", "$100,000", "$150,000", "$200,000"]
+    },
+    {
+      "car": "Lexus",
+      "model": "LX",
+      "body_type": ["SUV"],
+      "price_max": ["$80,000", "$90,000", "$100,000", "$150,000", "$200,000"]
+    },
+    {
+      "car": "Lexus",
+      "model": "NX",
+      "body_type": ["SUV"],
+      "price_max": ["$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000"]
+    },
+    {
+      "car": "Lexus",
+      "model": "RC",
+      "body_type": ["Coupe"],
+      "price_max": ["$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000"]
+    },
+    {
+      "car": "Lexus",
+      "model": "RX",
+      "body_type": ["SUV"],
+      "price_max": ["$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Lexus",
+      "model": "RZ",
+      "body_type": ["SUV"],
+      "price_max": ["$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Lexus",
+      "model": "UX",
+      "body_type": ["SUV"],
+      "price_max": ["$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Lotus",
+      "model": "Elise",
+      "body_type": ["Convertible"],
+      "price_max": ["$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "Lotus",
+      "model": "Emira",
+      "body_type": ["Coupe"],
+      "price_max": ["$150,000", "$200,000"]
+    },
+    {
+      "car": "Lotus",
+      "model": "Evora",
+      "body_type": ["Coupe"],
+      "price_max": ["$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Lotus",
+      "model": "Exige",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Mahindra",
+      "model": "Pik-Up",
+      "body_type": ["Ute", "Cab Chassis"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000"]
+    },
+    {
+      "car": "Mahindra",
+      "model": "Scorpio",
+      "body_type": ["SUV"],
+      "price_max": ["$40,000", "$45,000", "$50,000"]
+    },
+    {
+      "car": "Mahindra",
+      "model": "XUV700",
+      "body_type": ["SUV"],
+      "price_max": ["$35,000", "$40,000"]
+    },
+    {
+      "car": "Maserati",
+      "model": "Ghibli",
+      "body_type": ["Sedan"],
+      "price_max": ["$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Maserati",
+      "model": "GranTurismo",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$100,000", "$150,000", "$200,000", "$300,000", "$500,000"]
+    },
+    {
+      "car": "Maserati",
+      "model": "Grecale",
+      "body_type": ["SUV"],
+      "price_max": ["$90,000", "$100,000", "$150,000", "$200,000"]
+    },
+    {
+      "car": "Maserati",
+      "model": "Levante",
+      "body_type": ["SUV"],
+      "price_max": ["$90,000", "$100,000", "$150,000", "$200,000", "$300,000"]
+    },
+    {
+      "car": "Maserati",
+      "model": "MC20",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$300,000", "$500,000"]
+    },
+    {
+      "car": "Maserati",
+      "model": "Quattroporte",
+      "body_type": ["Sedan"],
+      "price_max": ["$100,000", "$150,000", "$200,000", "$300,000"]
+    },
+    {
+      "car": "Mazda",
+      "model": "2",
+      "body_type": ["Hatch", "Sedan"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000"]
+    },
+    {
+      "car": "Mazda",
+      "model": "3",
+      "body_type": ["Hatch", "Sedan"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000"]
+    },
+    {
+      "car": "Mazda",
+      "model": "6",
+      "body_type": ["Sedan", "Wagon"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Mazda",
+      "model": "BT-50",
+      "body_type": ["Ute", "Cab Chassis"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Mazda",
+      "model": "CX-3",
+      "body_type": ["SUV"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+    {
+      "car": "Mazda",
+      "model": "CX-30",
+      "body_type": ["SUV"],
+      "price_max": ["$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000"]
+    },
+    {
+      "car": "Mazda",
+      "model": "CX-5",
+      "body_type": ["SUV"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Mazda",
+      "model": "CX-60",
+      "body_type": ["SUV"],
+      "price_max": ["$50,000", "$60,000", "$70,000", "$80,000", "$90,000"]
+    },
+    {
+      "car": "Mazda",
+      "model": "CX-8",
+      "body_type": ["SUV"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Mazda",
+      "model": "CX-9",
+      "body_type": ["SUV"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Mazda",
+      "model": "CX-90",
+      "body_type": ["SUV"],
+      "price_max": ["$70,000", "$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "Mazda",
+      "model": "MX-30",
+      "body_type": ["SUV"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Mazda",
+      "model": "MX-5",
+      "body_type": ["Convertible"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000"]
+    },
+    {
+      "car": "McLaren",
+      "model": "570S",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$200,000", "$300,000", "$500,000"]
+    },
+      {
+      "car": "McLaren",
+      "model": "600LT",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$300,000", "$500,000"]
+    },
+      {
+      "car": "McLaren",
+      "model": "720S",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$300,000", "$500,000"]
+    },
+     {
+      "car": "McLaren",
+      "model": "750S",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$500,000"]
+    },
+     {
+      "car": "McLaren",
+      "model": "Artura",
+      "body_type": ["Coupe"],
+      "price_max": ["$300,000", "$500,000"]
+    },
+    {
+      "car": "McLaren",
+      "model": "GT",
+      "body_type": ["Coupe"],
+      "price_max": ["$300,000", "$500,000"]
+    },
+    {
+      "car": "Mercedes-Benz",
+      "model": "A-Class",
+      "body_type": ["Hatch", "Sedan"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "Mercedes-Benz",
+      "model": "B-Class",
+      "body_type": ["Hatch"],
+      "price_max": ["$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Mercedes-Benz",
+      "model": "C-Class",
+      "body_type": ["Sedan", "Wagon", "Coupe", "Convertible"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Mercedes-Benz",
+      "model": "CLA",
+      "body_type": ["Sedan", "Wagon"],
+      "price_max": ["$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Mercedes-Benz",
+      "model": "CLE",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Mercedes-Benz",
+      "model": "CLS",
+      "body_type": ["Sedan"],
+      "price_max": ["$70,000", "$80,000", "$90,000", "$100,000", "$150,000", "$200,000"]
+    },
+    {
+      "car": "Mercedes-Benz",
+      "model": "E-Class",
+      "body_type": ["Sedan", "Wagon", "Coupe", "Convertible"],
+      "price_max": ["$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000", "$150,000", "$200,000"]
+    },
+    {
+      "car": "Mercedes-Benz",
+      "model": "EQA",
+      "body_type": ["SUV"],
+      "price_max": ["$70,000", "$80,000", "$90,000", "$100,000"]
+    },
+      {
+      "car": "Mercedes-Benz",
+      "model": "EQB",
+      "body_type": ["SUV"],
+      "price_max": ["$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+      {
+      "car": "Mercedes-Benz",
+      "model": "EQC",
+      "body_type": ["SUV"],
+      "price_max": ["$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+      {
+      "car": "Mercedes-Benz",
+      "model": "EQE",
+      "body_type": ["Sedan", "SUV"],
+      "price_max": ["$100,000", "$150,000", "$200,000"]
+    },
+      {
+      "car": "Mercedes-Benz",
+      "model": "EQS",
+      "body_type": ["Sedan", "SUV"],
+      "price_max": ["$200,000", "$300,000", "$500,000"]
+    },
+    {
+      "car": "Mercedes-Benz",
+      "model": "G-Class",
+      "body_type": ["SUV"],
+      "price_max": ["$150,000", "$200,000", "$300,000", "$500,000"]
+    },
+    {
+      "car": "Mercedes-Benz",
+      "model": "GLA",
+      "body_type": ["SUV"],
+      "price_max": ["$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000"]
+    },
+    {
+      "car": "Mercedes-Benz",
+      "model": "GLB",
+      "body_type": ["SUV"],
+      "price_max": ["$50,000", "$60,000", "$70,000", "$80,000", "$90,000"]
+    },
+    {
+      "car": "Mercedes-Benz",
+      "model": "GLC",
+      "body_type": ["SUV", "Coupe"],
+      "price_max": ["$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Mercedes-Benz",
+      "model": "GLE",
+      "body_type": ["SUV", "Coupe"],
+      "price_max": ["$70,000", "$80,000", "$90,000", "$100,000", "$150,000", "$200,000"]
+    },
+    {
+      "car": "Mercedes-Benz",
+      "model": "GLS",
+      "body_type": ["SUV"],
+      "price_max": ["$100,000", "$150,000", "$200,000", "$300,000"]
+    },
+      {
+      "car": "Mercedes-Benz",
+      "model": "GT",
+      "body_type": ["Coupe", "Convertible", "Sedan"],
+      "price_max": ["$200,000", "$300,000", "$500,000"]
+    },
+    {
+      "car": "Mercedes-Benz",
+      "model": "S-Class",
+      "body_type": ["Sedan", "Coupe", "Convertible"],
+      "price_max": ["$100,000", "$150,000", "$200,000", "$300,000", "$500,000"]
+    },
+    {
+      "car": "Mercedes-Benz",
+      "model": "SL",
+      "body_type": ["Convertible"],
+      "price_max": ["$150,000", "$200,000", "$300,000", "$500,000"]
+    },
+    {
+      "car": "Mercedes-Benz",
+      "model": "Sprinter",
+      "body_type": ["Van", "Cab Chassis", "Bus"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000"]
+    },
+    {
+      "car": "Mercedes-Benz",
+      "model": "Valente",
+      "body_type": ["People Mover"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+      {
+      "car": "Mercedes-Benz",
+      "model": "V-Class",
+      "body_type": ["People Mover"],
+      "price_max": ["$60,000", "$70,000", "$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "Mercedes-Benz",
+      "model": "Vito",
+      "body_type": ["Van"],
+      "price_max": ["$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Mercedes-Benz",
+      "model": "X-Class",
+      "body_type": ["Ute"],
+      "price_max": ["$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "MG",
+      "model": "3",
+      "body_type": ["Hatch"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000"]
+    },
+    {
+      "car": "MG",
+      "model": "4",
+      "body_type": ["Hatch"],
+      "price_max": ["$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "MG",
+      "model": "5",
+      "body_type": ["Sedan"],
+      "price_max": ["$20,000", "$25,000", "$30,000"]
+    },
+    {
+      "car": "MG",
+      "model": "HS",
+      "body_type": ["SUV"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000"]
+    },
+    {
+      "car": "MG",
+      "model": "ZS",
+      "body_type": ["SUV"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000"]
+    },
+    {
+      "car": "MINI",
+      "model": "Clubman",
+      "body_type": ["Wagon"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "MINI",
+      "model": "Convertible",
+      "body_type": ["Convertible"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "MINI",
+      "model": "Countryman",
+      "body_type": ["SUV"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "MINI",
+      "model": "Hatch",
+      "body_type": ["Hatch"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Mitsubishi",
+      "model": "ASX",
+      "body_type": ["SUV"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000"]
+    },
+    {
+      "car": "Mitsubishi",
+      "model": "Eclipse Cross",
+      "body_type": ["SUV"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000"]
+    },
+    {
+      "car": "Mitsubishi",
+      "model": "Lancer",
+      "body_type": ["Sedan", "Hatch", "Wagon"],
+      "price_max": ["$5,000", "$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000"]
+    },
+    {
+      "car": "Mitsubishi",
+      "model": "Mirage",
+      "body_type": ["Hatch", "Sedan"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000"]
+    },
+    {
+      "car": "Mitsubishi",
+      "model": "Outlander",
+      "body_type": ["SUV"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Mitsubishi",
+      "model": "Pajero",
+      "body_type": ["SUV"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Mitsubishi",
+      "model": "Pajero Sport",
+      "body_type": ["SUV"],
+      "price_max": ["$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Mitsubishi",
+      "model": "Triton",
+      "body_type": ["Ute", "Cab Chassis"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Nissan",
+      "model": "370Z",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Nissan",
+      "model": "Altima",
+      "body_type": ["Sedan"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000"]
+    },
+    {
+      "car": "Nissan",
+      "model": "GT-R",
+      "body_type": ["Coupe"],
+      "price_max": ["$100,000", "$150,000", "$200,000", "$300,000"]
+    },
+    {
+      "car": "Nissan",
+      "model": "Juke",
+      "body_type": ["SUV"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+    {
+      "car": "Nissan",
+      "model": "Leaf",
+      "body_type": ["Hatch"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Nissan",
+      "model": "Micra",
+      "body_type": ["Hatch"],
+      "price_max": ["$5,000", "$7,500", "$10,000", "$15,000"]
+    },
+    {
+      "car": "Nissan",
+      "model": "Navara",
+      "body_type": ["Ute", "Cab Chassis"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Nissan",
+      "model": "Pathfinder",
+      "body_type": ["SUV"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000"]
+    },
+    {
+      "car": "Nissan",
+      "model": "Patrol",
+      "body_type": ["SUV", "Cab Chassis"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Nissan",
+      "model": "Pulsar",
+      "body_type": ["Sedan", "Hatch"],
+      "price_max": ["$3,000", "$5,000", "$7,500", "$10,000", "$15,000", "$20,000"]
+    },
+    {
+      "car": "Nissan",
+      "model": "Qashqai",
+      "body_type": ["SUV"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000"]
+    },
+      {
+      "car": "Nissan",
+      "model": "Skyline",
+      "body_type": ["Coupe", "Sedan"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "Nissan",
+      "model": "Tiida",
+      "body_type": ["Hatch", "Sedan"],
+      "price_max": ["$3,000", "$5,000", "$7,500", "$10,000"]
+    },
+    {
+      "car": "Nissan",
+      "model": "X-Trail",
+      "body_type": ["SUV"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Nissan",
+      "model": "Z",
+      "body_type": ["Coupe"],
+      "price_max": ["$60,000", "$70,000", "$80,000", "$90,000"]
+    },
+    {
+      "car": "Opel",
+      "model": "Astra",
+      "body_type": ["Hatch", "Wagon"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000"]
+    },
+    {
+      "car": "Opel",
+      "model": "Insignia",
+      "body_type": ["Sedan", "Wagon"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000"]
+    },
+    {
+      "car": "Peugeot",
+      "model": "2008",
+      "body_type": ["SUV"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Peugeot",
+      "model": "208",
+      "body_type": ["Hatch"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000", "$25,000"]
+    },
+    {
+      "car": "Peugeot",
+      "model": "3008",
+      "body_type": ["SUV"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Peugeot",
+      "model": "308",
+      "body_type": ["Hatch", "Wagon"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Peugeot",
+      "model": "5008",
+      "body_type": ["SUV"],
+      "price_max": ["$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Peugeot",
+      "model": "508",
+      "body_type": ["Sedan", "Wagon"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000"]
+    },
+    {
+      "car": "Peugeot",
+      "model": "Expert",
+      "body_type": ["Van"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Peugeot",
+      "model": "Partner",
+      "body_type": ["Van"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+    {
+      "car": "Polestar",
+      "model": "2",
+      "body_type": ["Sedan"],
+      "price_max": ["$50,000", "$60,000", "$70,000", "$80,000", "$90,000"]
+    },
+    {
+      "car": "Polestar",
+      "model": "3",
+      "body_type": ["SUV"],
+      "price_max": ["$100,000", "$150,000"]
+    },
+    {
+      "car": "Polestar",
+      "model": "4",
+      "body_type": ["SUV"],
+      "price_max": ["$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "Porsche",
+      "model": "718 Boxster",
+      "body_type": ["Convertible"],
+      "price_max": ["$90,000", "$100,000", "$150,000", "$200,000"]
+    },
+    {
+      "car": "Porsche",
+      "model": "718 Cayman",
+      "body_type": ["Coupe"],
+      "price_max": ["$90,000", "$100,000", "$150,000", "$200,000", "$300,000"]
+    },
+    {
+      "car": "Porsche",
+      "model": "911",
+      "body_type": ["Coupe", "Convertible"],
+      "price_max": ["$150,000", "$200,000", "$300,000", "$500,000"]
+    },
+    {
+      "car": "Porsche",
+      "model": "Cayenne",
+      "body_type": ["SUV", "Coupe"],
+      "price_max": ["$60,000", "$70,000", "$80,000", "$90,000", "$100,000", "$150,000", "$200,000", "$300,000"]
+    },
+    {
+      "car": "Porsche",
+      "model": "Macan",
+      "body_type": ["SUV"],
+      "price_max": ["$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Porsche",
+      "model": "Panamera",
+      "body_type": ["Sedan", "Wagon"],
+      "price_max": ["$100,000", "$150,000", "$200,000", "$300,000", "$500,000"]
+    },
+    {
+      "car": "Porsche",
+      "model": "Taycan",
+      "body_type": ["Sedan", "Wagon"],
+      "price_max": ["$150,000", "$200,000", "$300,000", "$500,000"]
+    },
+    {
+      "car": "RAM",
+      "model": "1500",
+      "body_type": ["Ute"],
+      "price_max": ["$70,000", "$80,000", "$90,000", "$100,000", "$150,000", "$200,000"]
+    },
+    {
+      "car": "RAM",
+      "model": "2500",
+      "body_type": ["Ute"],
+      "price_max": ["$150,000", "$200,000"]
+    },
+    {
+      "car": "RAM",
+      "model": "3500",
+      "body_type": ["Ute"],
+      "price_max": ["$150,000", "$200,000", "$300,000"]
+    },
+    {
+      "car": "Renault",
+      "model": "Arkana",
+      "body_type": ["SUV"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000"]
+    },
+    {
+      "car": "Renault",
+      "model": "Captur",
+      "body_type": ["SUV"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+    {
+      "car": "Renault",
+      "model": "Clio",
+      "body_type": ["Hatch"],
+      "price_max": ["$5,000", "$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000"]
+    },
+    {
+      "car": "Renault",
+      "model": "Kadjar",
+      "body_type": ["SUV"],
+      "price_max": ["$20,000", "$25,000", "$30,000"]
+    },
+    {
+      "car": "Renault",
+      "model": "Kangoo",
+      "body_type": ["Van"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000"]
+    },
+    {
+      "car": "Renault",
+      "model": "Koleos",
+      "body_type": ["SUV"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000"]
+    },
+    {
+      "car": "Renault",
+      "model": "Master",
+      "body_type": ["Van", "Cab Chassis", "Bus"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Renault",
+      "model": "Megane",
+      "body_type": ["Hatch", "Wagon", "Sedan", "Convertible"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Renault",
+      "model": "Trafic",
+      "body_type": ["Van"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Rolls-Royce",
+      "model": "Cullinan",
+      "body_type": ["SUV"],
+      "price_max": ["$500,000"]
+    },
+    {
+      "car": "Rolls-Royce",
+      "model": "Ghost",
+      "body_type": ["Sedan"],
+      "price_max": ["$500,000"]
+    },
+    {
+      "car": "Rolls-Royce",
+      "model": "Phantom",
+      "body_type": ["Sedan"],
+      "price_max": ["$500,000"]
+    },
+    {
+      "car": "Rolls-Royce",
+      "model": "Spectre",
+      "body_type": ["Coupe"],
+      "price_max": ["$500,000"]
+    },
+    {
+      "car": "Rolls-Royce",
+      "model": "Wraith",
+      "body_type": ["Coupe"],
+      "price_max": ["$300,000", "$500,000"]
+    },
+    {
+      "car": "Rolls-Royce",
+      "model": "Dawn",
+      "body_type": ["Convertible"],
+      "price_max": ["$300,000", "$500,000"]
+    },
+    {
+      "car": "SKODA",
+      "model": "Enyaq",
+      "body_type": ["SUV"],
+      "price_max": ["$80,000", "$90,000"]
+    },
+    {
+      "car": "SKODA",
+      "model": "Fabia",
+      "body_type": ["Hatch", "Wagon"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000"]
+    },
+    {
+      "car": "SKODA",
+      "model": "Kamiq",
+      "body_type": ["SUV"],
+      "price_max": ["$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+    {
+      "car": "SKODA",
+      "model": "Karoq",
+      "body_type": ["SUV"],
+      "price_max": ["$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000"]
+    },
+    {
+      "car": "SKODA",
+      "model": "Kodiaq",
+      "body_type": ["SUV"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "SKODA",
+      "model": "Octavia",
+      "body_type": ["Sedan", "Wagon"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "SKODA",
+      "model": "Scala",
+      "body_type": ["Hatch"],
+      "price_max": ["$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+    {
+      "car": "SKODA",
+      "model": "Superb",
+      "body_type": ["Sedan", "Wagon"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+      {
+      "car": "SKODA",
+      "model": "Yeti",
+      "body_type": ["SUV"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000", "$25,000"]
+    },
+    {
+      "car": "smart",
+      "model": "fortwo",
+      "body_type": ["Hatch", "Convertible"],
+      "price_max": ["$5,000", "$7,500", "$10,000", "$15,000", "$20,000"]
+    },
+      {
+      "car": "smart",
+      "model": "#1",
+      "body_type": ["SUV"],
+      "price_max": ["$60,000", "$70,000"]
+    },
+    {
+      "car": "SsangYong",
+      "model": "Korando",
+      "body_type": ["SUV"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+    {
+      "car": "SsangYong",
+      "model": "Musso",
+      "body_type": ["Ute"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000"]
+    },
+    {
+      "car": "SsangYong",
+      "model": "Rexton",
+      "body_type": ["SUV"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+      {
+      "car": "SsangYong",
+      "model": "Tivoli",
+      "body_type": ["SUV"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000"]
+    },
+    {
+      "car": "SsangYong",
+      "model": "Torres",
+      "body_type": ["SUV"],
+      "price_max": ["$45,000", "$50,000"]
+    },
+    {
+      "car": "Subaru",
+      "model": "BRZ",
+      "body_type": ["Coupe"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000"]
+    },
+    {
+      "car": "Subaru",
+      "model": "Crosstrek",
+      "body_type": ["SUV"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000"]
+    },
+    {
+      "car": "Subaru",
+      "model": "Forester",
+      "body_type": ["SUV"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000"]
+    },
+    {
+      "car": "Subaru",
+      "model": "Impreza",
+      "body_type": ["Hatch", "Sedan"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+    {
+      "car": "Subaru",
+      "model": "Levorg",
+      "body_type": ["Wagon"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000"]
+    },
+    {
+      "car": "Subaru",
+      "model": "Liberty",
+      "body_type": ["Sedan", "Wagon"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+    {
+      "car": "Subaru",
+      "model": "Outback",
+      "body_type": ["SUV", "Wagon"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Subaru",
+      "model": "Solterra",
+      "body_type": ["SUV"],
+      "price_max": ["$60,000", "$70,000", "$80,000", "$90,000"]
+    },
+    {
+      "car": "Subaru",
+      "model": "WRX",
+      "body_type": ["Sedan", "Wagon"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Subaru",
+      "model": "XV",
+      "body_type": ["SUV"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+    {
+      "car": "Suzuki",
+      "model": "Alto",
+      "body_type": ["Hatch"],
+      "price_max": ["$3,000", "$5,000", "$7,500", "$10,000"]
+    },
+      {
+      "car": "Suzuki",
+      "model": "APV",
+      "body_type": ["Van"],
+      "price_max": ["$5,000", "$7,500", "$10,000", "$15,000", "$20,000"]
+    },
+    {
+      "car": "Suzuki",
+      "model": "Baleno",
+      "body_type": ["Hatch"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000"]
+    },
+    {
+      "car": "Suzuki",
+      "model": "Carry",
+      "body_type": ["Van", "Ute"],
+      "price_max": ["$5,000", "$7,500", "$10,000", "$15,000"]
+    },
+      {
+      "car": "Suzuki",
+      "model": "Celerio",
+      "body_type": ["Hatch"],
+      "price_max": ["$5,000", "$7,500", "$10,000", "$15,000"]
+    },
+    {
+      "car": "Suzuki",
+      "model": "Grand Vitara",
+      "body_type": ["SUV"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000"]
+    },
+    {
+      "car": "Suzuki",
+      "model": "Ignis",
+      "body_type": ["SUV"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000"]
+    },
+    {
+      "car": "Suzuki",
+      "model": "Jimny",
+      "body_type": ["SUV"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+      {
+      "car": "Suzuki",
+      "model": "Kizashi",
+      "body_type": ["Sedan"],
+      "price_max": ["$5,000", "$7,500", "$10,000", "$15,000"]
+    },
+      {
+      "car": "Suzuki",
+      "model": "S-Cross",
+      "body_type": ["SUV"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000"]
+    },
+    {
+      "car": "Suzuki",
+      "model": "Swift",
+      "body_type": ["Hatch"],
+      "price_max": ["$5,000", "$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000"]
+    },
+    {
+      "car": "Suzuki",
+      "model": "Vitara",
+      "body_type": ["SUV"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+    {
+      "car": "Tesla",
+      "model": "Model 3",
+      "body_type": ["Sedan"],
+      "price_max": ["$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000"]
+    },
+    {
+      "car": "Tesla",
+      "model": "Model S",
+      "body_type": ["Sedan"],
+      "price_max": ["$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Tesla",
+      "model": "Model X",
+      "body_type": ["SUV"],
+      "price_max": ["$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Tesla",
+      "model": "Model Y",
+      "body_type": ["SUV"],
+      "price_max": ["$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "86",
+      "body_type": ["Coupe"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "Aurion",
+      "body_type": ["Sedan"],
+      "price_max": ["$5,000", "$7,500", "$10,000", "$15,000", "$20,000", "$25,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "Avalon",
+      "body_type": ["Sedan"],
+      "price_max": ["$3,000", "$5,000", "$7,500", "$10,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "C-HR",
+      "body_type": ["SUV"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "Camry",
+      "body_type": ["Sedan"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "Corolla",
+      "body_type": ["Hatch", "Sedan", "Wagon"],
+      "price_max": ["$5,000", "$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "Corolla Cross",
+      "body_type": ["SUV"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "Fortuner",
+      "body_type": ["SUV"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "GR Corolla",
+      "body_type": ["Hatch"],
+      "price_max": ["$60,000", "$70,000", "$80,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "GR Supra",
+      "body_type": ["Coupe"],
+      "price_max": ["$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "GR Yaris",
+      "body_type": ["Hatch"],
+      "price_max": ["$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "Granvia",
+      "body_type": ["People Mover"],
+      "price_max": ["$50,000", "$60,000", "$70,000", "$80,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "HiAce",
+      "body_type": ["Van", "Bus"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "Hilux",
+      "body_type": ["Ute", "Cab Chassis"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "Kluger",
+      "body_type": ["SUV"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "Land Cruiser",
+      "body_type": ["SUV", "Cab Chassis"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "Land Cruiser Prado",
+      "body_type": ["SUV"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "Prius",
+      "body_type": ["Hatch"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+      {
+      "car": "Toyota",
+      "model": "Prius C",
+      "body_type": ["Hatch"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "Prius V",
+      "body_type": ["Wagon", "People Mover"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "RAV4",
+      "body_type": ["SUV"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+      {
+      "car": "Toyota",
+      "model": "Rukus",
+      "body_type": ["Wagon"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "Tarago",
+      "body_type": ["People Mover"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "Yaris",
+      "body_type": ["Hatch", "Sedan"],
+      "price_max": ["$5,000", "$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000"]
+    },
+    {
+      "car": "Toyota",
+      "model": "Yaris Cross",
+      "body_type": ["SUV"],
+      "price_max": ["$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+    {
+      "car": "Volkswagen",
+      "model": "Amarok",
+      "body_type": ["Ute"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000"]
+    },
+      {
+      "car": "Volkswagen",
+      "model": "Arteon",
+      "body_type": ["Sedan", "Wagon"],
+      "price_max": ["$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+      {
+      "car": "Volkswagen",
+      "model": "Beetle",
+      "body_type": ["Hatch", "Convertible"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000"]
+    },
+    {
+      "car": "Volkswagen",
+      "model": "Caddy",
+      "body_type": ["Van", "People Mover"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000"]
+    },
+    {
+      "car": "Volkswagen",
+      "model": "California",
+      "body_type": ["Van", "People Mover"],
+      "price_max": ["$70,000", "$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "Volkswagen",
+      "model": "Caravelle",
+      "body_type": ["People Mover"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Volkswagen",
+      "model": "Crafter",
+      "body_type": ["Van", "Bus", "Cab Chassis"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+      {
+      "car": "Volkswagen",
+      "model": "Eos",
+      "body_type": ["Convertible"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000"]
+    },
+    {
+      "car": "Volkswagen",
+      "model": "Golf",
+      "body_type": ["Hatch", "Wagon", "Convertible"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Volkswagen",
+      "model": "ID.3",
+      "body_type": ["Hatch"],
+      "price_max": ["$50,000", "$60,000"]
+    },
+    {
+      "car": "Volkswagen",
+      "model": "ID.4",
+      "body_type": ["SUV"],
+      "price_max": ["$60,000", "$70,000", "$80,000"]
+    },
+      {
+      "car": "Volkswagen",
+      "model": "ID.5",
+      "body_type": ["SUV"],
+      "price_max": ["$70,000", "$80,000", "$90,000"]
+    },
+    {
+      "car": "Volkswagen",
+      "model": "ID.Buzz",
+      "body_type": ["Van", "People Mover"],
+      "price_max": ["$80,000", "$90,000", "$100,000"]
+    },
+    {
+      "car": "Volkswagen",
+      "model": "Jetta",
+      "body_type": ["Sedan"],
+      "price_max": ["$5,000", "$7,500", "$10,000", "$15,000", "$20,000"]
+    },
+    {
+      "car": "Volkswagen",
+      "model": "Multivan",
+      "body_type": ["People Mover"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000"]
+    },
+    {
+      "car": "Volkswagen",
+      "model": "Passat",
+      "body_type": ["Sedan", "Wagon"],
+      "price_max": ["$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Volkswagen",
+      "model": "Polo",
+      "body_type": ["Hatch"],
+      "price_max": ["$7,500", "$10,000", "$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000"]
+    },
+      {
+      "car": "Volkswagen",
+      "model": "Scirocco",
+      "body_type": ["Coupe"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000"]
+    },
+    {
+      "car": "Volkswagen",
+      "model": "T-Cross",
+      "body_type": ["SUV"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000"]
+    },
+    {
+      "car": "Volkswagen",
+      "model": "T-Roc",
+      "body_type": ["SUV", "Convertible"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+    {
+      "car": "Volkswagen",
+      "model": "Tiguan",
+      "body_type": ["SUV"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Volkswagen",
+      "model": "Touareg",
+      "body_type": ["SUV"],
+      "price_max": ["$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Volkswagen",
+      "model": "Transporter",
+      "body_type": ["Van", "Cab Chassis"],
+      "price_max": ["$15,000", "$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000"]
+    },
+      {
+      "car": "Volkswagen",
+      "model": "Up!",
+      "body_type": ["Hatch"],
+      "price_max": ["$5,000", "$7,500", "$10,000", "$15,000"]
+    },
+    {
+      "car": "Volvo",
+      "model": "C40 Recharge",
+      "body_type": ["SUV"],
+      "price_max": ["$70,000", "$80,000", "$90,000"]
+    },
+    {
+      "car": "Volvo",
+      "model": "EX30",
+      "body_type": ["SUV"],
+      "price_max": ["$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Volvo",
+      "model": "S60",
+      "body_type": ["Sedan"],
+      "price_max": ["$20,000", "$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Volvo",
+      "model": "V60 Cross Country",
+      "body_type": ["Wagon"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000"]
+    },
+    {
+      "car": "Volvo",
+      "model": "XC40",
+      "body_type": ["SUV"],
+      "price_max": ["$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000"]
+    },
+    {
+      "car": "Volvo",
+      "model": "XC60",
+      "body_type": ["SUV"],
+      "price_max": ["$25,000", "$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000"]
+    },
+    {
+      "car": "Volvo",
+      "model": "XC90",
+      "body_type": ["SUV"],
+      "price_max": ["$30,000", "$35,000", "$40,000", "$45,000", "$50,000", "$60,000", "$70,000", "$80,000", "$90,000", "$100,000", "$150,000"]
+    },
+    {
+      "car": "Zeekr",
+      "model": "009",
+      "body_type": ["People Mover"],
+      "price_max": ["$100,000", "$150,000"]
+    },
+    {
+      "car": "Zeekr",
+      "model": "X",
+      "body_type": ["SUV"],
+      "price_max": ["$60,000", "$70,000", "$80,000"]
+    }
+  ]
