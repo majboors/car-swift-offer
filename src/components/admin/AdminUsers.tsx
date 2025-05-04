@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -23,9 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { 
   RpcUser, 
-  AdminUserIdParams, 
   User, 
-  EmptyParams 
 } from "@/types/admin";
 
 export const AdminUsers = () => {
@@ -60,9 +57,8 @@ export const AdminUsers = () => {
       const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
       // Use the database functions to get all users via admin_get_all_users
-      // We need to use record<string, never> to solve the RPC typing issue
       const { data, error } = await supabase
-        .rpc('get_all_users', {} as Record<string, never>);
+        .rpc('get_all_users');
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -105,7 +101,7 @@ export const AdminUsers = () => {
         const { error } = await supabase
           .rpc('remove_admin', { 
             user_id_input: userId 
-          } as { user_id_input: string });
+          });
 
         if (error) throw error;
       } else {
@@ -113,7 +109,7 @@ export const AdminUsers = () => {
         const { error } = await supabase
           .rpc('add_admin', { 
             user_id_input: userId 
-          } as { user_id_input: string });
+          });
 
         if (error) throw error;
       }
