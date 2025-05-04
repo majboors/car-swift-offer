@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ArrowLeft } from 'lucide-react';
 import TrustedBanner from '@/components/TrustedBanner';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -264,6 +263,15 @@ const AddListing = () => {
       setActiveTab("features");
     } else if (activeTab === "features") {
       setActiveTab("images");
+    }
+  };
+  
+  // Function to handle going back to the previous tab
+  const handlePreviousStep = () => {
+    if (activeTab === "features") {
+      setActiveTab("details");
+    } else if (activeTab === "images") {
+      setActiveTab("features");
     }
   };
 
@@ -559,7 +567,16 @@ const AddListing = () => {
                   </CardContent>
                 </Card>
                 
-                <div className="flex justify-end">
+                <div className="flex justify-between">
+                  <Button 
+                    type="button"
+                    onClick={handlePreviousStep}
+                    variant="outline"
+                    className="px-8"
+                  >
+                    <ArrowLeft className="mr-2" /> Back
+                  </Button>
+                  
                   <Button 
                     type="button"
                     onClick={handleNextStep}
@@ -619,7 +636,16 @@ const AddListing = () => {
                   </CardContent>
                 </Card>
                 
-                <div className="flex justify-end">
+                <div className="flex justify-between">
+                  <Button 
+                    type="button"
+                    onClick={handlePreviousStep}
+                    variant="outline"
+                    className="px-8"
+                  >
+                    <ArrowLeft className="mr-2" /> Back
+                  </Button>
+                  
                   <Button
                     type="submit"
                     className="bg-[#007ac8] hover:bg-[#0069b4] px-8"
