@@ -148,14 +148,14 @@ const AddListing = () => {
     });
   };
   
-  const uploadImages = async () => {
-    if (selectedImages.length === 0) return [];
+  const uploadImages = async (images: File[] = selectedImages) => {
+    if (images.length === 0) return [];
     
     setUploadingImages(true);
     const imageUrls: string[] = [];
     
     try {
-      for (const image of selectedImages) {
+      for (const image of images) {
         const fileExt = image.name.split('.').pop();
         const fileName = `${uuidv4()}.${fileExt}`;
         const filePath = `car-listings/${fileName}`;
@@ -315,41 +315,6 @@ const AddListing = () => {
     }
   };
   
-  const uploadImages = async (images: File[] = selectedImages) => {
-    if (images.length === 0) return [];
-    
-    setUploadingImages(true);
-    const imageUrls: string[] = [];
-    
-    try {
-      for (const image of images) {
-        const fileExt = image.name.split('.').pop();
-        const fileName = `${uuidv4()}.${fileExt}`;
-        const filePath = `car-listings/${fileName}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('car-listings')
-          .upload(filePath, image);
-          
-        if (uploadError) throw uploadError;
-        
-        const { data } = supabase.storage.from('car-listings').getPublicUrl(filePath);
-        imageUrls.push(data.publicUrl);
-      }
-      
-      return imageUrls;
-    } catch (error: any) {
-      toast({
-        title: "Error uploading images",
-        description: error.message,
-        variant: "destructive",
-      });
-      return [];
-    } finally {
-      setUploadingImages(false);
-    }
-  };
-  
   // Function to populate test data
   const populateTestData = () => {
     // Populate form data with test values
@@ -458,99 +423,6 @@ const AddListing = () => {
       });
     } finally {
       setLoading(false);
-    }
-  };
-  
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to add a listing.",
-        variant: "destructive",
-      });
-      navigate('/auth');
-      return;
-    }
-    
-    setLoading(true);
-    
-    try {
-      // Upload images first
-      const imageUrls = await uploadImages();
-      
-      // Prepare features data
-      const featuresData = Object.entries(selectedFeatures).reduce((acc, [category, features]) => {
-        if (features.length > 0) {
-          return { ...acc, [category]: features };
-        }
-        return acc;
-      }, {});
-      
-      // Format the data
-      const listingData = {
-        user_id: user.id,
-        title: formData.car_name || formData.title, // Use car_name as title if available
-        car_name: formData.car_name,
-        make: formData.make,
-        model: formData.model,
-        year: parseInt(formData.year.toString()),
-        price: parseFloat(formData.price),
-        mileage: formData.mileage ? parseInt(formData.mileage) : null,
-        color: formData.color || null,
-        transmission: formData.transmission || null,
-        fuel_type: formData.fuel_type || null,
-        body_type: formData.body_type || null,
-        description: formData.description || null,
-        location: formData.location || null,
-        contact_email: formData.contact_email || null,
-        contact_phone: formData.contact_phone || null,
-        features: Object.keys(featuresData).length > 0 ? featuresData : null,
-        images: imageUrls,
-      };
-      
-      // Insert the listing
-      const { data, error } = await supabase
-        .from('car_listings')
-        .insert(listingData)
-        .select('id')
-        .single();
-        
-      if (error) throw error;
-      
-      toast({
-        title: "Success!",
-        description: "Your listing has been added successfully.",
-      });
-      
-      navigate(`/listing/${data.id}`);
-    } catch (error: any) {
-      toast({
-        title: "Error adding listing",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  // Function to handle proceeding to the next tab
-  const handleNextStep = () => {
-    if (activeTab === "details") {
-      setActiveTab("features");
-    } else if (activeTab === "features") {
-      setActiveTab("images");
-    }
-  };
-  
-  // Function to handle going back to the previous tab
-  const handlePreviousStep = () => {
-    if (activeTab === "features") {
-      setActiveTab("details");
-    } else if (activeTab === "images") {
-      setActiveTab("features");
     }
   };
 
