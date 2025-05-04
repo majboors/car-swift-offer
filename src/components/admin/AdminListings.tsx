@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -44,6 +43,9 @@ interface RpcListing {
   [key: string]: any; // For any additional properties
 }
 
+// Define the expected return type for our RPC function
+type GetCarListingsWithUsersResponse = RpcListing[];
+
 export const AdminListings = () => {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,9 +73,9 @@ export const AdminListings = () => {
       setFetchError(null);
       
       // Use the database function to get all listings with user emails
-      // Fix the generic type parameter to match Supabase expectations
+      // Explicitly type the RPC call
       const { data: listingsData, error: listingsError } = await supabase
-        .rpc('get_car_listings_with_users');
+        .rpc<GetCarListingsWithUsersResponse>('get_car_listings_with_users');
 
       if (listingsError) {
         console.error("Error fetching listings:", listingsError);
@@ -82,8 +84,7 @@ export const AdminListings = () => {
         return;
       }
       
-      // Add type assertion to handle the unknown type
-      setListings(listingsData as Listing[] || []);
+      setListings(listingsData || []);
     } catch (error) {
       console.error("Error in fetchListings:", error);
       setFetchError("An unexpected error occurred");

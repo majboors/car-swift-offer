@@ -45,6 +45,10 @@ interface RpcUser {
   [key: string]: any; // For any additional properties
 }
 
+// Define the expected return types for our RPC functions
+type GetAllUsersResponse = RpcUser[];
+type AddRemoveAdminResponse = null;
+
 export const AdminUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -77,9 +81,9 @@ export const AdminUsers = () => {
       const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
       // Use the database functions to get all users via admin_get_all_users
-      // Fix the generic type parameter to match Supabase expectations
+      // Explicitly type the RPC call
       const { data: userData, error: userError } = await supabase
-        .rpc('get_all_users');
+        .rpc<GetAllUsersResponse>('get_all_users');
 
       if (userError) {
         console.error("Error fetching users:", userError);
@@ -95,8 +99,7 @@ export const AdminUsers = () => {
       }
 
       // Transform the data to match our User interface
-      // Add type assertion to handle the unknown type
-      const enhancedUsers: User[] = (userData as RpcUser[] || []).map(user => ({
+      const enhancedUsers: User[] = userData.map(user => ({
         id: user.id,
         email: user.email,
         created_at: user.created_at,
@@ -117,16 +120,18 @@ export const AdminUsers = () => {
     try {
       if (currentStatus) {
         // Call the remove_admin RPC function with proper typing
-        const { error } = await supabase.rpc('remove_admin', {
-          user_id_input: userId
-        });
+        const { error } = await supabase
+          .rpc<AddRemoveAdminResponse>('remove_admin', {
+            user_id_input: userId
+          });
 
         if (error) throw error;
       } else {
         // Call the add_admin RPC function with proper typing
-        const { error } = await supabase.rpc('add_admin', {
-          user_id_input: userId
-        });
+        const { error } = await supabase
+          .rpc<AddRemoveAdminResponse>('add_admin', {
+            user_id_input: userId
+          });
 
         if (error) throw error;
       }
