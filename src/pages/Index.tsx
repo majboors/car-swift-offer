@@ -1,4 +1,3 @@
-
 // pages/index.tsx
 
 import React from "react";
@@ -26,13 +25,13 @@ const Index: React.FC = () => {
 
       {/* 3. Main content will take whatever space it needs */}
       <main className="flex-grow">
-        {/* Added -mt-12 to pull the hero section up closer to navbar */}
-        <div className="-mt-12">
-          <HeroSection />
-        </div>
+        <HeroSection />
 
         <section className="container mx-auto px-4 py-8 space-y-8">
-          <SearchForm />
+          {/* Keep the negative margin for the form to overlap the hero section */}
+          <div className="-mt-12">
+            <SearchForm />
+          </div>
           <CategoryStrip />
           <SaveSearchPrompt />
           <CarValuationSection />

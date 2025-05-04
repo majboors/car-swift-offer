@@ -71,18 +71,18 @@ const Navbar = () => {
 
   return (
     <SidebarProvider defaultOpen={false}>
-      <div className="w-full bg-white shadow-sm border-b border-gray-200">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14">
+      <div className="w-full bg-white shadow-md border-b border-gray-200">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20">
           <div className="flex justify-between items-center h-full">
             <div className="flex items-center gap-3">
               {isMobile && (
-                <SidebarTrigger className="h-6 w-6 text-gray-700" />
+                <SidebarTrigger className="h-8 w-8 text-gray-700" />
               )}
               <Link to="/" className="flex items-center">
                 <img
                   src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg"
                   alt="Snap My Car"
-                  className="h-8 w-auto max-w-full object-contain"
+                  className="h-10 w-auto max-w-full object-contain"
                 />
               </Link>
               <div className="hidden md:block ml-4">
@@ -233,12 +233,12 @@ const Navbar = () => {
                 </NavigationMenu>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Bell className="w-4 h-4" />
+            <div className="flex items-center space-x-3">
+              <Button variant="ghost" size="icon" className="h-10 w-10">
+                <Bell className="w-5 h-5" />
               </Button>
-              <Button variant="ghost" className="h-8 py-1 text-sm">Sign up/Log in</Button>
-              <Button className="bg-[#007ac8] hover:bg-[#0069b4] h-8 py-1 text-sm">
+              <Button variant="ghost" className="h-10 py-2 text-sm">Sign up/Log in</Button>
+              <Button className="bg-[#007ac8] hover:bg-[#0069b4] h-10 py-2 text-sm">
                 Sell my car
               </Button>
             </div>
