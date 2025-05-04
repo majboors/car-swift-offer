@@ -49,9 +49,9 @@ export const AdminUsers = () => {
     try {
       setLoading(true);
       
-      // Use RPC function with proper type assertion
+      // Fix type assertion for RPC call to get_all_users
       const { data: usersData, error: usersError } = await supabase
-        .rpc('get_all_users') as unknown as { 
+        .rpc('get_all_users', {}) as unknown as { 
           data: SupabaseUser[] | null, 
           error: Error | null 
         };
@@ -65,9 +65,9 @@ export const AdminUsers = () => {
         return;
       }
 
-      // Get admin users using the RPC function with proper type assertion
+      // Fix type assertion for RPC call to get_all_admins
       const { data: adminsData, error: adminsError } = await supabase
-        .rpc('get_all_admins') as unknown as { 
+        .rpc('get_all_admins', {}) as unknown as { 
           data: AdminUser[] | null, 
           error: Error | null 
         };
@@ -104,7 +104,7 @@ export const AdminUsers = () => {
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
-        // Remove admin role using RPC function with proper type assertion
+        // Fix type assertion for RPC call to remove_admin
         const { error } = await supabase
           .rpc('remove_admin', { user_id_input: userId }) as unknown as {
             data: null,
@@ -113,7 +113,7 @@ export const AdminUsers = () => {
 
         if (error) throw error;
       } else {
-        // Add admin role using RPC function with proper type assertion
+        // Fix type assertion for RPC call to add_admin
         const { error } = await supabase
           .rpc('add_admin', { user_id_input: userId }) as unknown as {
             data: null,

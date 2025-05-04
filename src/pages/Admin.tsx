@@ -32,16 +32,16 @@ const Admin = () => {
       }
 
       try {
-        // Check if user has admin role using the RPC function with proper type assertion
-        const { data, error } = await supabase
-          .rpc('get_all_admins') as unknown as { 
-            data: AdminUser[] | null, 
-            error: Error | null 
-          };
+        // Fix type assertion for RPC call
+        const { data, error } = await supabase.rpc('get_all_admins', {}) as unknown as { 
+          data: AdminUser[] | null, 
+          error: Error | null 
+        };
 
         if (error) throw error;
         
-        const isUserAdmin = data && data.some((admin) => admin.user_id === user.id);
+        // Add null check for data
+        const isUserAdmin = data ? data.some((admin) => admin.user_id === user.id) : false;
 
         if (!isUserAdmin) {
           toast({
