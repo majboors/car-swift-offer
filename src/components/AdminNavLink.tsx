@@ -7,13 +7,13 @@ import { supabase } from "@/integrations/supabase/client";
 type AdminUser = { id: string; user_id: string; created_at: string };
 
 export const AdminNavLink = () => {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkAdmin = async () => {
-      if (!user) {
+      if (!user || !session) {
         setIsAdmin(false);
         setIsLoading(false);
         return;
@@ -45,7 +45,7 @@ export const AdminNavLink = () => {
     };
 
     checkAdmin();
-  }, [user]);
+  }, [user, session]);
 
   if (isLoading || !isAdmin) return null;
 

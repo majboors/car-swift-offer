@@ -14,16 +14,17 @@ import { Navbar } from "@/components/Navbar";
 type AdminUser = { id: string; user_id: string; created_at: string };
 
 const Admin = () => {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const initialize = async () => {
-      if (!user) {
+      if (!user || !session) {
+        console.log("No user or session found, redirecting to auth page");
         toast({
-          title: "Access denied",
+          title: "Authentication required",
           description: "Please login to access this page",
           variant: "destructive",
         });
@@ -37,10 +38,15 @@ const Admin = () => {
         // First create default admin if needed
         await createDefaultAdmin();
         
-        // Then check admin status
+        // Then check admin status and wait for the result
         const isUserAdmin = await checkAdminAccess();
+        console.log("Admin check result:", isUserAdmin);
+        
+        // Update state based on admin status
+        setIsAdmin(isUserAdmin);
         
         if (!isUserAdmin) {
+          console.log("User is not an admin, redirecting to home page");
           toast({
             title: "Access denied",
             description: "You do not have permission to access the admin dashboard",
@@ -48,14 +54,13 @@ const Admin = () => {
           });
           navigate("/");
         } else {
-          console.log("Admin access granted");
-          setIsAdmin(true);
+          console.log("Admin access granted, showing admin dashboard");
         }
       } catch (error) {
         console.error("Admin initialization error:", error);
         toast({
           title: "Error",
-          description: "An unexpected error occurred",
+          description: "An unexpected error occurred while checking admin status",
           variant: "destructive",
         });
         setIsAdmin(false);
@@ -66,7 +71,7 @@ const Admin = () => {
     };
 
     initialize();
-  }, [user, navigate]);
+  }, [user, session, navigate]);
 
   const createDefaultAdmin = async () => {
     try {
