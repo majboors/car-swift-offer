@@ -15,48 +15,53 @@ serve(async (req) => {
 
   try {
     // Create Supabase client using the auth header from the request
-    const supabaseClient = createClient(
+    const authClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
         global: { headers: { Authorization: req.headers.get('Authorization')! } },
       }
     );
-    
-    // Create admin client for admin operations
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
 
-    // Check if the requesting user is an admin
-    const { data: { user: authUser }, error: authError } = await supabaseClient.auth.getUser();
+    // Verify the requesting user is authenticated
+    const { data: { user: authUser }, error: authError } = await authClient.auth.getUser();
     
     if (authError || !authUser) {
+      console.error("Authentication error:", authError);
       return new Response(
         JSON.stringify({ error: "Not authenticated" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Check if user is admin
-    const { data: adminCheck, error: adminError } = await supabaseClient
+    // Always use admin client for admin operations - bypass RLS completely
+    const adminClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    // Check if the user is an admin
+    const { data: adminCheck, error: adminCheckError } = await adminClient
       .from('admins')
       .select('id')
       .eq('user_id', authUser.id)
-      .maybeSingle();
+      .single();
 
-    if (adminError || !adminCheck) {
+    if (adminCheckError || !adminCheck) {
+      console.error("Admin check error:", adminCheckError);
       return new Response(
         JSON.stringify({ error: "Not authorized - admin access required" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Get all users using the admin client
-    const { data: users, error: usersError } = await supabaseAdmin.auth.admin.listUsers();
+    console.log("Admin check passed, retrieving all users");
+
+    // Get all users using the admin client and avoid RLS
+    const { data: users, error: usersError } = await adminClient.auth.admin.listUsers();
     
     if (usersError) {
+      console.error("Error fetching users:", usersError);
       throw usersError;
     }
 

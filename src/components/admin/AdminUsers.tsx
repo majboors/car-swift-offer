@@ -49,55 +49,47 @@ export const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Create default admin on component mount
-    createDefaultAdmin();
     fetchUsers();
   }, []);
-
-  const createDefaultAdmin = async () => {
-    try {
-      console.log("Creating default admin...");
-      const { data, error } = await supabase.functions.invoke<{ message: string, userId: string }>('create_default_admin', {
-        method: 'POST',
-      });
-      
-      if (error) {
-        console.error("Error creating default admin:", error);
-        return;
-      }
-      
-      console.log("Default admin creation response:", data);
-    } catch (error) {
-      console.error("Failed to create default admin:", error);
-    }
-  };
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
+      setFetchError(null);
       
+      console.log("Fetching all users...");
       const { data: usersData, error: usersError } = await supabase.functions.invoke<SupabaseUser[]>('get_all_users', {
         method: 'POST',
       });
 
       if (usersError) {
+        console.error("Error fetching users:", usersError);
+        setFetchError("Failed to load users: " + usersError.message);
         throw usersError;
       }
 
       if (!usersData) {
+        console.log("No users data returned");
         setUsers([]);
         return;
       }
 
+      console.log("Users data fetched, total users:", usersData.length);
+      console.log("Fetching all admins...");
       const { data: adminsData, error: adminsError } = await supabase.functions.invoke<AdminUser[]>('get_all_admins', {
         method: 'POST',
       });
 
       if (adminsError) {
+        console.error("Error fetching admins:", adminsError);
+        setFetchError("Failed to load admin status: " + adminsError.message);
         throw adminsError;
       }
+
+      console.log("Admins data fetched:", adminsData);
 
       // Create a map of admin user IDs for faster lookups
       const adminIds = adminsData ? adminsData.map((admin) => admin.user_id) : [];
@@ -111,12 +103,13 @@ export const AdminUsers = () => {
         is_admin: adminIds.includes(user.id),
       }));
 
+      console.log("Enhanced users prepared:", enhancedUsers.length);
       setUsers(enhancedUsers);
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error("Error in fetchUsers:", error);
       toast({
         title: "Error",
-        description: "Failed to load users",
+        description: fetchError || "Failed to load users",
         variant: "destructive",
       });
     } finally {
@@ -127,6 +120,7 @@ export const AdminUsers = () => {
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
+        console.log("Removing admin status for user:", userId);
         const { error } = await supabase.functions.invoke<null>('remove_admin', {
           method: 'POST',
           body: { user_id_input: userId }
@@ -134,6 +128,7 @@ export const AdminUsers = () => {
 
         if (error) throw error;
       } else {
+        console.log("Adding admin status for user:", userId);
         const { error } = await supabase.functions.invoke<null>('add_admin', {
           method: 'POST',
           body: { user_id_input: userId }
@@ -155,7 +150,7 @@ export const AdminUsers = () => {
       console.error("Error toggling admin status:", error);
       toast({
         title: "Error",
-        description: "Failed to update user admin status",
+        description: `Failed to ${currentStatus ? "remove" : "add"} admin status`,
         variant: "destructive",
       });
     }
@@ -169,14 +164,6 @@ export const AdminUsers = () => {
   const filteredUsers = users.filter(user => 
     user.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <Loader className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
 
   return (
     <div>
@@ -202,11 +189,29 @@ export const AdminUsers = () => {
             </DialogContent>
           </Dialog>
 
-          <Button onClick={fetchUsers} variant="outline">
-            Refresh
+          <Button 
+            onClick={fetchUsers} 
+            variant="outline"
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Loader className="mr-2 h-4 w-4 animate-spin" />
+                Loading...
+              </>
+            ) : (
+              'Refresh'
+            )}
           </Button>
         </div>
       </div>
+
+      {fetchError && (
+        <div className="bg-destructive/15 p-4 rounded-md mb-4 text-destructive">
+          <p className="font-medium">Error: {fetchError}</p>
+          <p className="text-sm mt-1">Please try refreshing or check your authentication status</p>
+        </div>
+      )}
 
       <div className="rounded-md border">
         <Table>
@@ -220,7 +225,16 @@ export const AdminUsers = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredUsers.length > 0 ? (
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-8">
+                  <div className="flex flex-col items-center justify-center">
+                    <Loader className="h-8 w-8 animate-spin text-primary mb-2" />
+                    <span>Loading users...</span>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : filteredUsers.length > 0 ? (
               filteredUsers.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell>{user.email}</TableCell>
@@ -255,7 +269,7 @@ export const AdminUsers = () => {
             ) : (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-4">
-                  No users found
+                  {fetchError ? 'Error loading users' : 'No users found'}
                 </TableCell>
               </TableRow>
             )}

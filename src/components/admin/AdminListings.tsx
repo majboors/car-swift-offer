@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ export const AdminListings = () => {
     description: "",
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchListings();
@@ -51,25 +53,26 @@ export const AdminListings = () => {
   const fetchListings = async () => {
     try {
       setLoading(true);
+      setFetchError(null);
       
-      // Use a more direct type casting approach
+      console.log("Fetching all car listings...");
       const { data, error } = await supabase.functions.invoke('get_car_listings_with_users', {
         method: 'POST'
-      }) as unknown as {
-        data: Listing[] | null,
-        error: Error | null
-      };
+      });
 
       if (error) {
+        console.error("Error fetching listings:", error);
+        setFetchError("Failed to load listings: " + error.message);
         throw error;
       }
 
+      console.log("Listings data fetched:", data);
       setListings(data || []);
     } catch (error) {
-      console.error("Error fetching listings:", error);
+      console.error("Error in fetchListings:", error);
       toast({
         title: "Error",
-        description: "Failed to load listings",
+        description: fetchError || "Failed to load listings",
         variant: "destructive",
       });
     } finally {
@@ -167,14 +170,6 @@ export const AdminListings = () => {
     listing.model?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <Loader className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -186,11 +181,29 @@ export const AdminListings = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-80"
           />
-          <Button onClick={fetchListings} variant="outline">
-            Refresh
+          <Button 
+            onClick={fetchListings} 
+            variant="outline"
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Loader className="mr-2 h-4 w-4 animate-spin" />
+                Loading...
+              </>
+            ) : (
+              'Refresh'
+            )}
           </Button>
         </div>
       </div>
+
+      {fetchError && (
+        <div className="bg-destructive/15 p-4 rounded-md mb-4 text-destructive">
+          <p className="font-medium">Error: {fetchError}</p>
+          <p className="text-sm mt-1">Please try refreshing or check your authentication status</p>
+        </div>
+      )}
 
       <div className="rounded-md border">
         <Table>
@@ -206,7 +219,16 @@ export const AdminListings = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredListings.length > 0 ? (
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-8">
+                  <div className="flex flex-col items-center justify-center">
+                    <Loader className="h-8 w-8 animate-spin text-primary mb-2" />
+                    <span>Loading listings...</span>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : filteredListings.length > 0 ? (
               filteredListings.map((listing) => (
                 <TableRow key={listing.id}>
                   <TableCell>{listing.title}</TableCell>
@@ -238,7 +260,7 @@ export const AdminListings = () => {
             ) : (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-4">
-                  No listings found
+                  {fetchError ? 'Error loading listings' : 'No listings found'}
                 </TableCell>
               </TableRow>
             )}

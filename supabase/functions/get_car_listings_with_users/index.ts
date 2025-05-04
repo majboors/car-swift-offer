@@ -15,7 +15,7 @@ serve(async (req) => {
 
   try {
     // Create Supabase client using the auth header from the request
-    const supabaseClient = createClient(
+    const authClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
@@ -24,15 +24,16 @@ serve(async (req) => {
     );
     
     // Create admin client for admin operations
-    const supabaseAdmin = createClient(
+    const adminClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
     // Check if the requesting user is authenticated
-    const { data: { user: authUser }, error: authError } = await supabaseClient.auth.getUser();
+    const { data: { user: authUser }, error: authError } = await authClient.auth.getUser();
     
     if (authError || !authUser) {
+      console.error("Authentication error:", authError);
       return new Response(
         JSON.stringify({ error: "Not authenticated" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -40,32 +41,37 @@ serve(async (req) => {
     }
 
     // Check if requesting user is an admin
-    const { data: adminCheck, error: adminError } = await supabaseClient
+    const { data: adminCheck, error: adminCheckError } = await adminClient
       .from('admins')
       .select('id')
       .eq('user_id', authUser.id)
-      .maybeSingle();
+      .single();
 
-    if (adminError || !adminCheck) {
+    if (adminCheckError || !adminCheck) {
+      console.error("Admin check error:", adminCheckError);
       return new Response(
         JSON.stringify({ error: "Not authorized - admin access required" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Get all car listings
-    const { data: listings, error: listingsError } = await supabaseClient
+    console.log("Admin check passed, retrieving all car listings");
+
+    // Get all car listings using the admin client to bypass RLS
+    const { data: listings, error: listingsError } = await adminClient
       .from('car_listings')
       .select('*');
 
     if (listingsError) {
+      console.error("Error fetching listings:", listingsError);
       throw listingsError;
     }
 
     // Get all users for adding email
-    const { data: users, error: usersError } = await supabaseAdmin.auth.admin.listUsers();
+    const { data: users, error: usersError } = await adminClient.auth.admin.listUsers();
     
     if (usersError) {
+      console.error("Error fetching users for mapping:", usersError);
       throw usersError;
     }
 
