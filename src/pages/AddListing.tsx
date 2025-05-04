@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -275,6 +276,284 @@ const AddListing = () => {
     }
   };
 
+  // Function to fetch placeholder images for testing
+  const fetchPlaceholderImages = async () => {
+    try {
+      // Define placeholders to use
+      const placeholderImageUrls = [
+        'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=800&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=80&w=800&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=800&auto=format&fit=crop'
+      ];
+      
+      // Convert URLs to image files
+      const imagePromises = placeholderImageUrls.map(async (url, index) => {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const fileName = `placeholder-${index + 1}.jpg`;
+        return new File([blob], fileName, { type: 'image/jpeg' });
+      });
+      
+      const imageFiles = await Promise.all(imagePromises);
+      
+      // Create object URLs for preview
+      const newPreviewUrls = imageFiles.map(file => URL.createObjectURL(file));
+      
+      // Set the fetched images and preview URLs
+      setSelectedImages(imageFiles);
+      setPreviewUrls(newPreviewUrls);
+      
+      return imageFiles;
+    } catch (error) {
+      console.error('Error fetching placeholder images:', error);
+      toast({
+        title: "Error loading test images",
+        description: "Could not fetch placeholder images for testing.",
+        variant: "destructive",
+      });
+      return [];
+    }
+  };
+  
+  const uploadImages = async (images: File[] = selectedImages) => {
+    if (images.length === 0) return [];
+    
+    setUploadingImages(true);
+    const imageUrls: string[] = [];
+    
+    try {
+      for (const image of images) {
+        const fileExt = image.name.split('.').pop();
+        const fileName = `${uuidv4()}.${fileExt}`;
+        const filePath = `car-listings/${fileName}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('car-listings')
+          .upload(filePath, image);
+          
+        if (uploadError) throw uploadError;
+        
+        const { data } = supabase.storage.from('car-listings').getPublicUrl(filePath);
+        imageUrls.push(data.publicUrl);
+      }
+      
+      return imageUrls;
+    } catch (error: any) {
+      toast({
+        title: "Error uploading images",
+        description: error.message,
+        variant: "destructive",
+      });
+      return [];
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+  
+  // Function to populate test data
+  const populateTestData = () => {
+    // Populate form data with test values
+    setFormData({
+      car_name: '2022 Tesla Model 3 Long Range',
+      title: '2022 Tesla Model 3 Long Range - Excellent Condition',
+      make: 'Tesla',
+      model: 'Model 3',
+      year: 2022,
+      price: '49990',
+      mileage: '15000',
+      color: 'Midnight Silver',
+      transmission: 'Automatic',
+      fuel_type: 'Electric',
+      body_type: 'Sedan',
+      description: 'This Tesla Model 3 Long Range is in excellent condition with only 15,000 km. Features include Autopilot, premium interior, and glass roof. Full service history available. Car is located in Sydney and available for inspection.',
+      location: 'Sydney, NSW',
+      contact_email: user?.email || 'test@example.com',
+      contact_phone: '0412345678',
+    });
+    
+    // Select some features for testing
+    setSelectedFeatures({
+      'Audio, Visual & Communication': ['Bluetooth', 'Navigation System', 'Smartphone Integration', 'USB Port', 'Apple CarPlay', 'Android Auto'],
+      'Comfort & Convenience': ['Automatic Climate Control', 'Cruise Control', 'Electric Parking Brake', 'Keyless Entry', 'Push Button Start'],
+      'Interior': ['Adjustable Steering Column', 'Cup Holders', 'Front Center Armrest', 'Leather Steering Wheel'],
+      'Safety & Security': ['ABS', 'Airbags', 'Electronic Stability Control', 'Lane Departure Warning', 'Parking Sensors', 'Reversing Camera'],
+      'Seating': ['Electric Seats', 'Heated Seats', 'Leather Seats']
+    });
+  };
+  
+  // Function to handle the test submission
+  const handleTestSubmit = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to use the test feature.",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      // Populate test data
+      populateTestData();
+      
+      // Fetch placeholder images
+      const testImages = await fetchPlaceholderImages();
+      
+      // Upload images
+      const imageUrls = await uploadImages(testImages);
+      
+      // Prepare features data
+      const featuresData = Object.entries(selectedFeatures).reduce((acc, [category, features]) => {
+        if (features.length > 0) {
+          return { ...acc, [category]: features };
+        }
+        return acc;
+      }, {});
+      
+      // Format the listing data
+      const listingData = {
+        user_id: user.id,
+        title: formData.title || formData.car_name,
+        car_name: formData.car_name,
+        make: formData.make,
+        model: formData.model,
+        year: parseInt(formData.year.toString()),
+        price: parseFloat(formData.price),
+        mileage: formData.mileage ? parseInt(formData.mileage) : null,
+        color: formData.color || null,
+        transmission: formData.transmission || null,
+        fuel_type: formData.fuel_type || null,
+        body_type: formData.body_type || null,
+        description: formData.description || null,
+        location: formData.location || null,
+        contact_email: formData.contact_email || null,
+        contact_phone: formData.contact_phone || null,
+        features: Object.keys(featuresData).length > 0 ? featuresData : null,
+        images: imageUrls,
+      };
+      
+      // Insert the listing
+      const { data, error } = await supabase
+        .from('car_listings')
+        .insert(listingData)
+        .select('id')
+        .single();
+        
+      if (error) throw error;
+      
+      toast({
+        title: "Test Listing Created!",
+        description: "Your test listing has been added successfully.",
+      });
+      
+      navigate(`/listing/${data.id}`);
+    } catch (error: any) {
+      toast({
+        title: "Error adding test listing",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to add a listing.",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      // Upload images first
+      const imageUrls = await uploadImages();
+      
+      // Prepare features data
+      const featuresData = Object.entries(selectedFeatures).reduce((acc, [category, features]) => {
+        if (features.length > 0) {
+          return { ...acc, [category]: features };
+        }
+        return acc;
+      }, {});
+      
+      // Format the data
+      const listingData = {
+        user_id: user.id,
+        title: formData.car_name || formData.title, // Use car_name as title if available
+        car_name: formData.car_name,
+        make: formData.make,
+        model: formData.model,
+        year: parseInt(formData.year.toString()),
+        price: parseFloat(formData.price),
+        mileage: formData.mileage ? parseInt(formData.mileage) : null,
+        color: formData.color || null,
+        transmission: formData.transmission || null,
+        fuel_type: formData.fuel_type || null,
+        body_type: formData.body_type || null,
+        description: formData.description || null,
+        location: formData.location || null,
+        contact_email: formData.contact_email || null,
+        contact_phone: formData.contact_phone || null,
+        features: Object.keys(featuresData).length > 0 ? featuresData : null,
+        images: imageUrls,
+      };
+      
+      // Insert the listing
+      const { data, error } = await supabase
+        .from('car_listings')
+        .insert(listingData)
+        .select('id')
+        .single();
+        
+      if (error) throw error;
+      
+      toast({
+        title: "Success!",
+        description: "Your listing has been added successfully.",
+      });
+      
+      navigate(`/listing/${data.id}`);
+    } catch (error: any) {
+      toast({
+        title: "Error adding listing",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Function to handle proceeding to the next tab
+  const handleNextStep = () => {
+    if (activeTab === "details") {
+      setActiveTab("features");
+    } else if (activeTab === "features") {
+      setActiveTab("images");
+    }
+  };
+  
+  // Function to handle going back to the previous tab
+  const handlePreviousStep = () => {
+    if (activeTab === "features") {
+      setActiveTab("details");
+    } else if (activeTab === "images") {
+      setActiveTab("features");
+    }
+  };
+
   // Count total selected features
   const totalSelectedFeatures = Object.values(selectedFeatures).reduce(
     (total, features) => total + features.length, 
@@ -304,7 +583,19 @@ const AddListing = () => {
       
       <div className="flex-grow container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6">Add a New Car Listing</h1>
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold">Add a New Car Listing</h1>
+            
+            <Button 
+              type="button" 
+              onClick={handleTestSubmit} 
+              variant="outline" 
+              className="border-blue-500 text-blue-500 hover:bg-blue-100"
+              disabled={loading || uploadingImages}
+            >
+              {loading ? 'Creating Test...' : 'Create Test Listing'}
+            </Button>
+          </div>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
