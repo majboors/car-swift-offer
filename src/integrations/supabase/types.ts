@@ -12,11 +12,13 @@ export type Database = {
       car_listings: {
         Row: {
           body_type: string | null
+          car_name: string | null
           color: string | null
           contact_email: string | null
           contact_phone: string | null
           created_at: string
           description: string | null
+          features: Json | null
           fuel_type: string | null
           id: string
           images: Json | null
@@ -33,11 +35,13 @@ export type Database = {
         }
         Insert: {
           body_type?: string | null
+          car_name?: string | null
           color?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
           description?: string | null
+          features?: Json | null
           fuel_type?: string | null
           id?: string
           images?: Json | null
@@ -54,11 +58,13 @@ export type Database = {
         }
         Update: {
           body_type?: string | null
+          car_name?: string | null
           color?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
           description?: string | null
+          features?: Json | null
           fuel_type?: string | null
           id?: string
           images?: Json | null
