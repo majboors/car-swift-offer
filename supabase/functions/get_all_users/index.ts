@@ -14,41 +14,48 @@ serve(async (req) => {
   }
 
   try {
-    // Create Supabase client using the auth header from the request
+    console.log("get_all_users function called");
+    
+    // Create admin client for direct admin operations
+    const adminClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    // Create auth client from request
     const authClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
-        global: { headers: { Authorization: req.headers.get('Authorization')! } },
+        global: { 
+          headers: { Authorization: req.headers.get('Authorization')! } 
+        },
       }
     );
-
-    // Verify the requesting user is authenticated
-    const { data: { user: authUser }, error: authError } = await authClient.auth.getUser();
     
-    if (authError || !authUser) {
+    // Verify the user is authenticated
+    const { data: { user }, error: authError } = await authClient.auth.getUser();
+    
+    if (authError || !user) {
       console.error("Authentication error:", authError);
       return new Response(
         JSON.stringify({ error: "Not authenticated" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-
-    // Always use admin client for admin operations - bypass RLS completely
-    const adminClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    
+    console.log("User authenticated:", user.id);
 
     // Check if the user is an admin
-    const { data: adminCheck, error: adminCheckError } = await adminClient
+    const { data: admins, error: adminsError } = await adminClient
       .from('admins')
-      .select('id')
-      .eq('user_id', authUser.id)
-      .single();
+      .select('*')
+      .eq('user_id', user.id);
+    
+    console.log("Admin check data:", admins, "Admin check error:", adminsError);
 
-    if (adminCheckError || !adminCheck) {
-      console.error("Admin check error:", adminCheckError);
+    if (adminsError || !admins || admins.length === 0) {
+      console.error("Admin check failed:", adminsError || "User is not an admin");
       return new Response(
         JSON.stringify({ error: "Not authorized - admin access required" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -57,16 +64,21 @@ serve(async (req) => {
 
     console.log("Admin check passed, retrieving all users");
 
-    // Get all users using the admin client and avoid RLS
-    const { data: users, error: usersError } = await adminClient.auth.admin.listUsers();
+    // Get all users using the admin client
+    const { data: { users }, error: usersError } = await adminClient.auth.admin.listUsers();
     
     if (usersError) {
       console.error("Error fetching users:", usersError);
-      throw usersError;
+      return new Response(
+        JSON.stringify({ error: usersError.message }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
+    console.log("Successfully fetched users, count:", users?.length || 0);
+    
     return new Response(
-      JSON.stringify(users.users),
+      JSON.stringify(users),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
