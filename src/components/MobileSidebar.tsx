@@ -1,26 +1,15 @@
 
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarMenuSub,
-  SidebarMenuSubItem,
-  SidebarMenuSubButton,
-  SidebarSeparator,
-} from "@/components/ui/sidebar";
+import React, { useState } from 'react';
 import { Link, useLocation } from "react-router-dom";
 import { Home, CarFront, Plus, LogOut, LogIn, ChevronDown, ChevronUp, Bell, ShoppingBag, Search, CircleHelp, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
-import { useState } from "react";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { Button } from "@/components/ui/button";
 
 export function MobileSidebar() {
   const location = useLocation();
@@ -108,8 +97,8 @@ export function MobileSidebar() {
   };
 
   return (
-    <Sidebar>
-      <SidebarHeader className="border-b p-4 bg-white">
+    <div className="h-full bg-white overflow-y-auto">
+      <div className="border-b p-4 flex items-center">
         <Link to="/">
           <img 
             src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg" 
@@ -117,27 +106,26 @@ export function MobileSidebar() {
             className="h-8 w-auto" 
           />
         </Link>
-      </SidebarHeader>
-      <SidebarContent className="bg-white">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link 
-                to="/" 
-                className={`flex items-center gap-3 ${isCurrentPath('/') ? 'text-[#007ac8] font-medium' : ''}`}
-              >
-                <Home className="h-5 w-5" />
-                <span className="text-base">Home</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+      </div>
+      <div className="p-4">
+        <nav className="space-y-4">
+          <div>
+            <Link 
+              to="/" 
+              className={`flex items-center gap-3 py-2 ${isCurrentPath('/') ? 'text-[#007ac8] font-medium' : 'text-gray-700'}`}
+            >
+              <Home className="h-5 w-5" />
+              <span className="text-base">Home</span>
+            </Link>
+          </div>
 
           {/* Buy Dropdown */}
-          <SidebarMenuItem>
+          <div>
             <Collapsible open={openDropdowns.buy}>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton 
-                  className="flex items-center gap-3 justify-between w-full"
+                <Button 
+                  variant="ghost" 
+                  className="w-full flex items-center justify-between p-2 hover:bg-gray-100 rounded-md"
                   onClick={() => toggleDropdown('buy')}
                 >
                   <div className="flex items-center gap-3">
@@ -145,51 +133,53 @@ export function MobileSidebar() {
                     <span className="text-base">Buy</span>
                   </div>
                   {openDropdowns.buy ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </SidebarMenuButton>
+                </Button>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <SidebarMenuSub>
+                <div className="ml-8 mt-2 border-l pl-4 space-y-2">
                   {buyDropdownItems.map((item) => (
-                    <SidebarMenuSubItem key={item.title}>
-                      <SidebarMenuSubButton 
-                        asChild 
-                        isActive={isCurrentPath(item.href)}
+                    <div key={item.title}>
+                      <Link to={item.href} className="block py-1.5 text-gray-700 hover:text-[#007ac8]">
+                        {item.title}
+                      </Link>
+                    </div>
+                  ))}
+                  <div className="pt-2">
+                    <div className="font-medium text-sm py-1">Popular makes</div>
+                    {popularMakes.slice(0, 6).map((make) => (
+                      <Link 
+                        key={make} 
+                        to="/cars" 
+                        className="block py-1.5 text-gray-700 hover:text-[#007ac8]"
                       >
-                        <Link to={item.href}>{item.title}</Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  ))}
-                  <SidebarMenuSubItem>
-                    <div className="pl-2 pt-2 pb-1 font-medium text-sm">Popular makes</div>
-                  </SidebarMenuSubItem>
-                  {popularMakes.slice(0, 6).map((make) => (
-                    <SidebarMenuSubItem key={make}>
-                      <SidebarMenuSubButton asChild>
-                        <Link to="/cars">{make}</Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  ))}
-                  <SidebarMenuSubItem>
-                    <div className="pl-2 pt-2 pb-1 font-medium text-sm">Body types</div>
-                  </SidebarMenuSubItem>
-                  {bodyTypes.slice(0, 5).map((type) => (
-                    <SidebarMenuSubItem key={type}>
-                      <SidebarMenuSubButton asChild>
-                        <Link to="/cars">{type}</Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  ))}
-                </SidebarMenuSub>
+                        {make}
+                      </Link>
+                    ))}
+                  </div>
+                  <div className="pt-2">
+                    <div className="font-medium text-sm py-1">Body types</div>
+                    {bodyTypes.slice(0, 5).map((type) => (
+                      <Link 
+                        key={type} 
+                        to="/cars" 
+                        className="block py-1.5 text-gray-700 hover:text-[#007ac8]"
+                      >
+                        {type}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               </CollapsibleContent>
             </Collapsible>
-          </SidebarMenuItem>
+          </div>
 
           {/* Sell Dropdown */}
-          <SidebarMenuItem>
+          <div>
             <Collapsible open={openDropdowns.sell}>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton 
-                  className="flex items-center gap-3 justify-between w-full"
+                <Button 
+                  variant="ghost" 
+                  className="w-full flex items-center justify-between p-2 hover:bg-gray-100 rounded-md"
                   onClick={() => toggleDropdown('sell')}
                 >
                   <div className="flex items-center gap-3">
@@ -197,31 +187,29 @@ export function MobileSidebar() {
                     <span className="text-base">Sell</span>
                   </div>
                   {openDropdowns.sell ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </SidebarMenuButton>
+                </Button>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <SidebarMenuSub>
+                <div className="ml-8 mt-2 border-l pl-4 space-y-2">
                   {sellDropdownItems.map((item) => (
-                    <SidebarMenuSubItem key={item.title}>
-                      <SidebarMenuSubButton 
-                        asChild 
-                        isActive={isCurrentPath(item.href)}
-                      >
-                        <Link to={item.href}>{item.title}</Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
+                    <div key={item.title}>
+                      <Link to={item.href} className="block py-1.5 text-gray-700 hover:text-[#007ac8]">
+                        {item.title}
+                      </Link>
+                    </div>
                   ))}
-                </SidebarMenuSub>
+                </div>
               </CollapsibleContent>
             </Collapsible>
-          </SidebarMenuItem>
+          </div>
 
           {/* Research Dropdown */}
-          <SidebarMenuItem>
+          <div>
             <Collapsible open={openDropdowns.research}>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton 
-                  className="flex items-center gap-3 justify-between w-full"
+                <Button 
+                  variant="ghost" 
+                  className="w-full flex items-center justify-between p-2 hover:bg-gray-100 rounded-md"
                   onClick={() => toggleDropdown('research')}
                 >
                   <div className="flex items-center gap-3">
@@ -229,41 +217,41 @@ export function MobileSidebar() {
                     <span className="text-base">Research</span>
                   </div>
                   {openDropdowns.research ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </SidebarMenuButton>
+                </Button>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <SidebarMenuSub>
+                <div className="ml-8 mt-2 border-l pl-4 space-y-2">
                   {researchDropdownItems.map((item) => (
-                    <SidebarMenuSubItem key={item.title}>
-                      <SidebarMenuSubButton 
-                        asChild 
-                        isActive={isCurrentPath(item.href)}
+                    <div key={item.title}>
+                      <Link to={item.href} className="block py-1.5 text-gray-700 hover:text-[#007ac8]">
+                        {item.title}
+                      </Link>
+                    </div>
+                  ))}
+                  <div className="pt-2">
+                    <div className="font-medium text-sm py-1">Popular makes</div>
+                    {popularMakes.slice(0, 4).map((make) => (
+                      <Link 
+                        key={make} 
+                        to="/research" 
+                        className="block py-1.5 text-gray-700 hover:text-[#007ac8]"
                       >
-                        <Link to={item.href}>{item.title}</Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  ))}
-                  <SidebarMenuSubItem>
-                    <div className="pl-2 pt-2 pb-1 font-medium text-sm">Popular makes</div>
-                  </SidebarMenuSubItem>
-                  {popularMakes.slice(0, 4).map((make) => (
-                    <SidebarMenuSubItem key={make}>
-                      <SidebarMenuSubButton asChild>
-                        <Link to="/research">{make}</Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  ))}
-                </SidebarMenuSub>
+                        {make}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               </CollapsibleContent>
             </Collapsible>
-          </SidebarMenuItem>
+          </div>
 
           {/* Showroom Dropdown */}
-          <SidebarMenuItem>
+          <div>
             <Collapsible open={openDropdowns.showroom}>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton 
-                  className="flex items-center gap-3 justify-between w-full"
+                <Button 
+                  variant="ghost" 
+                  className="w-full flex items-center justify-between p-2 hover:bg-gray-100 rounded-md"
                   onClick={() => toggleDropdown('showroom')}
                 >
                   <div className="flex items-center gap-3">
@@ -271,111 +259,102 @@ export function MobileSidebar() {
                     <span className="text-base">Showroom</span>
                   </div>
                   {openDropdowns.showroom ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </SidebarMenuButton>
+                </Button>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <SidebarMenuSub>
+                <div className="ml-8 mt-2 border-l pl-4 space-y-2">
                   {showroomDropdownItems.map((item) => (
-                    <SidebarMenuSubItem key={item.title}>
-                      <SidebarMenuSubButton 
-                        asChild 
-                        isActive={isCurrentPath(item.href)}
+                    <div key={item.title}>
+                      <Link to={item.href} className="block py-1.5 text-gray-700 hover:text-[#007ac8]">
+                        {item.title}
+                      </Link>
+                    </div>
+                  ))}
+                  <div className="pt-2">
+                    <div className="font-medium text-sm py-1">Body types</div>
+                    {bodyTypes.slice(0, 4).map((type) => (
+                      <Link 
+                        key={type} 
+                        to="/showroom" 
+                        className="block py-1.5 text-gray-700 hover:text-[#007ac8]"
                       >
-                        <Link to={item.href}>{item.title}</Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  ))}
-                  <SidebarMenuSubItem>
-                    <div className="pl-2 pt-2 pb-1 font-medium text-sm">Body types</div>
-                  </SidebarMenuSubItem>
-                  {bodyTypes.slice(0, 4).map((type) => (
-                    <SidebarMenuSubItem key={type}>
-                      <SidebarMenuSubButton asChild>
-                        <Link to="/showroom">{type}</Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  ))}
-                </SidebarMenuSub>
+                        {type}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               </CollapsibleContent>
             </Collapsible>
-          </SidebarMenuItem>
+          </div>
 
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link 
-                to="/value-my-car" 
-                className={`flex items-center gap-3 ${isCurrentPath('/value-my-car') ? 'text-[#007ac8] font-medium' : ''}`}
-              >
-                <CarFront className="h-5 w-5" />
-                <span className="text-base">Value my car</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          <div>
+            <Link 
+              to="/value-my-car" 
+              className={`flex items-center gap-3 py-2 ${isCurrentPath('/value-my-car') ? 'text-[#007ac8] font-medium' : 'text-gray-700'}`}
+            >
+              <CarFront className="h-5 w-5" />
+              <span className="text-base">Value my car</span>
+            </Link>
+          </div>
 
-          <SidebarSeparator className="my-2" />
+          <div className="border-t my-4"></div>
           
           {user ? (
             <>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link 
-                    to="/add-listing" 
-                    className={`flex items-center gap-3 ${isCurrentPath('/add-listing') ? 'text-[#007ac8] font-medium' : ''}`}
-                  >
-                    <Plus className="h-5 w-5" />
-                    <span className="text-base">Add Listing</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <div>
+                <Link 
+                  to="/add-listing" 
+                  className={`flex items-center gap-3 py-2 ${isCurrentPath('/add-listing') ? 'text-[#007ac8] font-medium' : 'text-gray-700'}`}
+                >
+                  <Plus className="h-5 w-5" />
+                  <span className="text-base">Add Listing</span>
+                </Link>
+              </div>
               
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link 
-                    to="/account" 
-                    className={`flex items-center gap-3 ${isCurrentPath('/account') ? 'text-[#007ac8] font-medium' : ''}`}
-                  >
-                    <User className="h-5 w-5" />
-                    <span className="text-base">My Account</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <div>
+                <Link 
+                  to="/account" 
+                  className={`flex items-center gap-3 py-2 ${isCurrentPath('/account') ? 'text-[#007ac8] font-medium' : 'text-gray-700'}`}
+                >
+                  <User className="h-5 w-5" />
+                  <span className="text-base">My Account</span>
+                </Link>
+              </div>
               
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  onClick={handleSignOut} 
-                  className="flex items-center gap-3"
+              <div>
+                <Button 
+                  variant="ghost" 
+                  className="w-full flex items-center justify-start gap-3 p-2 hover:bg-gray-100 rounded-md"
+                  onClick={handleSignOut}
                 >
                   <LogOut className="h-5 w-5" />
                   <span className="text-base">Sign Out</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+                </Button>
+              </div>
             </>
           ) : (
-            <>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link 
-                    to="/auth" 
-                    className={`flex items-center gap-3 ${isCurrentPath('/auth') ? 'text-[#007ac8] font-medium' : ''}`}
-                  >
-                    <LogIn className="h-5 w-5" />
-                    <span className="text-base">Sign In / Sign Up</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </>
+            <div>
+              <Link 
+                to="/auth" 
+                className={`flex items-center gap-3 py-2 ${isCurrentPath('/auth') ? 'text-[#007ac8] font-medium' : 'text-gray-700'}`}
+              >
+                <LogIn className="h-5 w-5" />
+                <span className="text-base">Sign In / Sign Up</span>
+              </Link>
+            </div>
           )}
           
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link to="/help" className="flex items-center gap-3">
-                <CircleHelp className="h-5 w-5" />
-                <span className="text-base">Help</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarContent>
-    </Sidebar>
+          <div>
+            <Link 
+              to="/help" 
+              className="flex items-center gap-3 py-2 text-gray-700"
+            >
+              <CircleHelp className="h-5 w-5" />
+              <span className="text-base">Help</span>
+            </Link>
+          </div>
+        </nav>
+      </div>
+    </div>
   );
 }
