@@ -1,7 +1,7 @@
 
 const TrustedBanner = () => {
   return (
-    <div className="bg-[#007ac8] text-white py-1 text-center text-xs">
+    <div className="bg-[#007ac8] text-white py-2 text-center text-sm font-medium">
       Australia's most trusted car marketplace
     </div>
   );

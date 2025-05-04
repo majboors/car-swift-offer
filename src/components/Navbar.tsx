@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Bell, Menu } from "lucide-react";
@@ -70,23 +71,25 @@ const Navbar = () => {
 
   return (
     <SidebarProvider defaultOpen={false}>
-      <div className="w-full">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-8">
-          <div className="flex justify-between items-center h-8">
-            <div className="flex items-center">
-              {isMobile && <SidebarTrigger className="h-5 w-5" />}
+      <div className="w-full bg-white shadow-sm border-b border-gray-200">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14">
+          <div className="flex justify-between items-center h-full">
+            <div className="flex items-center gap-3">
+              {isMobile && (
+                <SidebarTrigger className="h-6 w-6 text-gray-700" />
+              )}
               <Link to="/" className="flex items-center">
                 <img
                   src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg"
                   alt="Snap My Car"
-                  className="h-5 w-auto max-w-full object-contain"
+                  className="h-8 w-auto max-w-full object-contain"
                 />
               </Link>
               <div className="hidden md:block ml-4">
                 <NavigationMenu className="h-auto">
                   <NavigationMenuList className="h-auto">
                     <NavigationMenuItem>
-                      <NavigationMenuTrigger className="h-6 py-0 text-xs">Buy</NavigationMenuTrigger>
+                      <NavigationMenuTrigger className="h-8 py-1 text-sm">Buy</NavigationMenuTrigger>
                       <NavigationMenuContent className="bg-white absolute z-50 shadow-lg rounded-md">
                         <div className="grid grid-cols-3 gap-4 p-4 w-[800px]">
                           <div>
@@ -230,12 +233,12 @@ const Navbar = () => {
                 </NavigationMenu>
               </div>
             </div>
-            <div className="flex items-center space-x-1">
-              <Button variant="ghost" size="icon" className="h-5 w-5 p-0">
-                <Bell className="w-3 h-3" />
+            <div className="flex items-center space-x-2">
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Bell className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" className="h-5 py-0 text-xs px-1">Sign up/Log in</Button>
-              <Button className="bg-[#007ac8] hover:bg-[#0069b4] h-5 py-0 text-xs px-1">
+              <Button variant="ghost" className="h-8 py-1 text-sm">Sign up/Log in</Button>
+              <Button className="bg-[#007ac8] hover:bg-[#0069b4] h-8 py-1 text-sm">
                 Sell my car
               </Button>
             </div>

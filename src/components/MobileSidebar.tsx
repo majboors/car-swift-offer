@@ -1,3 +1,4 @@
+
 import {
   Sidebar,
   SidebarContent,
@@ -63,7 +64,7 @@ export function MobileSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="border-b p-4">
+      <SidebarHeader className="border-b p-4 bg-white">
         <Link to="/">
           <img
             src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg"
@@ -72,7 +73,7 @@ export function MobileSidebar() {
           />
         </Link>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="bg-white">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
