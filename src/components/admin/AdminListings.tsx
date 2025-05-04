@@ -71,9 +71,9 @@ export const AdminListings = () => {
       setFetchError(null);
       
       // Use the database function to get all listings with user emails
-      // Properly type the RPC return
+      // Properly type the RPC return with both return type and params type (empty object since no params)
       const { data: listingsData, error: listingsError } = await supabase
-        .rpc<RpcListing[]>('get_car_listings_with_users');
+        .rpc<RpcListing[], {}>('get_car_listings_with_users', {});
 
       if (listingsError) {
         console.error("Error fetching listings:", listingsError);
