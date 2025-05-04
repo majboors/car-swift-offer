@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,9 @@ interface RpcListing {
 // Define the expected return type for our RPC function
 type GetCarListingsWithUsersResponse = RpcListing[];
 
+// Define the input parameters type (empty in this case)
+type EmptyParams = Record<string, never>;
+
 export const AdminListings = () => {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,9 +77,9 @@ export const AdminListings = () => {
       setFetchError(null);
       
       // Use the database function to get all listings with user emails
-      // Explicitly type the RPC call
+      // Explicitly type the RPC call with both return type and params type
       const { data: listingsData, error: listingsError } = await supabase
-        .rpc<GetCarListingsWithUsersResponse>('get_car_listings_with_users');
+        .rpc<GetCarListingsWithUsersResponse, EmptyParams>('get_car_listings_with_users');
 
       if (listingsError) {
         console.error("Error fetching listings:", listingsError);

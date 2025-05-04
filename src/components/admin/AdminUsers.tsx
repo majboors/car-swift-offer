@@ -49,6 +49,10 @@ interface RpcUser {
 type GetAllUsersResponse = RpcUser[];
 type AddRemoveAdminResponse = null;
 
+// Define input parameter types
+type EmptyParams = Record<string, never>;
+type AdminUserIdParams = { user_id_input: string };
+
 export const AdminUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,9 +85,9 @@ export const AdminUsers = () => {
       const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
       // Use the database functions to get all users via admin_get_all_users
-      // Explicitly type the RPC call
+      // Explicitly type the RPC call with both return type and params type
       const { data: userData, error: userError } = await supabase
-        .rpc<GetAllUsersResponse>('get_all_users');
+        .rpc<GetAllUsersResponse, EmptyParams>('get_all_users');
 
       if (userError) {
         console.error("Error fetching users:", userError);
@@ -121,7 +125,7 @@ export const AdminUsers = () => {
       if (currentStatus) {
         // Call the remove_admin RPC function with proper typing
         const { error } = await supabase
-          .rpc<AddRemoveAdminResponse>('remove_admin', {
+          .rpc<AddRemoveAdminResponse, AdminUserIdParams>('remove_admin', {
             user_id_input: userId
           });
 
@@ -129,7 +133,7 @@ export const AdminUsers = () => {
       } else {
         // Call the add_admin RPC function with proper typing
         const { error } = await supabase
-          .rpc<AddRemoveAdminResponse>('add_admin', {
+          .rpc<AddRemoveAdminResponse, AdminUserIdParams>('add_admin', {
             user_id_input: userId
           });
 
