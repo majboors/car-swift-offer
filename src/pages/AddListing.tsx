@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -53,7 +52,7 @@ const featureCategories = {
 
 const AddListing = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
@@ -79,7 +78,8 @@ const AddListing = () => {
   });
   
   useEffect(() => {
-    if (!user) {
+    // Wait for auth to finish loading before checking
+    if (!authLoading && !user) {
       toast({
         title: "Authentication required",
         description: "Please log in to add a listing.",
@@ -89,11 +89,16 @@ const AddListing = () => {
       return;
     }
     
-    setFormData(prevState => ({
-      ...prevState,
-      contact_email: user.email || '',
-    }));
-  }, [user, navigate]);
+    // Only update form data if user exists
+    if (user) {
+      setFormData(prevState => ({
+        ...prevState,
+        contact_email: user.email || '',
+      }));
+      
+      console.log("User authenticated:", user.id);
+    }
+  }, [user, navigate, authLoading]);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -256,6 +261,22 @@ const AddListing = () => {
     (total, features) => total + features.length, 
     0
   );
+  
+  // Show loading state while auth is being checked
+  if (authLoading) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <TrustedBanner />
+        <Navbar />
+        <div className="flex-grow container mx-auto px-4 py-8 flex items-center justify-center">
+          <p>Loading...</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // If not loading and no user, this will be caught by the useEffect and redirected
   
   return (
     <div className="flex flex-col min-h-screen">
