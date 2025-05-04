@@ -55,26 +55,21 @@ export const AdminListings = () => {
       setLoading(true);
       setFetchError(null);
       
-      console.log("Fetching all car listings...");
-      const { data, error } = await supabase.functions.invoke('get_car_listings_with_users', {
-        method: 'POST'
-      });
+      // Use the database function to get all listings with user emails
+      const { data: listingsData, error: listingsError } = await supabase
+        .rpc('get_car_listings_with_users');
 
-      if (error) {
-        console.error("Error fetching listings:", error);
-        setFetchError("Failed to load listings: " + error.message);
-        throw error;
+      if (listingsError) {
+        console.error("Error fetching listings:", listingsError);
+        setFetchError("Failed to load listings data");
+        setLoading(false);
+        return;
       }
-
-      console.log("Listings data fetched:", data);
-      setListings(data || []);
+      
+      setListings(listingsData || []);
     } catch (error) {
       console.error("Error in fetchListings:", error);
-      toast({
-        title: "Error",
-        description: fetchError || "Failed to load listings",
-        variant: "destructive",
-      });
+      setFetchError("An unexpected error occurred");
     } finally {
       setLoading(false);
     }
@@ -110,11 +105,11 @@ export const AdminListings = () => {
         title: "Success",
         description: "Listing deleted successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting listing:", error);
       toast({
         title: "Error",
-        description: "Failed to delete listing",
+        description: error.message || "Failed to delete listing",
         variant: "destructive",
       });
     }
@@ -154,11 +149,11 @@ export const AdminListings = () => {
         title: "Success",
         description: "Listing updated successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating listing:", error);
       toast({
         title: "Error",
-        description: "Failed to update listing",
+        description: error.message || "Failed to update listing",
         variant: "destructive",
       });
     }

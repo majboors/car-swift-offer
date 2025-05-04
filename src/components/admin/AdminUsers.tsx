@@ -36,14 +36,6 @@ interface AdminUser {
   created_at: string;
 }
 
-interface SupabaseUser {
-  id: string;
-  email: string;
-  created_at: string;
-  last_sign_in_at: string | null;
-  [key: string]: any; // For any additional properties
-}
-
 export const AdminUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,58 +52,51 @@ export const AdminUsers = () => {
       setLoading(true);
       setFetchError(null);
       
-      console.log("Fetching all users...");
-      const { data: usersData, error: usersError } = await supabase.functions.invoke<SupabaseUser[]>('get_all_users', {
-        method: 'POST',
-      });
-
-      if (usersError) {
-        console.error("Error fetching users:", usersError);
-        setFetchError("Failed to load users: " + usersError.message);
-        throw usersError;
-      }
-
-      if (!usersData) {
-        console.log("No users data returned");
-        setUsers([]);
-        return;
-      }
-
-      console.log("Users data fetched, total users:", usersData.length);
-      console.log("Fetching all admins...");
-      const { data: adminsData, error: adminsError } = await supabase.functions.invoke<AdminUser[]>('get_all_admins', {
-        method: 'POST',
-      });
+      // Get all admin users from the public.admins table
+      const { data: admins, error: adminsError } = await supabase
+        .from('admins')
+        .select('user_id');
 
       if (adminsError) {
         console.error("Error fetching admins:", adminsError);
-        setFetchError("Failed to load admin status: " + adminsError.message);
-        throw adminsError;
+        setFetchError("Failed to load admin data");
+        setLoading(false);
+        return;
       }
 
-      console.log("Admins data fetched:", adminsData);
+      // Create a set of admin user IDs for faster lookups
+      const adminIds = new Set(admins?.map(admin => admin.user_id) || []);
+      
+      // Use the database functions to get all users via admin_get_all_users
+      const { data: userData, error: userError } = await supabase
+        .rpc('get_all_users');
 
-      // Create a map of admin user IDs for faster lookups
-      const adminIds = adminsData ? adminsData.map((admin) => admin.user_id) : [];
+      if (userError) {
+        console.error("Error fetching users:", userError);
+        setFetchError("Failed to load users data");
+        setLoading(false);
+        return;
+      }
+      
+      if (!userData) {
+        setUsers([]);
+        setLoading(false);
+        return;
+      }
 
-      // Combine the data to create our enhanced users array
-      const enhancedUsers: User[] = usersData.map((user) => ({
+      // Transform the data to match our User interface
+      const enhancedUsers: User[] = userData.map(user => ({
         id: user.id,
         email: user.email,
         created_at: user.created_at,
         last_sign_in_at: user.last_sign_in_at,
-        is_admin: adminIds.includes(user.id),
+        is_admin: adminIds.has(user.id)
       }));
 
-      console.log("Enhanced users prepared:", enhancedUsers.length);
       setUsers(enhancedUsers);
     } catch (error) {
       console.error("Error in fetchUsers:", error);
-      toast({
-        title: "Error",
-        description: fetchError || "Failed to load users",
-        variant: "destructive",
-      });
+      setFetchError("An unexpected error occurred");
     } finally {
       setLoading(false);
     }
@@ -120,18 +105,16 @@ export const AdminUsers = () => {
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
-        console.log("Removing admin status for user:", userId);
-        const { error } = await supabase.functions.invoke<null>('remove_admin', {
-          method: 'POST',
-          body: { user_id_input: userId }
+        // Call the remove_admin RPC function
+        const { error } = await supabase.rpc('remove_admin', {
+          user_id_input: userId
         });
 
         if (error) throw error;
       } else {
-        console.log("Adding admin status for user:", userId);
-        const { error } = await supabase.functions.invoke<null>('add_admin', {
-          method: 'POST',
-          body: { user_id_input: userId }
+        // Call the add_admin RPC function
+        const { error } = await supabase.rpc('add_admin', {
+          user_id_input: userId
         });
 
         if (error) throw error;
@@ -146,11 +129,11 @@ export const AdminUsers = () => {
         title: "Success",
         description: `User ${currentStatus ? "removed from" : "added to"} administrators`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error toggling admin status:", error);
       toast({
         title: "Error",
-        description: `Failed to ${currentStatus ? "remove" : "add"} admin status`,
+        description: error.message || `Failed to ${currentStatus ? "remove" : "add"} admin status`,
         variant: "destructive",
       });
     }

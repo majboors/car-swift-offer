@@ -9,6 +9,8 @@ interface AuthContextType {
   loading: boolean;
   signOut: () => Promise<void>;
   username: string | null;
+  isAdmin: boolean;
+  checkAdminStatus: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,25 +20,68 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Function to check if the current user is an admin
+  const checkAdminStatus = async (): Promise<boolean> => {
+    if (!user) return false;
+    
+    try {
+      const { data, error } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+        
+      if (error) {
+        console.error("Error checking admin status:", error);
+        return false;
+      }
+      
+      const isUserAdmin = !!data;
+      setIsAdmin(isUserAdmin);
+      return isUserAdmin;
+    } catch (error) {
+      console.error("Error checking admin status:", error);
+      return false;
+    }
+  };
 
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log("Auth state changed:", event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
         setUsername(session?.user?.user_metadata?.username ?? null);
+        
+        // Check admin status if user is logged in
+        if (session?.user) {
+          // Use setTimeout to avoid potential deadlocks with Supabase client
+          setTimeout(async () => {
+            await checkAdminStatus();
+          }, 0);
+        } else {
+          setIsAdmin(false);
+        }
+        
         setLoading(false);
       }
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       console.log("Initial session check:", session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       setUsername(session?.user?.user_metadata?.username ?? null);
+      
+      // Check admin status if user is logged in
+      if (session?.user) {
+        await checkAdminStatus();
+      }
+      
       setLoading(false);
     });
 
@@ -45,6 +90,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    setIsAdmin(false);
   };
 
   const value = {
@@ -53,6 +99,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     loading,
     signOut,
     username,
+    isAdmin,
+    checkAdminStatus,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
