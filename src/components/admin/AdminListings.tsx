@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { toast } from "@/components/ui/use-toast";
 import { Loader } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 
 interface Listing {
@@ -26,6 +26,7 @@ interface Listing {
   created_at: string;
   user_id: string;
   user_email?: string;
+  description?: string;
 }
 
 export const AdminListings = () => {
@@ -54,14 +55,13 @@ export const AdminListings = () => {
       
       // Fetch all listings with user emails
       const { data, error } = await supabase
-        .from("car_listings_with_users")
-        .select("*");
+        .rpc('get_car_listings_with_users');
 
       if (error) {
         throw error;
       }
 
-      setListings(data);
+      setListings(data || []);
     } catch (error) {
       console.error("Error fetching listings:", error);
       toast({

@@ -9,6 +9,7 @@ import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminListings } from "@/components/admin/AdminListings";
 import { Loader } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { Navbar } from "@/components/Navbar";
 
 const Admin = () => {
   const { user } = useAuth();
@@ -31,12 +32,11 @@ const Admin = () => {
       try {
         // Check if user has admin role
         const { data, error } = await supabase
-          .from("admins")
-          .select("*")
-          .eq("user_id", user.id)
-          .single();
+          .rpc('get_all_admins');
 
-        if (error || !data) {
+        const isUserAdmin = data?.some((admin: any) => admin.user_id === user.id);
+
+        if (error || !isUserAdmin) {
           toast({
             title: "Access denied",
             description: "You do not have permission to access the admin dashboard",
@@ -72,24 +72,27 @@ const Admin = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
-      
-      <Tabs defaultValue="listings">
-        <TabsList className="mb-6">
-          <TabsTrigger value="listings">Manage Listings</TabsTrigger>
-          <TabsTrigger value="users">Manage Users</TabsTrigger>
-        </TabsList>
+    <>
+      <Navbar />
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
         
-        <TabsContent value="listings">
-          <AdminListings />
-        </TabsContent>
-        
-        <TabsContent value="users">
-          <AdminUsers />
-        </TabsContent>
-      </Tabs>
-    </div>
+        <Tabs defaultValue="listings">
+          <TabsList className="mb-6">
+            <TabsTrigger value="listings">Manage Listings</TabsTrigger>
+            <TabsTrigger value="users">Manage Users</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="listings">
+            <AdminListings />
+          </TabsContent>
+          
+          <TabsContent value="users">
+            <AdminUsers />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </>
   );
 };
 

@@ -35,29 +35,35 @@ export const AdminUsers = () => {
     try {
       setLoading(true);
       
-      // Fetch all users from auth.users table using admin functions
+      // Fetch all users from users_view
       const { data: usersData, error: usersError } = await supabase
-        .from("users_view")
-        .select("*");
+        .rpc('get_all_users');
 
       if (usersError) {
         throw usersError;
       }
 
+      if (!usersData) {
+        setUsers([]);
+        return;
+      }
+
       // Get admin users
       const { data: adminsData, error: adminsError } = await supabase
-        .from("admins")
-        .select("user_id");
+        .rpc('get_all_admins');
 
       if (adminsError) {
         throw adminsError;
       }
 
-      const adminIds = adminsData.map((admin) => admin.user_id);
+      const adminIds = adminsData?.map((admin: any) => admin.user_id) || [];
 
       // Combine the data
-      const enhancedUsers = usersData.map((user) => ({
-        ...user,
+      const enhancedUsers: User[] = usersData.map((user: any) => ({
+        id: user.id,
+        email: user.email,
+        created_at: user.created_at,
+        last_sign_in_at: user.last_sign_in_at,
         is_admin: adminIds.includes(user.id),
       }));
 
@@ -79,16 +85,13 @@ export const AdminUsers = () => {
       if (currentStatus) {
         // Remove admin role
         const { error } = await supabase
-          .from("admins")
-          .delete()
-          .eq("user_id", userId);
+          .rpc('remove_admin', { user_id_input: userId });
 
         if (error) throw error;
       } else {
         // Add admin role
         const { error } = await supabase
-          .from("admins")
-          .insert({ user_id: userId });
+          .rpc('add_admin', { user_id_input: userId });
 
         if (error) throw error;
       }

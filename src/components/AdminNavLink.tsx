@@ -13,8 +13,10 @@ export const AdminNavLink = () => {
       if (!user) return;
 
       try {
+        // We need to use the 'any' type here since we don't have
+        // the 'admins' table defined in our types.ts file yet
         const { data, error } = await supabase
-          .from("admins")
+          .from('admins')
           .select("*")
           .eq("user_id", user.id)
           .single();
@@ -41,3 +43,5 @@ export const AdminNavLink = () => {
     </Link>
   );
 };
+
+export default AdminNavLink;
