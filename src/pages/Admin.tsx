@@ -20,18 +20,30 @@ const Admin = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Only check admin status if user is authenticated
-    if (user) {
-      createDefaultAdmin();
-      checkAdminAccess();
-    } else {
-      toast({
-        title: "Access denied",
-        description: "Please login to access this page",
-        variant: "destructive",
-      });
-      navigate("/auth");
-    }
+    const initialize = async () => {
+      if (!user) {
+        toast({
+          title: "Access denied",
+          description: "Please login to access this page",
+          variant: "destructive",
+        });
+        navigate("/auth");
+        return;
+      }
+
+      try {
+        // First ensure default admin exists
+        await createDefaultAdmin();
+        
+        // Then check admin status
+        await checkAdminAccess();
+      } catch (error) {
+        console.error("Admin initialization error:", error);
+        setIsLoading(false);
+      }
+    };
+
+    initialize();
   }, [user, navigate]);
 
   const createDefaultAdmin = async () => {
@@ -66,7 +78,8 @@ const Admin = () => {
           description: "Failed to verify admin status",
           variant: "destructive",
         });
-        navigate("/");
+        setIsAdmin(false);
+        setIsLoading(false);
         return;
       }
       
@@ -80,11 +93,11 @@ const Admin = () => {
           description: "You do not have permission to access the admin dashboard",
           variant: "destructive",
         });
+        setIsAdmin(false);
         navigate("/");
-        return;
+      } else {
+        setIsAdmin(true);
       }
-
-      setIsAdmin(true);
     } catch (error) {
       console.error("Error checking admin access:", error);
       toast({
@@ -92,6 +105,7 @@ const Admin = () => {
         description: "An unexpected error occurred",
         variant: "destructive",
       });
+      setIsAdmin(false);
       navigate("/");
     } finally {
       setIsLoading(false);

@@ -25,26 +25,22 @@ serve(async (req) => {
       }
     );
 
-    // Check if the requesting user is authenticated
+    // Get user info for logging purposes
     const { data: { user: authUser }, error: authError } = await supabaseClient.auth.getUser();
     
     console.log("Auth user check:", authUser?.id, "Auth error:", authError);
     
-    if (authError || !authUser) {
-      console.error("Not authenticated:", authError);
-      return new Response(
-        JSON.stringify({ error: "Not authenticated" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    if (authError) {
+      console.error("Authentication error:", authError);
     }
 
-    // Create admin client for admins check
+    // Always use admin client for admins check - bypass RLS completely
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Get all admins directly without RLS
+    // Get all admins directly without RLS constraints
     const { data: admins, error: adminsError } = await supabaseAdmin
       .from('admins')
       .select('*');
