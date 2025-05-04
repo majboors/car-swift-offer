@@ -13,6 +13,14 @@ import {
 } from "@/components/ui/table";
 import { toast } from "@/components/ui/use-toast";
 import { Loader } from "lucide-react";
+import { AddUserForm } from "./AddUserForm";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger 
+} from "@/components/ui/dialog";
 
 interface User {
   id: string;
@@ -40,10 +48,23 @@ export const AdminUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
+    // Create default admin on component mount
+    createDefaultAdmin();
     fetchUsers();
   }, []);
+
+  const createDefaultAdmin = async () => {
+    try {
+      await supabase.functions.invoke('create_default_admin', {
+        method: 'POST',
+      });
+    } catch (error) {
+      console.error("Failed to create default admin:", error);
+    }
+  };
 
   const fetchUsers = async () => {
     try {
@@ -148,6 +169,11 @@ export const AdminUsers = () => {
     }
   };
 
+  const handleAddUserSuccess = () => {
+    setDialogOpen(false);
+    fetchUsers();
+  };
+
   const filteredUsers = users.filter(user => 
     user.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -171,6 +197,19 @@ export const AdminUsers = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-80"
           />
+          
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="default">Add New User</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Add New User</DialogTitle>
+              </DialogHeader>
+              <AddUserForm onSuccess={handleAddUserSuccess} />
+            </DialogContent>
+          </Dialog>
+
           <Button onClick={fetchUsers} variant="outline">
             Refresh
           </Button>
