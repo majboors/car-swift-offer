@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,7 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Plus, Car } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import TrustedBanner from '@/components/TrustedBanner';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -58,6 +59,7 @@ const AddListing = () => {
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [selectedFeatures, setSelectedFeatures] = useState<Record<string, string[]>>({});
+  const [activeTab, setActiveTab] = useState<string>("details");
   
   const [formData, setFormData] = useState({
     car_name: '',
@@ -255,6 +257,15 @@ const AddListing = () => {
       setLoading(false);
     }
   };
+  
+  // Function to handle proceeding to the next tab
+  const handleNextStep = () => {
+    if (activeTab === "details") {
+      setActiveTab("features");
+    } else if (activeTab === "features") {
+      setActiveTab("images");
+    }
+  };
 
   // Count total selected features
   const totalSelectedFeatures = Object.values(selectedFeatures).reduce(
@@ -288,7 +299,7 @@ const AddListing = () => {
           <h1 className="text-3xl font-bold mb-6">Add a New Car Listing</h1>
           
           <form onSubmit={handleSubmit} className="space-y-6">
-            <Tabs defaultValue="details" className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="details">Car Details</TabsTrigger>
                 <TabsTrigger value="features">
@@ -495,6 +506,16 @@ const AddListing = () => {
                     </div>
                   </CardContent>
                 </Card>
+                
+                <div className="flex justify-end">
+                  <Button 
+                    type="button"
+                    onClick={handleNextStep}
+                    className="bg-[#007ac8] hover:bg-[#0069b4] px-8"
+                  >
+                    Next Step <ArrowRight className="ml-2" />
+                  </Button>
+                </div>
               </TabsContent>
 
               <TabsContent value="features" className="space-y-4 mt-4">
@@ -537,6 +558,16 @@ const AddListing = () => {
                     </div>
                   </CardContent>
                 </Card>
+                
+                <div className="flex justify-end">
+                  <Button 
+                    type="button"
+                    onClick={handleNextStep}
+                    className="bg-[#007ac8] hover:bg-[#0069b4] px-8"
+                  >
+                    Next Step <ArrowRight className="ml-2" />
+                  </Button>
+                </div>
               </TabsContent>
 
               <TabsContent value="images" className="space-y-4 mt-4">
@@ -587,18 +618,18 @@ const AddListing = () => {
                     </div>
                   </CardContent>
                 </Card>
+                
+                <div className="flex justify-end">
+                  <Button
+                    type="submit"
+                    className="bg-[#007ac8] hover:bg-[#0069b4] px-8"
+                    disabled={loading || uploadingImages}
+                  >
+                    {(loading || uploadingImages) ? 'Processing...' : 'Submit Listing'}
+                  </Button>
+                </div>
               </TabsContent>
             </Tabs>
-            
-            <div className="flex justify-end">
-              <Button
-                type="submit"
-                className="bg-[#007ac8] hover:bg-[#0069b4] px-8"
-                disabled={loading || uploadingImages}
-              >
-                {(loading || uploadingImages) ? 'Processing...' : 'Submit Listing'}
-              </Button>
-            </div>
           </form>
         </div>
       </div>
