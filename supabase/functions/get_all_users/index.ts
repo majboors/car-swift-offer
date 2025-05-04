@@ -22,7 +22,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Create auth client from request
+    // Create auth client from request for user verification
     const authClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -33,8 +33,10 @@ serve(async (req) => {
       }
     );
     
-    // Verify the user is authenticated
+    // First verify the user is authenticated
     const { data: { user }, error: authError } = await authClient.auth.getUser();
+    
+    console.log("Auth check result:", user ? "User authenticated" : "Auth failed", authError);
     
     if (authError || !user) {
       console.error("Authentication error:", authError);
@@ -46,7 +48,7 @@ serve(async (req) => {
     
     console.log("User authenticated:", user.id);
 
-    // Check if the user is an admin
+    // Then check if the user is an admin
     const { data: admins, error: adminsError } = await adminClient
       .from('admins')
       .select('*')
@@ -54,8 +56,16 @@ serve(async (req) => {
     
     console.log("Admin check data:", admins, "Admin check error:", adminsError);
 
-    if (adminsError || !admins || admins.length === 0) {
-      console.error("Admin check failed:", adminsError || "User is not an admin");
+    if (adminsError) {
+      console.error("Error checking admin status:", adminsError);
+      return new Response(
+        JSON.stringify({ error: "Error checking admin status" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    if (!admins || admins.length === 0) {
+      console.error("User is not an admin:", user.id);
       return new Response(
         JSON.stringify({ error: "Not authorized - admin access required" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -65,7 +75,7 @@ serve(async (req) => {
     console.log("Admin check passed, retrieving all users");
 
     // Get all users using the admin client
-    const { data: { users }, error: usersError } = await adminClient.auth.admin.listUsers();
+    const { data, error: usersError } = await adminClient.auth.admin.listUsers();
     
     if (usersError) {
       console.error("Error fetching users:", usersError);
@@ -75,11 +85,11 @@ serve(async (req) => {
       );
     }
 
-    console.log("Successfully fetched users, count:", users?.length || 0);
+    console.log("Successfully fetched users, count:", data?.users?.length || 0);
     
     return new Response(
-      JSON.stringify(users),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify(data.users),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
     console.error("Error in get_all_users function:", error);
