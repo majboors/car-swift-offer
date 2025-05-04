@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -59,18 +60,18 @@ export const AdminUsers = () => {
       const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
       // Use the database functions to get all users via admin_get_all_users
-      const result = await supabase
-        .rpc<RpcUser[], EmptyParams>('get_all_users', {});
+      const { data, error } = await supabase
+        .rpc('get_all_users');
 
-      if (result.error) {
-        console.error("Error fetching users:", result.error);
+      if (error) {
+        console.error("Error fetching users:", error);
         setFetchError("Failed to load users data");
         setLoading(false);
         return;
       }
       
       // Type assertion to ensure TypeScript understands the data structure
-      const userData = result.data as RpcUser[] | null;
+      const userData = data as RpcUser[] | null;
       
       if (!userData) {
         setUsers([]);
@@ -99,21 +100,21 @@ export const AdminUsers = () => {
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
-        // Call the remove_admin RPC function with proper type parameters
-        const result = await supabase
-          .rpc<null, AdminUserIdParams>('remove_admin', { 
+        // Call the remove_admin RPC function
+        const { error } = await supabase
+          .rpc('remove_admin', { 
             user_id_input: userId 
           });
 
-        if (result.error) throw result.error;
+        if (error) throw error;
       } else {
-        // Call the add_admin RPC function with proper type parameters
-        const result = await supabase
-          .rpc<null, AdminUserIdParams>('add_admin', { 
+        // Call the add_admin RPC function
+        const { error } = await supabase
+          .rpc('add_admin', { 
             user_id_input: userId 
           });
 
-        if (result.error) throw result.error;
+        if (error) throw error;
       }
 
       // Update local state
