@@ -4,9 +4,22 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from './ui/button';
 import { toast } from '@/hooks/use-toast';
-import { Menu } from 'lucide-react';
+import { Menu, ChevronDown } from 'lucide-react';
 import { MobileSidebar } from './MobileSidebar';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "./ui/navigation-menu";
 
 const Navbar: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -28,6 +41,32 @@ const Navbar: React.FC = () => {
     }
   };
 
+  // Navigation items for dropdown menus
+  const buyItems = [
+    { title: "All Cars", href: "/cars" },
+    { title: "New Cars", href: "/cars/new" },
+    { title: "Used Cars", href: "/cars/used" },
+    { title: "Certified Pre-Owned", href: "/cars/certified" },
+  ];
+
+  const sellItems = [
+    { title: "Sell Your Car", href: "/sell" },
+    { title: "Trade In", href: "/trade-in" },
+    { title: "Get Cash Offer", href: "/cash-offer" },
+  ];
+
+  const researchItems = [
+    { title: "Compare Cars", href: "/compare" },
+    { title: "Car Reviews", href: "/reviews" },
+    { title: "Buying Guides", href: "/guides" },
+  ];
+
+  const showroomItems = [
+    { title: "Featured Models", href: "/showroom/featured" },
+    { title: "New Arrivals", href: "/showroom/new" },
+    { title: "Special Offers", href: "/showroom/offers" },
+  ];
+
   return (
     <nav className="bg-white shadow-md">
       <div className="container mx-auto px-4">
@@ -41,13 +80,97 @@ const Navbar: React.FC = () => {
             </div>
             
             {/* Desktop nav links */}
-            <div className="hidden md:ml-6 md:flex md:items-center md:space-x-4">
-              <Link to="/" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#007ac8]">
-                Home
-              </Link>
-              <Link to="/value-my-car" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#007ac8]">
-                Value My Car
-              </Link>
+            <div className="hidden md:ml-6 md:flex md:items-center md:space-x-1">
+              <NavigationMenu>
+                <NavigationMenuList>
+                  {/* Buy Dropdown */}
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger className="text-sm font-medium text-gray-700 hover:text-[#007ac8]">
+                      Buy
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent className="bg-white rounded-md shadow-lg w-64">
+                      <div className="p-2">
+                        {buyItems.map((item) => (
+                          <Link 
+                            key={item.title} 
+                            to={item.href}
+                            className="block p-2 text-sm text-gray-700 hover:bg-[#f0f9ff] hover:text-[#007ac8] rounded-md"
+                          >
+                            {item.title}
+                          </Link>
+                        ))}
+                      </div>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                  
+                  {/* Sell Dropdown */}
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger className="text-sm font-medium text-gray-700 hover:text-[#007ac8]">
+                      Sell
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent className="bg-white rounded-md shadow-lg w-64">
+                      <div className="p-2">
+                        {sellItems.map((item) => (
+                          <Link 
+                            key={item.title} 
+                            to={item.href}
+                            className="block p-2 text-sm text-gray-700 hover:bg-[#f0f9ff] hover:text-[#007ac8] rounded-md"
+                          >
+                            {item.title}
+                          </Link>
+                        ))}
+                      </div>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                  
+                  {/* Research Dropdown */}
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger className="text-sm font-medium text-gray-700 hover:text-[#007ac8]">
+                      Research
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent className="bg-white rounded-md shadow-lg w-64">
+                      <div className="p-2">
+                        {researchItems.map((item) => (
+                          <Link 
+                            key={item.title} 
+                            to={item.href}
+                            className="block p-2 text-sm text-gray-700 hover:bg-[#f0f9ff] hover:text-[#007ac8] rounded-md"
+                          >
+                            {item.title}
+                          </Link>
+                        ))}
+                      </div>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                  
+                  {/* Showroom Dropdown */}
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger className="text-sm font-medium text-gray-700 hover:text-[#007ac8]">
+                      Showroom
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent className="bg-white rounded-md shadow-lg w-64">
+                      <div className="p-2">
+                        {showroomItems.map((item) => (
+                          <Link 
+                            key={item.title} 
+                            to={item.href}
+                            className="block p-2 text-sm text-gray-700 hover:bg-[#f0f9ff] hover:text-[#007ac8] rounded-md"
+                          >
+                            {item.title}
+                          </Link>
+                        ))}
+                      </div>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                  
+                  {/* Value My Car Link */}
+                  <NavigationMenuItem>
+                    <Link to="/value-my-car" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#007ac8] flex items-center">
+                      Value My Car
+                    </Link>
+                  </NavigationMenuItem>
+                </NavigationMenuList>
+              </NavigationMenu>
             </div>
           </div>
           
