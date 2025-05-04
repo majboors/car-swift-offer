@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -44,10 +43,7 @@ interface RpcListing {
   [key: string]: any; // For any additional properties
 }
 
-// Define the expected return type for our RPC function
-type GetCarListingsWithUsersResponse = RpcListing[];
-
-// Define the input parameters type (empty in this case)
+// Define the empty params type
 type EmptyParams = Record<string, never>;
 
 export const AdminListings = () => {
@@ -77,9 +73,8 @@ export const AdminListings = () => {
       setFetchError(null);
       
       // Use the database function to get all listings with user emails
-      // Explicitly type the RPC call with both return type and params type
-      const { data: listingsData, error: listingsError } = await supabase
-        .rpc<GetCarListingsWithUsersResponse, EmptyParams>('get_car_listings_with_users');
+      const { data, error: listingsError } = await supabase
+        .rpc('get_car_listings_with_users');
 
       if (listingsError) {
         console.error("Error fetching listings:", listingsError);
@@ -88,6 +83,8 @@ export const AdminListings = () => {
         return;
       }
       
+      // Type assertion to ensure TypeScript understands the data structure
+      const listingsData = data as RpcListing[] | null;
       setListings(listingsData || []);
     } catch (error) {
       console.error("Error in fetchListings:", error);

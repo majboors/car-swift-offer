@@ -45,12 +45,7 @@ interface RpcUser {
   [key: string]: any; // For any additional properties
 }
 
-// Define the expected return types for our RPC functions
-type GetAllUsersResponse = RpcUser[];
-type AddRemoveAdminResponse = null;
-
-// Define input parameter types
-type EmptyParams = Record<string, never>;
+// Define the input parameter types
 type AdminUserIdParams = { user_id_input: string };
 
 export const AdminUsers = () => {
@@ -85,9 +80,8 @@ export const AdminUsers = () => {
       const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
       // Use the database functions to get all users via admin_get_all_users
-      // Explicitly type the RPC call with both return type and params type
-      const { data: userData, error: userError } = await supabase
-        .rpc<GetAllUsersResponse, EmptyParams>('get_all_users');
+      const { data, error: userError } = await supabase
+        .rpc('get_all_users');
 
       if (userError) {
         console.error("Error fetching users:", userError);
@@ -95,6 +89,9 @@ export const AdminUsers = () => {
         setLoading(false);
         return;
       }
+      
+      // Type assertion to ensure TypeScript understands the data structure
+      const userData = data as RpcUser[] | null;
       
       if (!userData) {
         setUsers([]);
@@ -123,17 +120,17 @@ export const AdminUsers = () => {
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
-        // Call the remove_admin RPC function with proper typing
+        // Call the remove_admin RPC function
         const { error } = await supabase
-          .rpc<AddRemoveAdminResponse, AdminUserIdParams>('remove_admin', {
+          .rpc('remove_admin', {
             user_id_input: userId
           });
 
         if (error) throw error;
       } else {
-        // Call the add_admin RPC function with proper typing
+        // Call the add_admin RPC function
         const { error } = await supabase
-          .rpc<AddRemoveAdminResponse, AdminUserIdParams>('add_admin', {
+          .rpc('add_admin', {
             user_id_input: userId
           });
 
