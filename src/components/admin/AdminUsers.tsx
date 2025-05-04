@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -59,19 +60,18 @@ export const AdminUsers = () => {
       const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
       // Use the database functions to get all users via admin_get_all_users
-      // Use any to bypass the TypeScript error
-      const { data, error: userError } = await supabase
-        .rpc('get_all_users') as { data: RpcUser[] | null, error: any };
+      const result = await supabase
+        .rpc<any>('get_all_users');
 
-      if (userError) {
-        console.error("Error fetching users:", userError);
+      if (result.error) {
+        console.error("Error fetching users:", result.error);
         setFetchError("Failed to load users data");
         setLoading(false);
         return;
       }
       
       // Type assertion to ensure TypeScript understands the data structure
-      const userData = data as RpcUser[] | null;
+      const userData = result.data as RpcUser[] | null;
       
       if (!userData) {
         setUsers([]);
@@ -101,20 +101,20 @@ export const AdminUsers = () => {
     try {
       if (currentStatus) {
         // Call the remove_admin RPC function with type assertion
-        const { error } = await supabase
-          .rpc('remove_admin', { 
+        const result = await supabase
+          .rpc<any>('remove_admin', { 
             user_id_input: userId 
-          }) as { data: null, error: any };
+          });
 
-        if (error) throw error;
+        if (result.error) throw result.error;
       } else {
         // Call the add_admin RPC function with type assertion
-        const { error } = await supabase
-          .rpc('add_admin', { 
+        const result = await supabase
+          .rpc<any>('add_admin', { 
             user_id_input: userId 
-          }) as { data: null, error: any };
+          });
 
-        if (error) throw error;
+        if (result.error) throw result.error;
       }
 
       // Update local state
