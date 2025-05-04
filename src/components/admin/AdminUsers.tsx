@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -55,7 +56,7 @@ export const AdminUsers = () => {
       
       // Use the database functions to get all users via admin_get_all_users
       const { data, error: userError } = await supabase
-        .rpc<RpcUser[], EmptyParams>('get_all_users');
+        .rpc<RpcUser[], EmptyParams>('get_all_users', {});
 
       if (userError) {
         console.error("Error fetching users:", userError);
