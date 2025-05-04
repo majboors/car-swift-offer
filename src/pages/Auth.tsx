@@ -40,12 +40,19 @@ const Auth = () => {
           description: "Check your email for the confirmation link.",
         });
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        console.log(`Attempting to sign in with: ${email}`);
+        
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         
-        if (error) throw error;
+        if (error) {
+          console.error("Login error:", error);
+          throw error;
+        }
+        
+        console.log("Login successful:", data);
         
         toast({
           title: "Success!",
@@ -54,6 +61,7 @@ const Auth = () => {
         navigate('/');
       }
     } catch (error: any) {
+      console.error("Authentication error:", error);
       toast({
         title: "Error",
         description: error.message,
@@ -61,6 +69,21 @@ const Auth = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+  
+  // Helper to create default admin if needed
+  const createDefaultAdmin = async () => {
+    try {
+      await supabase.functions.invoke('create_default_admin', {
+        method: 'POST',
+      });
+      toast({
+        title: "Admin Created",
+        description: "Default admin account has been created or verified.",
+      });
+    } catch (error: any) {
+      console.error("Error creating default admin:", error);
     }
   };
   
@@ -75,6 +98,12 @@ const Auth = () => {
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
               {isSignUp ? 'Create your account' : 'Sign in to your account'}
             </h2>
+            
+            {!isSignUp && (
+              <p className="mt-2 text-center text-sm text-gray-600">
+                Default admin: root@admin.com / root123
+              </p>
+            )}
           </div>
           
           <form className="mt-8 space-y-6" onSubmit={handleAuth}>
@@ -132,7 +161,7 @@ const Auth = () => {
               </div>
             </div>
 
-            <div>
+            <div className="flex flex-col gap-4">
               <Button
                 type="submit"
                 className="group relative w-full bg-[#007ac8] hover:bg-[#0069b4]"
@@ -140,6 +169,17 @@ const Auth = () => {
               >
                 {loading ? 'Processing...' : isSignUp ? 'Sign up' : 'Sign in'}
               </Button>
+              
+              {!isSignUp && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="group relative w-full"
+                  onClick={createDefaultAdmin}
+                >
+                  Create Default Admin
+                </Button>
+              )}
             </div>
           </form>
           

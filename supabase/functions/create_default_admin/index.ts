@@ -14,6 +14,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log("Attempting to create default admin");
+    
     // Create Supabase client
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -25,25 +27,26 @@ serve(async (req) => {
     const password = 'root123';
 
     // Check if the admin user already exists
-    const { data: existingUsers, error: existingError } = await supabaseAdmin
-      .from('auth.users')
-      .select('id, email')
-      .eq('email', email)
-      .maybeSingle();
-
-    if (existingError && existingError.message !== 'No rows found') {
-      console.error("Error checking for existing user:", existingError);
-      throw new Error("Failed to check for existing admin user");
+    const { data: usersList, error: usersError } = await supabaseAdmin.auth.admin.listUsers();
+    
+    if (usersError) {
+      console.error("Error listing users:", usersError);
+      throw new Error("Failed to list users");
     }
+    
+    // Find if email exists
+    let existingUser = usersList.users.find(user => user.email === email);
+    
+    console.log(`Existing user check: ${existingUser ? 'Found' : 'Not found'}`);
 
     // If admin already exists, just return user id
-    if (existingUsers) {
-      console.log("Admin user already exists");
+    if (existingUser) {
+      console.log("Admin user already exists, ensuring they're in admins table");
       
       // Make sure they're in the admins table
       const { error: adminError } = await supabaseAdmin
         .from('admins')
-        .upsert({ user_id: existingUsers.id })
+        .upsert({ user_id: existingUser.id })
         .select();
       
       if (adminError) {
@@ -52,12 +55,13 @@ serve(async (req) => {
       }
       
       return new Response(
-        JSON.stringify({ message: "Default admin already exists", userId: existingUsers.id }),
+        JSON.stringify({ message: "Default admin already exists", userId: existingUser.id }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     // Create new admin user
+    console.log("Creating new admin user");
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,

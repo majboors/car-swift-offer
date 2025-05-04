@@ -15,13 +15,9 @@ export const AdminNavLink = () => {
       if (!user) return;
 
       try {
-        // Use a more direct type casting approach
-        const { data, error } = await supabase.functions.invoke('get_all_admins', {
+        const { data, error } = await supabase.functions.invoke<AdminUser[]>('get_all_admins', {
           method: 'POST',
-        }) as unknown as { 
-          data: AdminUser[] | null, 
-          error: Error | null 
-        };
+        });
 
         if (!error && data) {
           // Check if current user is in the admin list
