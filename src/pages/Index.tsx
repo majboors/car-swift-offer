@@ -1,3 +1,4 @@
+// pages/index.tsx
 
 import React from "react";
 import Navbar from "@/components/Navbar";
@@ -13,14 +14,15 @@ import Footer from "@/components/Footer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex flex-col">
+    // No more min-h-screen or flex-grow
+    <div className="flex flex-col">
       <TrustedBanner />
       <Navbar />
-      <main className="flex-grow">
-        <div className="-mt-4">
-          <HeroSection />
-        </div>
-        <div className="container mx-auto px-4 -mt-12 relative z-10">
+
+      {/* main now just flows with content */}
+      <main>
+        <HeroSection />
+        <div className="container mx-auto px-4">
           <SearchForm />
         </div>
         <CategoryStrip />
@@ -29,6 +31,7 @@ const Index = () => {
         <ShowroomSection />
         <ReviewsSection />
       </main>
+
       <Footer />
     </div>
   );
