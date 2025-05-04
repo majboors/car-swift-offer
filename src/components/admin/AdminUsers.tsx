@@ -65,7 +65,7 @@ export const AdminUsers = () => {
       }
 
       // Create a set of admin user IDs for faster lookups
-      const adminIds = new Set(admins?.map(admin => admin.user_id) || []);
+      const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
       // Use the database functions to get all users via admin_get_all_users
       const { data: userData, error: userError } = await supabase
@@ -85,7 +85,7 @@ export const AdminUsers = () => {
       }
 
       // Transform the data to match our User interface
-      const enhancedUsers: User[] = userData.map(user => ({
+      const enhancedUsers: User[] = (userData || []).map(user => ({
         id: user.id,
         email: user.email,
         created_at: user.created_at,
