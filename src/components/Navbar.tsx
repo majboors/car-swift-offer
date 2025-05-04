@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,6 +6,7 @@ import { toast } from '@/hooks/use-toast';
 import { Menu, ChevronDown, Bell } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { MobileSidebar } from './MobileSidebar';
 import {
   NavigationMenu,
   NavigationMenuContent,
