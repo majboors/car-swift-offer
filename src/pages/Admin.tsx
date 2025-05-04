@@ -30,13 +30,15 @@ const Admin = () => {
       }
 
       try {
-        // Check if user has admin role
+        // Check if user has admin role using the RPC function
         const { data, error } = await supabase
           .rpc('get_all_admins');
 
+        if (error) throw error;
+        
         const isUserAdmin = data?.some((admin: any) => admin.user_id === user.id);
 
-        if (error || !isUserAdmin) {
+        if (!isUserAdmin) {
           toast({
             title: "Access denied",
             description: "You do not have permission to access the admin dashboard",

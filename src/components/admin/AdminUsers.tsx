@@ -35,7 +35,7 @@ export const AdminUsers = () => {
     try {
       setLoading(true);
       
-      // Fetch all users from users_view
+      // Use RPC function instead of direct table access
       const { data: usersData, error: usersError } = await supabase
         .rpc('get_all_users');
 
@@ -48,7 +48,7 @@ export const AdminUsers = () => {
         return;
       }
 
-      // Get admin users
+      // Get admin users using the RPC function
       const { data: adminsData, error: adminsError } = await supabase
         .rpc('get_all_admins');
 
@@ -56,9 +56,10 @@ export const AdminUsers = () => {
         throw adminsError;
       }
 
-      const adminIds = adminsData?.map((admin: any) => admin.user_id) || [];
+      // Create a map of admin user IDs for faster lookups
+      const adminIds = adminsData ? adminsData.map((admin: any) => admin.user_id) : [];
 
-      // Combine the data
+      // Combine the data to create our enhanced users array
       const enhancedUsers: User[] = usersData.map((user: any) => ({
         id: user.id,
         email: user.email,
@@ -83,13 +84,13 @@ export const AdminUsers = () => {
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
-        // Remove admin role
+        // Remove admin role using RPC function
         const { error } = await supabase
           .rpc('remove_admin', { user_id_input: userId });
 
         if (error) throw error;
       } else {
-        // Add admin role
+        // Add admin role using RPC function
         const { error } = await supabase
           .rpc('add_admin', { user_id_input: userId });
 

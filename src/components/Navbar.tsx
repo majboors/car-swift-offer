@@ -68,4 +68,5 @@ export function Navbar() {
   );
 }
 
+// Need to add a default export to match the import in Index.tsx
 export default Navbar;

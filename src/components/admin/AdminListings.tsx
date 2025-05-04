@@ -53,7 +53,7 @@ export const AdminListings = () => {
     try {
       setLoading(true);
       
-      // Fetch all listings with user emails
+      // Use RPC function to get car listings with user emails
       const { data, error } = await supabase
         .rpc('get_car_listings_with_users');
 

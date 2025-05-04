@@ -13,16 +13,14 @@ export const AdminNavLink = () => {
       if (!user) return;
 
       try {
-        // We need to use the 'any' type here since we don't have
-        // the 'admins' table defined in our types.ts file yet
+        // Use the RPC function instead of direct table access
         const { data, error } = await supabase
-          .from('admins')
-          .select("*")
-          .eq("user_id", user.id)
-          .single();
+          .rpc('get_all_admins');
 
         if (!error && data) {
-          setIsAdmin(true);
+          // Check if current user is in the admin list
+          const isUserAdmin = data.some((admin: any) => admin.user_id === user.id);
+          setIsAdmin(isUserAdmin);
         }
       } catch (error) {
         console.error("Error checking admin status:", error);
