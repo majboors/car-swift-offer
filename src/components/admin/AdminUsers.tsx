@@ -22,6 +22,20 @@ interface User {
   is_admin: boolean;
 }
 
+interface AdminUser {
+  id: string;
+  user_id: string;
+  created_at: string;
+}
+
+interface SupabaseUser {
+  id: string;
+  email: string;
+  created_at: string;
+  last_sign_in_at: string | null;
+  [key: string]: any; // For any additional properties
+}
+
 export const AdminUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,9 +49,12 @@ export const AdminUsers = () => {
     try {
       setLoading(true);
       
-      // Use RPC function instead of direct table access
+      // Use RPC function with proper type assertion
       const { data: usersData, error: usersError } = await supabase
-        .rpc('get_all_users');
+        .rpc('get_all_users') as unknown as { 
+          data: SupabaseUser[] | null, 
+          error: Error | null 
+        };
 
       if (usersError) {
         throw usersError;
@@ -48,19 +65,22 @@ export const AdminUsers = () => {
         return;
       }
 
-      // Get admin users using the RPC function
+      // Get admin users using the RPC function with proper type assertion
       const { data: adminsData, error: adminsError } = await supabase
-        .rpc('get_all_admins');
+        .rpc('get_all_admins') as unknown as { 
+          data: AdminUser[] | null, 
+          error: Error | null 
+        };
 
       if (adminsError) {
         throw adminsError;
       }
 
       // Create a map of admin user IDs for faster lookups
-      const adminIds = adminsData ? adminsData.map((admin: any) => admin.user_id) : [];
+      const adminIds = adminsData ? adminsData.map((admin) => admin.user_id) : [];
 
       // Combine the data to create our enhanced users array
-      const enhancedUsers: User[] = usersData.map((user: any) => ({
+      const enhancedUsers: User[] = usersData.map((user) => ({
         id: user.id,
         email: user.email,
         created_at: user.created_at,
@@ -84,15 +104,21 @@ export const AdminUsers = () => {
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
-        // Remove admin role using RPC function
+        // Remove admin role using RPC function with proper type assertion
         const { error } = await supabase
-          .rpc('remove_admin', { user_id_input: userId });
+          .rpc('remove_admin', { user_id_input: userId }) as unknown as {
+            data: null,
+            error: Error | null
+          };
 
         if (error) throw error;
       } else {
-        // Add admin role using RPC function
+        // Add admin role using RPC function with proper type assertion
         const { error } = await supabase
-          .rpc('add_admin', { user_id_input: userId });
+          .rpc('add_admin', { user_id_input: userId }) as unknown as {
+            data: null,
+            error: Error | null
+          };
 
         if (error) throw error;
       }

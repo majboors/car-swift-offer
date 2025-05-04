@@ -11,6 +11,8 @@ import { Loader } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { Navbar } from "@/components/Navbar";
 
+type AdminUser = { id: string; user_id: string; created_at: string };
+
 const Admin = () => {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
@@ -30,13 +32,16 @@ const Admin = () => {
       }
 
       try {
-        // Check if user has admin role using the RPC function
+        // Check if user has admin role using the RPC function with proper type assertion
         const { data, error } = await supabase
-          .rpc('get_all_admins');
+          .rpc('get_all_admins') as unknown as { 
+            data: AdminUser[] | null, 
+            error: Error | null 
+          };
 
         if (error) throw error;
         
-        const isUserAdmin = data?.some((admin: any) => admin.user_id === user.id);
+        const isUserAdmin = data && data.some((admin) => admin.user_id === user.id);
 
         if (!isUserAdmin) {
           toast({

@@ -13,13 +13,16 @@ export const AdminNavLink = () => {
       if (!user) return;
 
       try {
-        // Use the RPC function instead of direct table access
+        // Use the RPC function with explicit type assertion to avoid TS errors
         const { data, error } = await supabase
-          .rpc('get_all_admins');
+          .rpc('get_all_admins') as unknown as { 
+            data: Array<{ id: string, user_id: string, created_at: string }> | null, 
+            error: Error | null 
+          };
 
         if (!error && data) {
           // Check if current user is in the admin list
-          const isUserAdmin = data.some((admin: any) => admin.user_id === user.id);
+          const isUserAdmin = data.some((admin) => admin.user_id === user.id);
           setIsAdmin(isUserAdmin);
         }
       } catch (error) {

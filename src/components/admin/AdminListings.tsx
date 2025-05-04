@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -53,9 +52,12 @@ export const AdminListings = () => {
     try {
       setLoading(true);
       
-      // Use RPC function to get car listings with user emails
+      // Use RPC function with proper type assertion
       const { data, error } = await supabase
-        .rpc('get_car_listings_with_users');
+        .rpc('get_car_listings_with_users') as unknown as {
+          data: Listing[] | null,
+          error: Error | null
+        };
 
       if (error) {
         throw error;
