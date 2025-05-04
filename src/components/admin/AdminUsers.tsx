@@ -64,8 +64,9 @@ export const AdminUsers = () => {
       const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
       // Use the database functions to get all users via RPC
+      // Without explicit type parameters, letting TypeScript infer them
       const { data, error } = await supabase
-        .rpc('get_all_users', {});
+        .rpc('get_all_users');
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -104,19 +105,15 @@ export const AdminUsers = () => {
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
-        // Call the remove_admin RPC function
+        // Call the remove_admin RPC function without explicit type parameters
         const { error } = await supabase
-          .rpc('remove_admin', { 
-            user_id_input: userId 
-          });
+          .rpc('remove_admin', { user_id_input: userId });
 
         if (error) throw error;
       } else {
-        // Call the add_admin RPC function
+        // Call the add_admin RPC function without explicit type parameters
         const { error } = await supabase
-          .rpc('add_admin', { 
-            user_id_input: userId 
-          });
+          .rpc('add_admin', { user_id_input: userId });
 
         if (error) throw error;
       }
