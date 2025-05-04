@@ -14,6 +14,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log("get_all_admins function called");
+    
     // Create Supabase client using the auth header from the request
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -26,19 +28,31 @@ serve(async (req) => {
     // Check if the requesting user is authenticated
     const { data: { user: authUser }, error: authError } = await supabaseClient.auth.getUser();
     
+    console.log("Auth user check:", authUser?.id, "Auth error:", authError);
+    
     if (authError || !authUser) {
+      console.error("Not authenticated:", authError);
       return new Response(
         JSON.stringify({ error: "Not authenticated" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Get all admins 
-    const { data: admins, error: adminsError } = await supabaseClient
+    // Create admin client for admins check
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    // Get all admins directly without RLS
+    const { data: admins, error: adminsError } = await supabaseAdmin
       .from('admins')
       .select('*');
 
+    console.log("Admins data:", admins, "Admins error:", adminsError);
+
     if (adminsError) {
+      console.error("Error fetching admins:", adminsError);
       throw adminsError;
     }
 

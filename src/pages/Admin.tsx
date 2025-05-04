@@ -20,49 +20,59 @@ const Admin = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Make sure the default admin is created first
-    createDefaultAdmin();
-    checkAdminAccess();
-  }, [user, navigate]);
-
-  const createDefaultAdmin = async () => {
-    try {
-      console.log("Creating default admin from Admin page...");
-      const { data, error } = await supabase.functions.invoke<{ message: string, userId: string }>('create_default_admin', {
-        method: 'POST',
-      });
-      
-      if (error) {
-        console.error("Error creating default admin:", error);
-        return;
-      }
-      
-      console.log("Default admin creation response:", data);
-    } catch (error) {
-      console.error("Failed to create default admin:", error);
-    }
-  };
-
-  const checkAdminAccess = async () => {
-    if (!user) {
+    // Only check admin status if user is authenticated
+    if (user) {
+      createDefaultAdmin();
+      checkAdminAccess();
+    } else {
       toast({
         title: "Access denied",
         description: "Please login to access this page",
         variant: "destructive",
       });
       navigate("/auth");
-      return;
     }
+  }, [user, navigate]);
+
+  const createDefaultAdmin = async () => {
+    try {
+      console.log("Creating default admin from Admin page...");
+      await supabase.functions.invoke('create_default_admin', {
+        method: 'POST',
+      });
+      console.log("Default admin creation completed");
+    } catch (error) {
+      console.error("Failed to create default admin:", error);
+    }
+  };
+
+  const checkAdminAccess = async () => {
+    if (!user) return;
 
     try {
+      console.log("Checking admin status for user:", user.id);
+      
       const { data, error } = await supabase.functions.invoke<AdminUser[]>('get_all_admins', {
         method: 'POST',
       });
 
-      if (error) throw error;
+      console.log("Admin check data:", data);
+      console.log("Admin check error:", error);
+
+      if (error) {
+        console.error("Error checking admin status:", error);
+        toast({
+          title: "Error",
+          description: "Failed to verify admin status",
+          variant: "destructive",
+        });
+        navigate("/");
+        return;
+      }
       
-      // Add null check for data
+      // Check if current user is in the admin list
       const isUserAdmin = data ? data.some((admin) => admin.user_id === user.id) : false;
+      console.log("Is user admin:", isUserAdmin);
 
       if (!isUserAdmin) {
         toast({
@@ -77,12 +87,18 @@ const Admin = () => {
       setIsAdmin(true);
     } catch (error) {
       console.error("Error checking admin access:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
       navigate("/");
     } finally {
       setIsLoading(false);
     }
   };
 
+  // If still loading, show loading spinner
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -92,8 +108,9 @@ const Admin = () => {
     );
   }
 
+  // If not admin or not logged in, will redirect in useEffect
   if (!isAdmin) {
-    return null; // Will redirect in useEffect
+    return null;
   }
 
   return (

@@ -9,12 +9,18 @@ type AdminUser = { id: string; user_id: string; created_at: string };
 export const AdminNavLink = () => {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkAdmin = async () => {
-      if (!user) return;
+      if (!user) {
+        setIsAdmin(false);
+        setIsLoading(false);
+        return;
+      }
 
       try {
+        console.log("Checking admin status in navbar for user:", user.id);
         const { data, error } = await supabase.functions.invoke<AdminUser[]>('get_all_admins', {
           method: 'POST',
         });
@@ -22,17 +28,24 @@ export const AdminNavLink = () => {
         if (!error && data) {
           // Check if current user is in the admin list
           const isUserAdmin = data.some((admin) => admin.user_id === user.id);
+          console.log("AdminNavLink - Is user admin:", isUserAdmin, "Admin data:", data);
           setIsAdmin(isUserAdmin);
+        } else {
+          console.error("Error checking admin status in navbar:", error);
+          setIsAdmin(false);
         }
       } catch (error) {
-        console.error("Error checking admin status:", error);
+        console.error("Error checking admin status in navbar:", error);
+        setIsAdmin(false);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     checkAdmin();
   }, [user]);
 
-  if (!isAdmin) return null;
+  if (isLoading || !isAdmin) return null;
 
   return (
     <Link 

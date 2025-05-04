@@ -1,6 +1,4 @@
 
-# A string used to distinguish different Supabase projects on the same host. Defaults to the
-# working directory name when running `supabase init`.
 project_id = "bwawnunqeiyjhbjxlpin"
 
 [api]
@@ -10,6 +8,8 @@ schemas = ["public", "storage", "graphql_public"]
 
 [db]
 port = 54322
+shadow_port = 54320
+major_version = 15
 
 [studio]
 enabled = true
@@ -22,38 +22,19 @@ port = 54324
 
 [storage]
 enabled = true
-file_size_limit = "50MiB"
 
 [auth]
 enabled = true
 site_url = "http://localhost:3000"
 
+[realtime]
+enabled = true
+
 [analytics]
 enabled = false
-port = 54327
-vector_port = 54328
-gcp_project_id = ""
-gcp_project_number = ""
-gcp_jwt_path = "supabase/gcloud.json"
 
-# Edge function configurations
-[functions.create_default_admin]
-verify_jwt = false
+[vector]
+enabled = false
 
-[functions.admin_add_user]
-verify_jwt = true
-
-[functions.get_all_users]
-verify_jwt = true
-
-[functions.get_all_admins]
-verify_jwt = true
-
-[functions.add_admin]
-verify_jwt = true
-
-[functions.remove_admin]
-verify_jwt = true
-
-[functions.get_car_listings_with_users]
-verify_jwt = true
+[edge_functions]
+enabled = true
