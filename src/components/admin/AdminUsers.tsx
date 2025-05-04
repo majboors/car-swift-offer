@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -21,34 +20,7 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from "@/components/ui/dialog";
-
-interface User {
-  id: string;
-  email: string;
-  created_at: string;
-  last_sign_in_at: string | null;
-  is_admin: boolean;
-}
-
-interface AdminUser {
-  id: string;
-  user_id: string;
-  created_at: string;
-}
-
-// Define proper types for the RPC function returns
-interface RpcUser {
-  id: string;
-  email: string;
-  created_at: string;
-  last_sign_in_at: string | null;
-  [key: string]: any; // For any additional properties
-}
-
-// Define the input parameter types
-interface AdminUserIdParams {
-  user_id_input: string;
-}
+import { RpcUser, AdminUserIdParams, User, EmptyParams } from "@/types/admin";
 
 export const AdminUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -83,7 +55,7 @@ export const AdminUsers = () => {
       
       // Use the database functions to get all users via admin_get_all_users
       const { data, error: userError } = await supabase
-        .rpc<RpcUser[]>('get_all_users');
+        .rpc<RpcUser[], EmptyParams>('get_all_users');
 
       if (userError) {
         console.error("Error fetching users:", userError);
@@ -124,7 +96,7 @@ export const AdminUsers = () => {
       if (currentStatus) {
         // Call the remove_admin RPC function
         const { error } = await supabase
-          .rpc<null, AdminUserIdParams>('remove_admin', {
+          .rpc<void, AdminUserIdParams>('remove_admin', {
             user_id_input: userId
           });
 
@@ -132,7 +104,7 @@ export const AdminUsers = () => {
       } else {
         // Call the add_admin RPC function
         const { error } = await supabase
-          .rpc<null, AdminUserIdParams>('add_admin', {
+          .rpc<void, AdminUserIdParams>('add_admin', {
             user_id_input: userId
           });
 
