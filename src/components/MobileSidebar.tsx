@@ -7,192 +7,52 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarSeparator,
-  SidebarMenuSub,
-  SidebarMenuSubItem,
-  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
-import { ChevronRight, Home, LogIn, CarFront, ShoppingBag, Bell, User, Search, CircleHelp } from "lucide-react";
-import { useState } from "react";
-
-const buyDropdownItems = [
-  { title: "All cars for sale", href: "/" },
-  { title: "New cars", href: "/" },
-  { title: "Used cars", href: "/" },
-  { title: "Dealer cars", href: "/" },
-  { title: "Private seller cars", href: "/" },
-  { title: "Electric cars", href: "/" },
-  { title: "Finance", href: "/" },
-  { title: "Inspections", href: "/" },
-];
-
-const sellDropdownItems = [
-  { title: "Create an ad", href: "/" },
-  { title: "Get an Instant Offer™", href: "/" },
-  { title: "Manage my ad", href: "/" },
-  { title: "Value my car", href: "/value-my-car" },
-];
-
-const researchDropdownItems = [
-  { title: "Research all cars", href: "/" },
-  { title: "All news and reviews", href: "/" },
-  { title: "News", href: "/" },
-  { title: "Reviews", href: "/" },
-  { title: "Advice", href: "/" },
-  { title: "Best cars", href: "/" },
-  { title: "Owner reviews", href: "/" },
-  { title: "Compare cars", href: "/" },
-  { title: "Electric cars", href: "/" },
-  { title: "Car of the year", href: "/" },
-];
-
-const showroomDropdownItems = [
-  { title: "Showroom", href: "/" },
-  { title: "Electric cars", href: "/" },
-  { title: "Certified pre-owned", href: "/" },
-  { title: "New car calendar", href: "/" },
-];
+import { Home, CarFront, Plus, LogOut, LogIn } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
 
 export function MobileSidebar() {
   const location = useLocation();
-  const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
+  const { user, signOut } = useAuth();
   const isCurrentPath = (path: string) => location.pathname === path;
 
-  const toggleMenu = (menuName: string) => {
-    setExpandedMenu(expandedMenu === menuName ? null : menuName);
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
     <Sidebar>
       <SidebarHeader className="border-b p-4 bg-white">
         <Link to="/">
-          <img
-            src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg"
-            alt="Snap My Car"
-            className="h-8 w-auto"
-          />
+          <span className="text-xl font-bold text-[#007ac8]">Car Swift Offer</span>
         </Link>
       </SidebarHeader>
       <SidebarContent className="bg-white">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link to="/" className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-3">
-                  <LogIn className="h-5 w-5" />
-                  <span className="text-base">Sign up/Log in</span>
-                </div>
+              <Link 
+                to="/" 
+                className={`flex items-center gap-3 ${isCurrentPath('/') ? 'text-[#007ac8] font-medium' : ''}`}
+              >
+                <Home className="h-5 w-5" />
+                <span className="text-base">Home</span>
               </Link>
             </SidebarMenuButton>
-          </SidebarMenuItem>
-
-          <SidebarSeparator className="my-4" />
-
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link to="/" className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-3">
-                  <Home className="h-5 w-5" />
-                  <span className="text-base">Home</span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              onClick={() => toggleMenu('buy')} 
-              className="flex items-center justify-between w-full"
-            >
-              <div className="flex items-center gap-3">
-                <ShoppingBag className="h-5 w-5" />
-                <span className="text-base">Buy</span>
-              </div>
-              <ChevronRight className={`h-5 w-5 transform transition-transform ${expandedMenu === 'buy' ? 'rotate-90' : ''}`} />
-            </SidebarMenuButton>
-            {expandedMenu === 'buy' && (
-              <SidebarMenuSub>
-                {buyDropdownItems.map((item) => (
-                  <SidebarMenuSubItem key={item.title}>
-                    <SidebarMenuSubButton asChild>
-                      <Link to={item.href}>{item.title}</Link>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                ))}
-              </SidebarMenuSub>
-            )}
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              onClick={() => toggleMenu('sell')} 
-              className="flex items-center justify-between w-full"
-            >
-              <div className="flex items-center gap-3">
-                <Bell className="h-5 w-5" />
-                <span className="text-base">Sell</span>
-              </div>
-              <ChevronRight className={`h-5 w-5 transform transition-transform ${expandedMenu === 'sell' ? 'rotate-90' : ''}`} />
-            </SidebarMenuButton>
-            {expandedMenu === 'sell' && (
-              <SidebarMenuSub>
-                {sellDropdownItems.map((item) => (
-                  <SidebarMenuSubItem key={item.title}>
-                    <SidebarMenuSubButton asChild>
-                      <Link to={item.href}>{item.title}</Link>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                ))}
-              </SidebarMenuSub>
-            )}
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              onClick={() => toggleMenu('research')} 
-              className="flex items-center justify-between w-full"
-            >
-              <div className="flex items-center gap-3">
-                <Search className="h-5 w-5" />
-                <span className="text-base">Research</span>
-              </div>
-              <ChevronRight className={`h-5 w-5 transform transition-transform ${expandedMenu === 'research' ? 'rotate-90' : ''}`} />
-            </SidebarMenuButton>
-            {expandedMenu === 'research' && (
-              <SidebarMenuSub>
-                {researchDropdownItems.map((item) => (
-                  <SidebarMenuSubItem key={item.title}>
-                    <SidebarMenuSubButton asChild>
-                      <Link to={item.href}>{item.title}</Link>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                ))}
-              </SidebarMenuSub>
-            )}
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              onClick={() => toggleMenu('showroom')} 
-              className="flex items-center justify-between w-full"
-            >
-              <div className="flex items-center gap-3">
-                <Bell className="h-5 w-5" />
-                <span className="text-base">Showroom</span>
-              </div>
-              <ChevronRight className={`h-5 w-5 transform transition-transform ${expandedMenu === 'showroom' ? 'rotate-90' : ''}`} />
-            </SidebarMenuButton>
-            {expandedMenu === 'showroom' && (
-              <SidebarMenuSub>
-                {showroomDropdownItems.map((item) => (
-                  <SidebarMenuSubItem key={item.title}>
-                    <SidebarMenuSubButton asChild>
-                      <Link to={item.href}>{item.title}</Link>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                ))}
-              </SidebarMenuSub>
-            )}
           </SidebarMenuItem>
 
           <SidebarMenuItem>
@@ -207,29 +67,45 @@ export function MobileSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link to="/" className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-3">
-                  <User className="h-5 w-5" />
-                  <span className="text-base">My account</span>
-                </div>
-                <ChevronRight className="h-5 w-5" />
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link to="/" className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-3">
-                  <CircleHelp className="h-5 w-5" />
-                  <span className="text-base">Help</span>
-                </div>
-                <ChevronRight className="h-5 w-5" />
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {user ? (
+            <>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link 
+                    to="/add-listing" 
+                    className={`flex items-center gap-3 ${isCurrentPath('/add-listing') ? 'text-[#007ac8] font-medium' : ''}`}
+                  >
+                    <Plus className="h-5 w-5" />
+                    <span className="text-base">Add Listing</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              
+              <SidebarSeparator className="my-2" />
+              
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  onClick={handleSignOut} 
+                  className="flex items-center gap-3"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span className="text-base">Sign Out</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </>
+          ) : (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link 
+                  to="/auth" 
+                  className={`flex items-center gap-3 ${isCurrentPath('/auth') ? 'text-[#007ac8] font-medium' : ''}`}
+                >
+                  <LogIn className="h-5 w-5" />
+                  <span className="text-base">Sign In</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
         </SidebarMenu>
       </SidebarContent>
     </Sidebar>
