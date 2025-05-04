@@ -17,7 +17,9 @@ const Index = () => {
       <TrustedBanner />
       <Navbar />
       <main className="flex-grow">
-        <HeroSection />
+        <div className="-mt-4">
+          <HeroSection />
+        </div>
         <div className="container mx-auto px-4 -mt-12 relative z-10">
           <SearchForm />
         </div>
