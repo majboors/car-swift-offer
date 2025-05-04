@@ -1,3 +1,4 @@
+
 // pages/index.tsx
 
 import React from "react";
@@ -14,18 +15,21 @@ import Footer from "@/components/Footer";
 
 const Index: React.FC = () => {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col">
       {/* 1. Top banner never grows */}
       <TrustedBanner />
 
-      {/* 2. Navbar is fixed-height (won’t stretch) */}
+      {/* 2. Navbar is fixed-height (won't stretch) */}
       <div className="flex-shrink-0">
         <Navbar />
       </div>
 
       {/* 3. Main content will take whatever space it needs */}
       <main className="flex-grow">
-        <HeroSection />
+        {/* Added -mt-12 to pull the hero section up closer to navbar */}
+        <div className="-mt-12">
+          <HeroSection />
+        </div>
 
         <section className="container mx-auto px-4 py-8 space-y-8">
           <SearchForm />

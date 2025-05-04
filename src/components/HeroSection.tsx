@@ -1,4 +1,5 @@
 
+
 import { Shield } from "lucide-react";
 
 const HeroSection = () => {
@@ -11,7 +12,7 @@ const HeroSection = () => {
           className="w-full h-full object-cover opacity-30"
         />
       </div>
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-12">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-12">
         <div className="flex items-center justify-center mb-6">
           <Shield className="w-12 h-12 mr-4" />
           <h1 className="text-4xl md:text-6xl font-bold">safer with snap my car</h1>
