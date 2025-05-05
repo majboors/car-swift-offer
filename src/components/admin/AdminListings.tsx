@@ -1,5 +1,5 @@
-
-import { useState, useEffect } from "react";
+// src/components/admin/AdminListings.tsx
+import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { EditListingDialog } from "./listings/EditListingDialog";
@@ -8,44 +8,45 @@ import { ListingTable } from "./listings/ListingTable";
 import { ListingTableHeader } from "./listings/ListingTableHeader";
 import { Listing, RpcListing, EmptyParams } from "@/types/admin";
 
-export const AdminListings = () => {
+export const AdminListings: React.FC = () => {
   const [listings, setListings] = useState<Listing[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [editListing, setEditListing] = useState<Listing | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
+
+  const fetchListings = async () => {
+    setLoading(true);
+    setFetchError(null);
+
+    const { data, error } = await supabase
+      .rpc<RpcListing[], EmptyParams>("get_car_listings_with_users", {});
+
+    if (error) {
+      setFetchError("Failed to load listings data");
+      setLoading(false);
+      return;
+    }
+
+    const result: Listing[] = (data || []).map(item => ({
+      id: item.id,
+      title: item.title,
+      make: item.make,
+      model: item.model,
+      price: item.price,
+      description: item.description,
+      created_at: item.created_at,
+      // map other fields as needed
+    }));
+
+    setListings(result);
+    setLoading(false);
+  };
 
   useEffect(() => {
     fetchListings();
   }, []);
-
-  const fetchListings = async () => {
-    try {
-      setLoading(true);
-      setFetchError(null);
-      
-      // Use the database function to get all listings with user emails
-      // Specify both parameter and return types for the RPC call
-      const { data, error: listingsError } = await supabase
-        .rpc<RpcListing[], EmptyParams>('get_car_listings_with_users', {});
-
-      if (listingsError) {
-        console.error("Error fetching listings:", listingsError);
-        setFetchError("Failed to load listings data");
-        setLoading(false);
-        return;
-      }
-      
-      // Type assertion to ensure TypeScript understands the data structure
-      setListings(data || []);
-    } catch (error) {
-      console.error("Error in fetchListings:", error);
-      setFetchError("An unexpected error occurred");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleEdit = (listing: Listing) => {
     setEditListing(listing);
@@ -56,35 +57,30 @@ export const AdminListings = () => {
     if (!window.confirm("Are you sure you want to delete this listing?")) {
       return;
     }
-
     try {
-      supabase
+      const { error } = await supabase
         .from("car_listings")
         .delete()
-        .eq("id", id)
-        .then(({ error }) => {
-          if (error) {
-            throw error;
-          }
+        .eq("id", id);
 
-          setListings(listings.filter(listing => listing.id !== id));
-          toast({
-            title: "Success",
-            description: "Listing deleted successfully",
-          });
-        });
-    } catch (error: any) {
-      console.error("Error deleting listing:", error);
+      if (error) throw error;
+
+      setListings(prev => prev.filter(l => l.id !== id));
+      toast({
+        title: "Success",
+        description: "Listing deleted successfully"
+      });
+    } catch (err: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to delete listing",
-        variant: "destructive",
+        description: err.message || "Failed to delete listing",
+        variant: "destructive"
       });
     }
   };
 
   const handleSaveEdit = async (
-    id: string, 
+    id: string,
     data: { title: string; price: number; description: string }
   ) => {
     try {
@@ -93,45 +89,33 @@ export const AdminListings = () => {
         .update({
           title: data.title,
           price: data.price,
-          description: data.description,
+          description: data.description
         })
         .eq("id", id);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      // Update local state
-      setListings(listings.map(listing => 
-        listing.id === id 
-          ? { 
-              ...listing, 
-              title: data.title, 
-              price: data.price,
-              description: data.description 
-            } 
-          : listing
-      ));
-
+      setListings(prev =>
+        prev.map(l => (l.id === id ? { ...l, ...data } : l))
+      );
       setIsDialogOpen(false);
       toast({
         title: "Success",
-        description: "Listing updated successfully",
+        description: "Listing updated successfully"
       });
-    } catch (error: any) {
-      console.error("Error updating listing:", error);
+    } catch (err: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to update listing",
-        variant: "destructive",
+        description: err.message || "Failed to update listing",
+        variant: "destructive"
       });
     }
   };
 
-  const filteredListings = listings.filter(listing => 
-    listing.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    listing.make?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    listing.model?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredListings = listings.filter(l =>
+    l.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    l.make.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    l.model.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -142,9 +126,7 @@ export const AdminListings = () => {
         onRefresh={fetchListings}
         loading={loading}
       />
-
       {fetchError && <ErrorAlert message={fetchError} />}
-
       <ListingTable
         listings={filteredListings}
         loading={loading}
@@ -152,7 +134,6 @@ export const AdminListings = () => {
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
-
       <EditListingDialog
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
