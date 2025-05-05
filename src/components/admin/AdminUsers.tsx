@@ -1,251 +1,230 @@
-// src/components/admin/AdminUsers.tsx
-import React, { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { toast } from "@/components/ui/use-toast";
-import { Loader } from "lucide-react";
-import { AddUserForm } from "./AddUserForm";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
-} from "@/components/ui/dialog";
-import { 
-  User, 
-  AdminUserIdParams
-} from "@/types/admin";
 
-export const AdminUsers: React.FC = () => {
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@/types/admin";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { AddUserForm } from "./AddUserForm";
+import { Loader, UserPlus, Trash, Shield, ShieldOff } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+
+export const AdminUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [fetchError, setFetchError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  const [showAddUserForm, setShowAddUserForm] = useState(false);
 
   const fetchUsers = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      setFetchError(null);
+      const { data, error } = await supabase.rpc('get_all_users');
       
-      // Call the get_all_users RPC function with our updated schema
-      const { data, error } = await supabase
-        .rpc('get_all_users');
-
       if (error) {
-        console.error("Error fetching users:", error);
-        setFetchError("Failed to load users data");
-        setLoading(false);
-        return;
+        throw error;
       }
 
-      console.log("Users data:", data);
-      
-      // Handle the case where data might be null
-      if (!data || !Array.isArray(data)) {
-        setUsers([]);
-        setLoading(false);
-        return;
-      }
-
-      // Our updated function now returns is_admin directly
-      const enhancedUsers: User[] = data.map(user => ({
-        id: user.id,
-        email: user.email,
-        created_at: user.created_at,
-        last_sign_in_at: user.last_sign_in_at || null,
-        is_admin: user.is_admin || user.email === 'root@admin.com'
-      }));
-
-      setUsers(enhancedUsers);
-    } catch (error) {
-      console.error("Error in fetchUsers:", error);
-      setFetchError("An unexpected error occurred");
+      setUsers(data);
+    } catch (error: any) {
+      console.error("Error fetching users:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to fetch users",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleAddUserSuccess = () => {
+    setShowAddUserForm(false);
+    fetchUsers();
+    toast({
+      title: "Success",
+      description: "User added successfully"
+    });
+  };
+
+  const handleRemoveUser = async (userId: string, isAdmin: boolean) => {
+    if (!window.confirm("Are you sure you want to remove this user?")) {
+      return;
+    }
+    
     try {
-      if (currentStatus) {
-        // Don't allow removing root admin status
-        const userToToggle = users.find(u => u.id === userId);
-        if (userToToggle?.email === 'root@admin.com') {
-          toast({
-            title: "Error",
-            description: "Cannot remove admin status from the root admin account",
-            variant: "destructive",
-          });
-          return;
-        }
-        
-        // Remove admin status
-        const { error } = await supabase.rpc(
-          'remove_admin',
-          { user_id_input: userId }
-        );
-
-        if (error) throw error;
-      } else {
-        // Add admin status
-        const { error } = await supabase.rpc(
-          'add_admin',
-          { user_id_input: userId }
-        );
-
-        if (error) throw error;
+      if (isAdmin) {
+        await supabase.rpc('remove_admin', { user_id_input: userId });
       }
-
-      // Update local state
-      setUsers(users.map(user => 
-        user.id === userId ? { ...user, is_admin: !currentStatus } : user
-      ));
-
+      
+      // TODO: Add API to delete user account completely if needed
       toast({
         title: "Success",
-        description: `User ${currentStatus ? "removed from" : "added to"} administrators`,
+        description: isAdmin ? "Admin privileges removed" : "User removed",
       });
+      
+      fetchUsers();
     } catch (error: any) {
-      console.error("Error toggling admin status:", error);
+      console.error("Error removing user:", error);
       toast({
         title: "Error",
-        description: error.message || `Failed to ${currentStatus ? "remove" : "add"} admin status`,
-        variant: "destructive",
+        description: error.message || "Failed to remove user",
+        variant: "destructive"
       });
     }
   };
 
-  const handleAddUserSuccess = () => {
-    setDialogOpen(false);
-    fetchUsers();
+  const handleToggleAdmin = async (userId: string, isCurrentlyAdmin: boolean) => {
+    try {
+      if (isCurrentlyAdmin) {
+        await supabase.rpc('remove_admin', { user_id_input: userId });
+        toast({
+          title: "Success",
+          description: "Admin privileges removed"
+        });
+      } else {
+        await supabase.rpc('add_admin', { user_id_input: userId });
+        toast({
+          title: "Success",
+          description: "Admin privileges granted"
+        });
+      }
+      fetchUsers();
+    } catch (error: any) {
+      console.error("Error toggling admin:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update admin status",
+        variant: "destructive"
+      });
+    }
   };
 
   const filteredUsers = users.filter(user => 
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold">User Management</h2>
-        <div className="flex gap-4">
-          <Input
-            placeholder="Search users by email..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="w-80"
-          />
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle>Users Management</CardTitle>
+        <div className="flex items-center space-x-2">
+          <Dialog open={showAddUserForm} onOpenChange={setShowAddUserForm}>
             <DialogTrigger asChild>
-              <Button>Add New User</Button>
+              <Button size="sm" className="h-8 gap-1">
+                <UserPlus className="h-4 w-4" />
+                <span className="hidden sm:inline">Add User</span>
+              </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent>
               <DialogHeader>
                 <DialogTitle>Add New User</DialogTitle>
               </DialogHeader>
               <AddUserForm onSuccess={handleAddUserSuccess} />
             </DialogContent>
           </Dialog>
-          <Button onClick={fetchUsers} variant="outline" disabled={loading}>
-            {loading ? (
-              <>
-                <Loader className="mr-2 h-4 w-4 animate-spin" />
-                Loading...
-              </>
-            ) : (
-              "Refresh"
-            )}
+        </div>
+      </CardHeader>
+      
+      <CardContent>
+        <div className="flex mb-4 justify-between items-center">
+          <div className="w-full max-w-sm">
+            <Input 
+              placeholder="Search users..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="h-9"
+            />
+          </div>
+          <Button 
+            variant="ghost"
+            size="sm"
+            onClick={fetchUsers}
+            disabled={loading}
+            className="ml-2"
+          >
+            {loading ? <Loader className="h-4 w-4 animate-spin" /> : "Refresh"}
           </Button>
         </div>
-      </div>
 
-      {fetchError && (
-        <div className="bg-destructive/15 p-4 rounded-md mb-4 text-destructive">
-          <p className="font-medium">Error: {fetchError}</p>
-          <p className="text-sm mt-1">
-            Please try refreshing or check your authentication status
-          </p>
-        </div>
-      )}
-
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Email</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead>Last Sign In</TableHead>
-              <TableHead>Admin Status</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8">
-                  <div className="flex flex-col items-center justify-center">
-                    <Loader className="h-8 w-8 animate-spin text-primary mb-2" />
-                    <span>Loading users...</span>
-                  </div>
-                </TableCell>
+                <TableHead>Email</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead>Last Login</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            ) : filteredUsers.length > 0 ? (
-              filteredUsers.map(user => (
-                <TableRow key={user.id}>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{new Date(user.created_at).toLocaleString()}</TableCell>
-                  <TableCell>
-                    {user.last_sign_in_at
-                      ? new Date(user.last_sign_in_at).toLocaleString()
-                      : "Never"}
-                  </TableCell>
-                  <TableCell>
-                    <span
-                      className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        user.is_admin
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {user.is_admin ? "Admin" : "User"}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant={user.is_admin ? "destructive" : "outline"}
-                      size="sm"
-                      onClick={() => toggleAdminStatus(user.id, user.is_admin)}
-                    >
-                      {user.is_admin ? "Revoke Admin" : "Make Admin"}
-                    </Button>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-24 text-center">
+                    <Loader className="h-5 w-5 mx-auto animate-spin" />
                   </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-4">
-                  {fetchError ? "Error loading users" : "No users found"}
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
+              ) : filteredUsers.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-24 text-center">
+                    No users found.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredUsers.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      {user.is_admin ? (
+                        <Badge variant="default" className="bg-purple-600 hover:bg-purple-700">Admin</Badge>
+                      ) : (
+                        <Badge variant="outline">User</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {new Date(user.created_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      {user.last_sign_in_at 
+                        ? new Date(user.last_sign_in_at).toLocaleDateString() 
+                        : 'Never'}
+                    </TableCell>
+                    <TableCell className="text-right space-x-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleToggleAdmin(user.id, user.is_admin)}
+                        title={user.is_admin ? "Remove Admin" : "Make Admin"}
+                      >
+                        {user.is_admin ? (
+                          <ShieldOff className="h-4 w-4 text-gray-500" />
+                        ) : (
+                          <Shield className="h-4 w-4 text-purple-500" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveUser(user.id, user.is_admin)}
+                        title="Remove User"
+                      >
+                        <Trash className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
   );
 };

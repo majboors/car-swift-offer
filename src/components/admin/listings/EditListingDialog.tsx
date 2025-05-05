@@ -13,6 +13,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Listing } from "@/types/admin";
+import { supabase } from "@/integrations/supabase/client";
+import { Image as ImageIcon, X, Upload, Plus } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 
 interface EditListingDialogProps {
   isOpen: boolean;
@@ -65,6 +68,8 @@ export const EditListingDialog = ({
   onSave 
 }: EditListingDialogProps) => {
   const [featuresInput, setFeaturesInput] = useState<string>('');
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [images, setImages] = useState<string[]>([]);
   
   // Create a more comprehensive form object
   const [formData, setFormData] = useState<{
@@ -121,6 +126,13 @@ export const EditListingDialog = ({
       // Set features as a comma-separated string for editing
       const features = flattenFeatures(listing.features);
       setFeaturesInput(features.join(', '));
+      
+      // Set images from listing
+      if (listing.images && Array.isArray(listing.images)) {
+        setImages(listing.images as string[]);
+      } else {
+        setImages([]);
+      }
     }
   }, [listing]);
 
@@ -150,6 +162,7 @@ export const EditListingDialog = ({
       contact_email: formData.contact_email || null,
       contact_phone: formData.contact_phone || null,
       features: featuresArray.length > 0 ? featuresArray : null,
+      images: images.length > 0 ? images : null,
     };
     
     await onSave(listing.id, updatedData);
@@ -157,6 +170,41 @@ export const EditListingDialog = ({
 
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    setIsUploading(true);
+    const file = e.target.files[0];
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+    
+    try {
+      const { data, error } = await supabase.storage
+        .from('car-listings')
+        .upload(fileName, file);
+        
+      if (error) throw error;
+      
+      const publicUrl = `${supabase.supabaseUrl}/storage/v1/object/public/car-listings/${fileName}`;
+      setImages(prev => [...prev, publicUrl]);
+      toast({ title: "Success", description: "Image uploaded successfully" });
+    } catch (error: any) {
+      toast({ 
+        title: "Error", 
+        description: error.message || "Failed to upload image",
+        variant: "destructive" 
+      });
+    } finally {
+      setIsUploading(false);
+      // Clear the file input
+      if (e.target) e.target.value = '';
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -169,6 +217,43 @@ export const EditListingDialog = ({
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
+          {/* Images Section */}
+          <div className="space-y-2">
+            <Label>Images</Label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {images.map((img, idx) => (
+                <div key={idx} className="relative group">
+                  <img 
+                    src={img} 
+                    alt={`Car listing ${idx + 1}`} 
+                    className="h-20 w-20 object-cover rounded-md border border-border"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(idx)}
+                    className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+              <label className="flex items-center justify-center h-20 w-20 border-2 border-dashed border-muted-foreground/50 rounded-md cursor-pointer hover:border-primary/50 transition-colors">
+                <div className="flex flex-col items-center justify-center text-muted-foreground">
+                  <Plus className="h-6 w-6" />
+                  <span className="text-xs mt-1">Add Image</span>
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  disabled={isUploading}
+                  className="hidden"
+                />
+              </label>
+            </div>
+            {isUploading && <p className="text-sm text-muted-foreground">Uploading...</p>}
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Basic Information */}
             <div className="space-y-2">

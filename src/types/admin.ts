@@ -20,6 +20,7 @@ export interface Listing {
   contact_email?: string | null;
   contact_phone?: string | null;
   features?: any;
+  images?: string[] | null;
 }
 
 // Add User interface for AdminUsers component
