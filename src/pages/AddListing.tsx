@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -168,28 +167,53 @@ const AddListing = () => {
     
     try {
       for (const image of images) {
+        // Limit filesize to 5MB to avoid potential size-related issues
+        if (image.size > 5 * 1024 * 1024) {
+          toast({
+            title: "File too large",
+            description: `Image ${image.name} exceeds 5MB limit`,
+            variant: "destructive",
+          });
+          continue;
+        }
+        
         const fileExt = image.name.split('.').pop();
         const fileName = `${uuidv4()}.${fileExt}`;
-        const filePath = `car-listings/${fileName}`;
+        const filePath = `${fileName}`; // Remove nested path to avoid confusion
         
-        const { error: uploadError } = await supabase.storage
+        console.log(`Uploading file ${fileName} to bucket car-listings`);
+        
+        const { data, error: uploadError } = await supabase.storage
           .from('car-listings')
-          .upload(filePath, image);
+          .upload(filePath, image, {
+            cacheControl: '3600',
+            upsert: false
+          });
           
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          throw uploadError;
+        }
         
-        const { data } = supabase.storage.from('car-listings').getPublicUrl(filePath);
-        imageUrls.push(data.publicUrl);
+        console.log('Upload successful:', data);
+        
+        const { data: urlData } = supabase.storage
+          .from('car-listings')
+          .getPublicUrl(filePath);
+          
+        console.log('Public URL:', urlData.publicUrl);
+        imageUrls.push(urlData.publicUrl);
       }
       
       return imageUrls;
     } catch (error: any) {
+      console.error('Error in uploadImages:', error);
       toast({
         title: "Error uploading images",
-        description: error.message,
+        description: error.message || "Failed to upload one or more images",
         variant: "destructive",
       });
-      return [];
+      return imageUrls; // Return any successfully uploaded images
     } finally {
       setUploadingImages(false);
     }
