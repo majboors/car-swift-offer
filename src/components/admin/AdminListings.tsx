@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -62,7 +63,17 @@ export const AdminListings: React.FC = () => {
         created_at: item.created_at || '',
         year: item.year || 0,
         user_id: item.user_id || '',
-        user_email: 'User ID: ' + item.user_id.substring(0, 8) + '...' // Display partial user ID as placeholder
+        user_email: 'User ID: ' + item.user_id.substring(0, 8) + '...', // Display partial user ID as placeholder
+        // Additional fields needed for the expanded edit dialog
+        mileage: item.mileage,
+        color: item.color,
+        transmission: item.transmission,
+        fuel_type: item.fuel_type,
+        body_type: item.body_type,
+        location: item.location,
+        contact_email: item.contact_email,
+        contact_phone: item.contact_phone,
+        features: item.features
       }));
 
       setListings(result);
@@ -109,17 +120,28 @@ export const AdminListings: React.FC = () => {
     }
   };
 
-  const handleSaveEdit = async (
-    id: string,
-    data: { title: string; price: number; description: string }
-  ) => {
+  const handleSaveEdit = async (id: string, data: any) => {
     try {
+      console.log("Saving listing with data:", data);
+
       const { error } = await supabase
         .from("car_listings")
         .update({
           title: data.title,
+          make: data.make,
+          model: data.model,
+          year: data.year,
           price: data.price,
-          description: data.description
+          mileage: data.mileage,
+          color: data.color,
+          transmission: data.transmission,
+          fuel_type: data.fuel_type,
+          body_type: data.body_type,
+          description: data.description,
+          location: data.location,
+          contact_email: data.contact_email,
+          contact_phone: data.contact_phone,
+          features: data.features
         })
         .eq("id", id);
 
@@ -134,6 +156,7 @@ export const AdminListings: React.FC = () => {
         description: "Listing updated successfully"
       });
     } catch (err: any) {
+      console.error("Error updating listing:", err);
       toast({
         title: "Error",
         description: err.message || "Failed to update listing",

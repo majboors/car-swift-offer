@@ -10,14 +10,16 @@ export interface Listing {
   user_id: string;
   user_email?: string;
   description?: string;
-}
-
-export interface User {
-  id: string;
-  email: string;
-  created_at: string;
-  last_sign_in_at: string | null;
-  is_admin: boolean;
+  // Additional fields for expanded edit functionality
+  mileage?: number | null;
+  color?: string | null;
+  transmission?: string | null;
+  fuel_type?: string | null;
+  body_type?: string | null;
+  location?: string | null;
+  contact_email?: string | null;
+  contact_phone?: string | null;
+  features?: any;
 }
 
 // Parameter types for each RPC function
