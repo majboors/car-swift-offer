@@ -24,8 +24,7 @@ import {
 import { 
   User, 
   AdminUserIdParams,
-  EmptyParams,
-  RpcResponse
+  EmptyParams
 } from "@/types/admin";
 
 export const AdminUsers = () => {
@@ -59,8 +58,8 @@ export const AdminUsers = () => {
       // Create a set of admin user IDs for faster lookups
       const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
-      // Get all users using rpc with proper type parameters
-      const { data, error } = await supabase.rpc<any>('get_all_users', {} as EmptyParams);
+      // Get all users using proper type parameters for the RPC call
+      const { data, error } = await supabase.rpc('get_all_users');
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -99,13 +98,13 @@ export const AdminUsers = () => {
       if (currentStatus) {
         // Remove admin status
         const params: AdminUserIdParams = { user_id_input: userId };
-        const { error } = await supabase.rpc<void>('remove_admin', params);
+        const { error } = await supabase.rpc('remove_admin', params);
 
         if (error) throw error;
       } else {
         // Add admin status
         const params: AdminUserIdParams = { user_id_input: userId };
-        const { error } = await supabase.rpc<void>('add_admin', params);
+        const { error } = await supabase.rpc('add_admin', params);
 
         if (error) throw error;
       }
