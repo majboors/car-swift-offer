@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,6 +8,8 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
+import { Card, CardContent } from '@/components/ui/card';
+import { CheckCircle2 } from 'lucide-react';
 
 interface CarListing {
   id: string;
@@ -26,6 +29,7 @@ interface CarListing {
   contact_phone: string | null;
   images: string[];
   created_at: string;
+  features: string[] | null;
 }
 
 const CarListingPage = () => {
@@ -235,6 +239,23 @@ const CarListingPage = () => {
                 </div>
               )}
             </div>
+            
+            {/* Features section */}
+            {listing.features && Array.isArray(listing.features) && listing.features.length > 0 && (
+              <Card className="mb-6">
+                <CardContent className="pt-6">
+                  <h2 className="text-xl font-bold mb-3">Features</h2>
+                  <div className="grid grid-cols-2 gap-2">
+                    {listing.features.map((feature, index) => (
+                      <div key={index} className="flex items-center">
+                        <CheckCircle2 className="h-4 w-4 mr-2 text-green-500" />
+                        <span>{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             
             {listing.description && (
               <div className="mb-6">
