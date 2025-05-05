@@ -28,11 +28,6 @@ import {
   EmptyParams
 } from "@/types/admin";
 
-// Define proper types for our RPC calls
-type AdminUserParams = {
-  user_id_input: string;
-};
-
 export const AdminUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,9 +60,9 @@ export const AdminUsers = () => {
       const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
       // Use the database functions to get all users via RPC
-      // Fixed: The rpc method requires two type parameters: return type and input parameters type
+      // Fixed: The Supabase client's rpc method requires proper typing but without constraints
       const { data, error } = await supabase
-        .rpc<RpcUser[], EmptyParams>('get_all_users', {});
+        .rpc('get_all_users', {});
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -106,17 +101,17 @@ export const AdminUsers = () => {
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
-        // Fixed: Added the second type parameter for the input type
+        // Fixed: Remove type parameters that cause constraint issues
         const { error } = await supabase
-          .rpc<void, AdminUserIdParams>('remove_admin', { 
+          .rpc('remove_admin', { 
             user_id_input: userId 
           });
 
         if (error) throw error;
       } else {
-        // Fixed: Added the second type parameter for the input type
+        // Fixed: Remove type parameters that cause constraint issues
         const { error } = await supabase
-          .rpc<void, AdminUserIdParams>('add_admin', { 
+          .rpc('add_admin', { 
             user_id_input: userId 
           });
 
