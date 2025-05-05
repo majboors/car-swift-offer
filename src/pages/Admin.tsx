@@ -127,7 +127,11 @@ const Admin = () => {
           const [aMonth, aYear] = a.name.split(' ');
           const [bMonth, bYear] = b.name.split(' ');
           
-          if (aYear !== bYear) return Number(aYear) - Number(bYear);
+          // Compare years first
+          const yearDiff = parseInt(aYear) - parseInt(bYear);
+          if (yearDiff !== 0) return yearDiff;
+          
+          // If years are the same, compare months
           return months.indexOf(aMonth) - months.indexOf(bMonth);
         });
       
@@ -215,3 +219,4 @@ const Admin = () => {
 };
 
 export default Admin;
+
