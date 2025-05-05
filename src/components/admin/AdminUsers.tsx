@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -66,7 +67,7 @@ export const AdminUsers = () => {
       // Use the database functions to get all users via RPC
       // Using an empty object for params as this function doesn't require parameters
       const { data, error } = await supabase
-        .rpc('get_all_users', {} as EmptyParams);
+        .rpc<RpcUser[]>('get_all_users');
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -105,15 +106,19 @@ export const AdminUsers = () => {
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
-        // Fix: Cast the param object to AdminUserIdParams type
+        // Using the generic type parameter to specify the return type and properly typed parameters
         const { error } = await supabase
-          .rpc('remove_admin', { user_id_input: userId } as AdminUserIdParams);
+          .rpc<void>('remove_admin', { 
+            user_id_input: userId 
+          });
 
         if (error) throw error;
       } else {
-        // Fix: Cast the param object to AdminUserIdParams type
+        // Using the generic type parameter to specify the return type and properly typed parameters
         const { error } = await supabase
-          .rpc('add_admin', { user_id_input: userId } as AdminUserIdParams);
+          .rpc<void>('add_admin', { 
+            user_id_input: userId 
+          });
 
         if (error) throw error;
       }
