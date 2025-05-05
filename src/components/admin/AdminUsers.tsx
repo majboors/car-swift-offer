@@ -60,9 +60,9 @@ export const AdminUsers = () => {
       const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
       // Use the database functions to get all users via RPC
-      // Use type assertion to override strict TypeScript constraints
+      // Properly specify both generic type parameters
       const { data, error } = await supabase
-        .rpc<any>('get_all_users', {});
+        .rpc<RpcUser[], EmptyParams>('get_all_users', {});
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -101,17 +101,17 @@ export const AdminUsers = () => {
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
-        // Use type assertion to override strict TypeScript constraints
+        // Properly specify both generic type parameters for remove_admin
         const { error } = await supabase
-          .rpc<any>('remove_admin', { 
+          .rpc<void, AdminUserIdParams>('remove_admin', { 
             user_id_input: userId 
           });
 
         if (error) throw error;
       } else {
-        // Use type assertion to override strict TypeScript constraints  
+        // Properly specify both generic type parameters for add_admin
         const { error } = await supabase
-          .rpc<any>('add_admin', { 
+          .rpc<void, AdminUserIdParams>('add_admin', { 
             user_id_input: userId 
           });
 
