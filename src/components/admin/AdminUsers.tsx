@@ -60,9 +60,9 @@ export const AdminUsers = () => {
       const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
       // Use the database functions to get all users via RPC
-      // We need to cast the empty object to any to avoid type constraint issues
+      // Use type assertion to override strict TypeScript constraints
       const { data, error } = await supabase
-        .rpc('get_all_users', {} as any);
+        .rpc<any>('get_all_users', {});
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -101,19 +101,19 @@ export const AdminUsers = () => {
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
-        // We need to cast the parameter object to any to avoid type constraint issues
+        // Use type assertion to override strict TypeScript constraints
         const { error } = await supabase
-          .rpc('remove_admin', { 
+          .rpc<any>('remove_admin', { 
             user_id_input: userId 
-          } as any);
+          });
 
         if (error) throw error;
       } else {
-        // We need to cast the parameter object to any to avoid type constraint issues
+        // Use type assertion to override strict TypeScript constraints  
         const { error } = await supabase
-          .rpc('add_admin', { 
+          .rpc<any>('add_admin', { 
             user_id_input: userId 
-          } as any);
+          });
 
         if (error) throw error;
       }
