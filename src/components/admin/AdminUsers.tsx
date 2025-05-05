@@ -22,10 +22,10 @@ import {
   DialogTrigger 
 } from "@/components/ui/dialog";
 import { 
-  RpcUser, 
-  User,
+  User, 
   AdminUserIdParams,
-  EmptyParams
+  EmptyParams,
+  RpcResponse
 } from "@/types/admin";
 
 export const AdminUsers = () => {
@@ -59,10 +59,8 @@ export const AdminUsers = () => {
       // Create a set of admin user IDs for faster lookups
       const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
-      // Get all users with proper type annotations
-      const { data, error } = await supabase.rpc<any[]>('get_all_users', {}, {
-        count: 'exact'
-      });
+      // Get all users using rpc with proper type parameters
+      const { data, error } = await supabase.rpc<any>('get_all_users', {} as EmptyParams);
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -72,7 +70,7 @@ export const AdminUsers = () => {
       }
       
       // Handle the case where data might be null
-      if (!data) {
+      if (!data || !Array.isArray(data)) {
         setUsers([]);
         setLoading(false);
         return;
@@ -100,18 +98,14 @@ export const AdminUsers = () => {
     try {
       if (currentStatus) {
         // Remove admin status
-        const { error } = await supabase.rpc(
-          'remove_admin', 
-          { user_id_input: userId }
-        );
+        const params: AdminUserIdParams = { user_id_input: userId };
+        const { error } = await supabase.rpc<void>('remove_admin', params);
 
         if (error) throw error;
       } else {
         // Add admin status
-        const { error } = await supabase.rpc(
-          'add_admin', 
-          { user_id_input: userId }
-        );
+        const params: AdminUserIdParams = { user_id_input: userId };
+        const { error } = await supabase.rpc<void>('add_admin', params);
 
         if (error) throw error;
       }

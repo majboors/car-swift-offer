@@ -42,9 +42,16 @@ export interface RpcUser {
   [key: string]: any;
 }
 
+// Parameter types for each RPC function
 export type AdminUserIdParams = {
   user_id_input: string;
 };
 
 // Empty params type for RPC calls that don't require parameters
 export type EmptyParams = Record<string, never>;
+
+// Custom generic type for RPC function responses
+export interface RpcResponse<T> {
+  data: T;
+  error: Error | null;
+}
