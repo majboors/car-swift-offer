@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -65,10 +64,9 @@ export const AdminUsers = () => {
       const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
       // Use the database functions to get all users via RPC
+      // Using an empty object for params as this function doesn't require parameters
       const { data, error } = await supabase
-        .rpc('get_all_users', {}, {
-          count: 'exact'
-        });
+        .rpc('get_all_users', {} as EmptyParams);
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -107,17 +105,15 @@ export const AdminUsers = () => {
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
+        // Fix: Cast the param object to AdminUserIdParams type
         const { error } = await supabase
-          .rpc('remove_admin', { user_id_input: userId }, {
-            count: 'exact'
-          });
+          .rpc('remove_admin', { user_id_input: userId } as AdminUserIdParams);
 
         if (error) throw error;
       } else {
+        // Fix: Cast the param object to AdminUserIdParams type
         const { error } = await supabase
-          .rpc('add_admin', { user_id_input: userId }, {
-            count: 'exact'
-          });
+          .rpc('add_admin', { user_id_input: userId } as AdminUserIdParams);
 
         if (error) throw error;
       }
