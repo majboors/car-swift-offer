@@ -60,8 +60,9 @@ export const AdminUsers = () => {
       const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
       // Use the database functions to get all users via RPC
+      // Using type assertion to provide proper type information
       const { data, error } = await supabase
-        .rpc('get_all_users');
+        .rpc('get_all_users') as { data: RpcUser[] | null, error: any };
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -100,19 +101,19 @@ export const AdminUsers = () => {
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
-        // Remove admin status
+        // Remove admin status with type assertion
         const { error } = await supabase
           .rpc('remove_admin', { 
             user_id_input: userId 
-          });
+          }) as { data: null, error: any };
 
         if (error) throw error;
       } else {
-        // Add admin status
+        // Add admin status with type assertion
         const { error } = await supabase
           .rpc('add_admin', { 
             user_id_input: userId 
-          });
+          }) as { data: null, error: any };
 
         if (error) throw error;
       }
