@@ -60,9 +60,8 @@ export const AdminUsers = () => {
       const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
       // Use the database functions to get all users via RPC
-      // Properly specify both generic type parameters
       const { data, error } = await supabase
-        .rpc<RpcUser[], EmptyParams>('get_all_users', {});
+        .rpc('get_all_users');
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -101,17 +100,17 @@ export const AdminUsers = () => {
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
-        // Properly specify both generic type parameters for remove_admin
+        // Remove admin status
         const { error } = await supabase
-          .rpc<void, AdminUserIdParams>('remove_admin', { 
+          .rpc('remove_admin', { 
             user_id_input: userId 
           });
 
         if (error) throw error;
       } else {
-        // Properly specify both generic type parameters for add_admin
+        // Add admin status
         const { error } = await supabase
-          .rpc<void, AdminUserIdParams>('add_admin', { 
+          .rpc('add_admin', { 
             user_id_input: userId 
           });
 
