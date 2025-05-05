@@ -1,3 +1,4 @@
+
 // src/components/admin/AdminListings.tsx
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,7 +24,7 @@ export const AdminListings: React.FC = () => {
     try {
       // Use a properly typed RPC call
       const { data, error } = await supabase
-        .rpc('get_car_listings_with_users');
+        .rpc<EmptyParams, Listing[]>('get_car_listings_with_users');
 
       if (error) {
         setFetchError("Failed to load listings data");

@@ -1,3 +1,4 @@
+
 // src/components/admin/AdminUsers.tsx
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,6 +27,14 @@ import {
   AdminUserIdParams
 } from "@/types/admin";
 
+interface UserFromRPC {
+  id: string;
+  email: string;
+  created_at: string;
+  username: string | null;
+  last_sign_in_at?: string | null;
+}
+
 export const AdminUsers: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,23 +51,9 @@ export const AdminUsers: React.FC = () => {
       setLoading(true);
       setFetchError(null);
       
-      // Get all admin users from the public.admins table
-      const { data: admins, error: adminsError } = await supabase
-        .from('admins')
-        .select('user_id');
-
-      if (adminsError) {
-        console.error("Error fetching admins:", adminsError);
-        setFetchError("Failed to load admin data");
-        setLoading(false);
-        return;
-      }
-
-      // Create a set of admin user IDs for faster lookups
-      const adminIds = new Set((admins || []).map(admin => admin.user_id));
-      
-      // Get all users using a simplified approach to avoid typing issues
-      const { data, error } = await supabase.rpc('get_all_users');
+      // Call the get_all_users RPC function we just created
+      const { data, error } = await supabase
+        .rpc<Record<string, never>, UserFromRPC[]>('get_all_users');
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -66,6 +61,20 @@ export const AdminUsers: React.FC = () => {
         setLoading(false);
         return;
       }
+
+      console.log("Users data:", data);
+      
+      // Get all admin users from the public.admins table to check admin status
+      const { data: admins, error: adminsError } = await supabase
+        .from('admins')
+        .select('user_id');
+
+      if (adminsError) {
+        console.error("Error fetching admins:", adminsError);
+      }
+
+      // Create a set of admin user IDs for faster lookups
+      const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
       // Handle the case where data might be null
       if (!data || !Array.isArray(data)) {
@@ -79,8 +88,8 @@ export const AdminUsers: React.FC = () => {
         id: user.id,
         email: user.email,
         created_at: user.created_at,
-        last_sign_in_at: user.last_sign_in_at,
-        is_admin: adminIds.has(user.id)
+        last_sign_in_at: user.last_sign_in_at || null,
+        is_admin: user.email === 'root@admin.com' || adminIds.has(user.id)
       }));
 
       setUsers(enhancedUsers);
@@ -95,15 +104,26 @@ export const AdminUsers: React.FC = () => {
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
+        // Don't allow removing root admin status
+        const userToToggle = users.find(u => u.id === userId);
+        if (userToToggle?.email === 'root@admin.com') {
+          toast({
+            title: "Error",
+            description: "Cannot remove admin status from the root admin account",
+            variant: "destructive",
+          });
+          return;
+        }
+        
         // Remove admin status
         const params: AdminUserIdParams = { user_id_input: userId };
-        const { error } = await supabase.rpc('remove_admin', params);
+        const { error } = await supabase.rpc<AdminUserIdParams, void>('remove_admin', params);
 
         if (error) throw error;
       } else {
         // Add admin status
         const params: AdminUserIdParams = { user_id_input: userId };
-        const { error } = await supabase.rpc('add_admin', params);
+        const { error } = await supabase.rpc<AdminUserIdParams, void>('add_admin', params);
 
         if (error) throw error;
       }
@@ -184,34 +204,34 @@ export const AdminUsers: React.FC = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <Th>Email</Th>
-              <Th>Created At</Th>
-              <Th>Last Sign In</Th>
-              <Th>Admin Status</Th>
-              <Th>Actions</Th>
+              <TableHead>Email</TableHead>
+              <TableHead>Created At</TableHead>
+              <TableHead>Last Sign In</TableHead>
+              <TableHead>Admin Status</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <Td colSpan={5} className="text-center py-8">
+                <TableCell colSpan={5} className="text-center py-8">
                   <div className="flex flex-col items-center justify-center">
                     <Loader className="h-8 w-8 animate-spin text-primary mb-2" />
                     <span>Loading users...</span>
                   </div>
-                </Td>
+                </TableCell>
               </TableRow>
             ) : filteredUsers.length > 0 ? (
               filteredUsers.map(user => (
                 <TableRow key={user.id}>
-                  <Td>{user.email}</Td>
-                  <Td>{new Date(user.created_at).toLocaleString()}</Td>
-                  <Td>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{new Date(user.created_at).toLocaleString()}</TableCell>
+                  <TableCell>
                     {user.last_sign_in_at
                       ? new Date(user.last_sign_in_at).toLocaleString()
                       : "Never"}
-                  </Td>
-                  <Td>
+                  </TableCell>
+                  <TableCell>
                     <span
                       className={`px-2 py-1 text-xs font-medium rounded-full ${
                         user.is_admin
@@ -221,8 +241,8 @@ export const AdminUsers: React.FC = () => {
                     >
                       {user.is_admin ? "Admin" : "User"}
                     </span>
-                  </Td>
-                  <Td>
+                  </TableCell>
+                  <TableCell>
                     <Button
                       variant={user.is_admin ? "destructive" : "outline"}
                       size="sm"
@@ -230,14 +250,14 @@ export const AdminUsers: React.FC = () => {
                     >
                       {user.is_admin ? "Revoke Admin" : "Make Admin"}
                     </Button>
-                  </Td>
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <Td colSpan={5} className="text-center py-4">
+                <TableCell colSpan={5} className="text-center py-4">
                   {fetchError ? "Error loading users" : "No users found"}
-                </Td>
+                </TableCell>
               </TableRow>
             )}
           </TableBody>

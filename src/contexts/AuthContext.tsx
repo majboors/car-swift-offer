@@ -27,8 +27,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!user) return false;
     
     try {
-      console.log("Checking admin status for user:", user.id);
+      console.log("Checking admin status for user:", user.id, user.email);
       
+      // Check if the user email is root@admin.com (primary admin)
+      if (user.email === 'root@admin.com') {
+        console.log("Root admin detected!");
+        setIsAdmin(true);
+        return true;
+      }
+      
+      // Also check the admins table for other admins
       const { data, error } = await supabase
         .from('admins')
         .select('*')
@@ -55,7 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log("Auth state changed:", event, session?.user?.id);
+        console.log("Auth state changed:", event, session?.user?.id, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         setUsername(session?.user?.user_metadata?.username ?? null);
@@ -76,7 +84,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // THEN check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log("Initial session check:", session?.user?.id);
+      console.log("Initial session check:", session?.user?.id, session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       setUsername(session?.user?.user_metadata?.username ?? null);
