@@ -59,10 +59,10 @@ export const AdminUsers = () => {
       // Create a set of admin user IDs for faster lookups
       const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
-      // Use the database functions to get all users via RPC
-      // Using type assertion to provide proper type information
-      const { data, error } = await supabase
-        .rpc('get_all_users') as { data: RpcUser[] | null, error: any };
+      // Get all users with proper type annotations
+      const { data, error } = await supabase.rpc<any[]>('get_all_users', {}, {
+        count: 'exact'
+      });
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -71,17 +71,15 @@ export const AdminUsers = () => {
         return;
       }
       
-      // Type assertion to ensure TypeScript understands the data structure
-      const userData = data as RpcUser[] | null;
-      
-      if (!userData) {
+      // Handle the case where data might be null
+      if (!data) {
         setUsers([]);
         setLoading(false);
         return;
       }
 
       // Transform the data to match our User interface
-      const enhancedUsers: User[] = userData.map(user => ({
+      const enhancedUsers: User[] = data.map(user => ({
         id: user.id,
         email: user.email,
         created_at: user.created_at,
@@ -101,19 +99,19 @@ export const AdminUsers = () => {
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
-        // Remove admin status with type assertion
-        const { error } = await supabase
-          .rpc('remove_admin', { 
-            user_id_input: userId 
-          }) as { data: null, error: any };
+        // Remove admin status
+        const { error } = await supabase.rpc(
+          'remove_admin', 
+          { user_id_input: userId }
+        );
 
         if (error) throw error;
       } else {
-        // Add admin status with type assertion
-        const { error } = await supabase
-          .rpc('add_admin', { 
-            user_id_input: userId 
-          }) as { data: null, error: any };
+        // Add admin status
+        const { error } = await supabase.rpc(
+          'add_admin', 
+          { user_id_input: userId }
+        );
 
         if (error) throw error;
       }
