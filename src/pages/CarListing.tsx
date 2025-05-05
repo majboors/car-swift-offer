@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,9 +7,6 @@ import TrustedBanner from '@/components/TrustedBanner';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { formatCurrency } from '@/lib/utils';
-import { Card, CardContent } from '@/components/ui/card';
-import { CheckCircle2 } from 'lucide-react';
 import CarDetails from '@/components/CarDetails';
 
 interface CarListing {
@@ -29,7 +27,7 @@ interface CarListing {
   contact_phone: string | null;
   images: string[];
   created_at: string;
-  features: string[] | null;
+  features: any; // Could be string[], object, or null
 }
 
 const CarListingPage = () => {
@@ -49,9 +47,33 @@ const CarListingPage = () => {
           .maybeSingle();
 
         if (error) throw error;
+        
         if (data) {
           console.log("Fetched listing data:", data);
-          setListing(data as CarListing);
+          
+          // Debug logging to check what data we have
+          console.log("Make:", data.make);
+          console.log("Model:", data.model);
+          console.log("Features:", data.features);
+          
+          // Make sure features is properly processed
+          let processedFeatures = data.features;
+          
+          // If features is a string, try to parse it as JSON
+          if (typeof data.features === 'string') {
+            try {
+              processedFeatures = JSON.parse(data.features);
+              console.log("Parsed features from string:", processedFeatures);
+            } catch (e) {
+              console.error("Error parsing features string:", e);
+              processedFeatures = null;
+            }
+          }
+          
+          setListing({
+            ...data,
+            features: processedFeatures
+          });
           
           // Initialize image load error array
           if (data.images && Array.isArray(data.images)) {

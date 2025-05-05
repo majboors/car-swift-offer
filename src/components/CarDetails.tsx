@@ -24,6 +24,37 @@ interface CarDetailsProps {
 }
 
 const CarDetails = ({ listing }: CarDetailsProps) => {
+  // Function to flatten features object into an array if needed
+  const getFeaturesList = () => {
+    if (!listing.features) return null;
+
+    // Check if features is already an array
+    if (Array.isArray(listing.features)) {
+      return listing.features;
+    }
+
+    // If features is an object of categories, flatten it
+    if (typeof listing.features === 'object') {
+      try {
+        // Try to convert from potential JSON format or object of categories
+        const featuresObj = typeof listing.features === 'string' 
+          ? JSON.parse(listing.features) 
+          : listing.features;
+        
+        // If it's an object with categories as keys and arrays as values
+        if (Object.keys(featuresObj).length > 0) {
+          return Object.values(featuresObj).flat();
+        }
+      } catch (e) {
+        console.error("Error parsing features:", e);
+      }
+    }
+
+    return null;
+  };
+
+  const featuresList = getFeaturesList();
+  
   return (
     <div>
       <h1 className="text-3xl font-bold mb-2">{listing.title}</h1>
@@ -79,13 +110,13 @@ const CarDetails = ({ listing }: CarDetailsProps) => {
         </div>
       </div>
 
-      {/* Features section */}
-      {listing.features && Array.isArray(listing.features) && listing.features.length > 0 && (
+      {/* Features section - Now with improved handling of various feature formats */}
+      {featuresList && featuresList.length > 0 && (
         <Card className="mb-6">
           <CardContent className="pt-6">
             <h2 className="text-xl font-bold mb-3">Features</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {listing.features.map((feature, index) => (
+              {featuresList.map((feature, index) => (
                 <div key={index} className="flex items-center">
                   <CheckCircle2 className="h-4 w-4 mr-2 text-green-500" />
                   <span>{feature}</span>
