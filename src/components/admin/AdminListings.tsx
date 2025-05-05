@@ -22,17 +22,20 @@ export const AdminListings: React.FC = () => {
     setFetchError(null);
 
     try {
-      // Use a properly typed RPC call
+      console.log("Fetching listings...");
+      // Call our RPC function to get all car listings with user emails
       const { data, error } = await supabase
         .rpc('get_car_listings_with_users');
 
       if (error) {
-        setFetchError("Failed to load listings data");
         console.error("Error fetching listings:", error);
+        setFetchError("Failed to load listings data");
         setLoading(false);
         return;
       }
 
+      console.log("Listings data:", data);
+      
       // Safety check if data is null or not an array
       if (!data || !Array.isArray(data)) {
         setListings([]);
@@ -40,6 +43,7 @@ export const AdminListings: React.FC = () => {
         return;
       }
 
+      // Map the returned data to match our Listing type
       const result: Listing[] = data.map(item => ({
         id: item.id,
         title: item.title,
