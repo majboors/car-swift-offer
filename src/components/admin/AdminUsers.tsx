@@ -64,9 +64,10 @@ export const AdminUsers = () => {
       // Create a set of admin user IDs for faster lookups
       const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
-      // Use the database functions to get all users via RPC without specifying parameters
+      // Use the database functions to get all users via RPC
+      // Fix: Use `any` type to bypass the constraint error
       const { data, error } = await supabase
-        .rpc<RpcUser[], EmptyParams>('get_all_users');
+        .rpc('get_all_users');
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -105,15 +106,15 @@ export const AdminUsers = () => {
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
-        // Call the remove_admin RPC function with proper type specification
+        // Fix: Use standard rpc call without type parameters
         const { error } = await supabase
-          .rpc<void, AdminUserParams>('remove_admin', { user_id_input: userId });
+          .rpc('remove_admin', { user_id_input: userId });
 
         if (error) throw error;
       } else {
-        // Call the add_admin RPC function with proper type specification
+        // Fix: Use standard rpc call without type parameters
         const { error } = await supabase
-          .rpc<void, AdminUserParams>('add_admin', { user_id_input: userId });
+          .rpc('add_admin', { user_id_input: userId });
 
         if (error) throw error;
       }
