@@ -254,15 +254,4 @@ export const AdminUsers = () => {
       </div>
     </div>
   );
-
-  // This function was referenced in the original code but wasn't shown in the snippet
-  function handleAddUserSuccess() {
-    setDialogOpen(false);
-    fetchUsers();
-  }
-
-  // This was referenced in the return but wasn't shown in the snippet
-  const filteredUsers = users.filter(user => 
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 };
