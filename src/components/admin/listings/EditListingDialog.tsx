@@ -13,8 +13,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Listing } from "@/types/admin";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
 
 interface EditListingDialogProps {
   isOpen: boolean;
@@ -27,18 +25,24 @@ interface EditListingDialogProps {
 const flattenFeatures = (features: any): string[] => {
   if (!features) return [];
   
-  // If features is already an array, return it
-  if (Array.isArray(features)) return features;
+  // If features is already an array, return it as string array
+  if (Array.isArray(features)) {
+    return features.map(item => String(item));
+  }
   
   // If features is a string, try to parse it
   if (typeof features === 'string') {
     try {
       const parsed = JSON.parse(features);
-      if (Array.isArray(parsed)) return parsed;
+      if (Array.isArray(parsed)) {
+        return parsed.map(item => String(item));
+      }
       
       // If it's an object with categories
       if (typeof parsed === 'object') {
-        return Object.values(parsed).flat();
+        return Object.values(parsed)
+          .flat()
+          .map(item => String(item));
       }
     } catch (e) {
       return [];
@@ -47,7 +51,8 @@ const flattenFeatures = (features: any): string[] => {
   
   // If features is an object with categories
   if (typeof features === 'object') {
-    return Object.values(features).flat();
+    const allFeatures = Object.values(features).flat();
+    return allFeatures.map(item => String(item));
   }
   
   return [];

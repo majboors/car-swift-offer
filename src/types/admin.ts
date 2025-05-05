@@ -22,6 +22,15 @@ export interface Listing {
   features?: any;
 }
 
+// Add User interface for AdminUsers component
+export interface User {
+  id: string;
+  email: string;
+  created_at: string;
+  last_sign_in_at: string | null;
+  is_admin: boolean;
+}
+
 // Parameter types for each RPC function
 export interface AdminUserIdParams {
   user_id_input: string;
