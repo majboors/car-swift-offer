@@ -7,7 +7,7 @@ import { EditListingDialog } from "./listings/EditListingDialog";
 import { ErrorAlert } from "./listings/ErrorAlert";
 import { ListingTable } from "./listings/ListingTable";
 import { ListingTableHeader } from "./listings/ListingTableHeader";
-import { Listing, EmptyParams } from "@/types/admin";
+import { Listing } from "@/types/admin";
 
 export const AdminListings: React.FC = () => {
   const [listings, setListings] = useState<Listing[]>([]);
@@ -24,7 +24,7 @@ export const AdminListings: React.FC = () => {
     try {
       // Use a properly typed RPC call
       const { data, error } = await supabase
-        .rpc<EmptyParams, Listing[]>('get_car_listings_with_users');
+        .rpc('get_car_listings_with_users');
 
       if (error) {
         setFetchError("Failed to load listings data");
@@ -33,7 +33,14 @@ export const AdminListings: React.FC = () => {
         return;
       }
 
-      const result: Listing[] = (data || []).map(item => ({
+      // Safety check if data is null or not an array
+      if (!data || !Array.isArray(data)) {
+        setListings([]);
+        setLoading(false);
+        return;
+      }
+
+      const result: Listing[] = data.map(item => ({
         id: item.id,
         title: item.title,
         make: item.make,

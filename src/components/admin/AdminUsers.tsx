@@ -51,9 +51,9 @@ export const AdminUsers: React.FC = () => {
       setLoading(true);
       setFetchError(null);
       
-      // Call the get_all_users RPC function we just created
+      // Call the get_all_users RPC function we created
       const { data, error } = await supabase
-        .rpc<Record<string, never>, UserFromRPC[]>('get_all_users');
+        .rpc('get_all_users');
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -116,14 +116,18 @@ export const AdminUsers: React.FC = () => {
         }
         
         // Remove admin status
-        const params: AdminUserIdParams = { user_id_input: userId };
-        const { error } = await supabase.rpc<AdminUserIdParams, void>('remove_admin', params);
+        const { error } = await supabase.rpc(
+          'remove_admin',
+          { user_id_input: userId }
+        );
 
         if (error) throw error;
       } else {
         // Add admin status
-        const params: AdminUserIdParams = { user_id_input: userId };
-        const { error } = await supabase.rpc<AdminUserIdParams, void>('add_admin', params);
+        const { error } = await supabase.rpc(
+          'add_admin',
+          { user_id_input: userId }
+        );
 
         if (error) throw error;
       }
