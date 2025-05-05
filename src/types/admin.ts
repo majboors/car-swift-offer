@@ -19,8 +19,8 @@ export interface Listing {
   location?: string | null;
   contact_email?: string | null;
   contact_phone?: string | null;
-  features?: any;
-  images?: string[] | null;
+  features?: string[];
+  images?: string[];
 }
 
 // Add User interface for AdminUsers component

@@ -96,7 +96,7 @@ const Admin = () => {
       });
       
       const listingsByMake = Object.entries(makeCount)
-        .map(([name, count]) => ({ name, count }))
+        .map(([name, value]) => ({ name, count: value }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 5);
       
@@ -108,7 +108,7 @@ const Admin = () => {
       });
       
       const listingsByBodyType = Object.entries(bodyTypeCount)
-        .map(([name, count]) => ({ name, count }));
+        .map(([name, value]) => ({ name, count: value }));
       
       // Process listings by month
       const monthCount = {};
@@ -122,7 +122,7 @@ const Admin = () => {
       
       // Convert to array and sort chronologically
       const listingsByMonth = Object.entries(monthCount)
-        .map(([name, count]) => ({ name, count }))
+        .map(([name, value]) => ({ name, count: value }))
         .sort((a, b) => {
           const [aMonth, aYear] = a.name.split(' ');
           const [bMonth, bYear] = b.name.split(' ');

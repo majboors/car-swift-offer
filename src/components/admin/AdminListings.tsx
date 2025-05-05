@@ -58,16 +58,16 @@ export const AdminListings: React.FC = () => {
         user_id: item.user_id || '',
         user_email: 'User ID: ' + item.user_id.substring(0, 8) + '...',
         // Additional fields needed for the expanded edit dialog
-        mileage: item.mileage,
-        color: item.color,
-        transmission: item.transmission,
-        fuel_type: item.fuel_type,
-        body_type: item.body_type,
-        location: item.location,
-        contact_email: item.contact_email,
-        contact_phone: item.contact_phone,
-        features: item.features,
-        images: item.images
+        mileage: item.mileage || 0,
+        color: item.color || '',
+        transmission: item.transmission || '',
+        fuel_type: item.fuel_type || '',
+        body_type: item.body_type || '',
+        location: item.location || '',
+        contact_email: item.contact_email || '',
+        contact_phone: item.contact_phone || '',
+        features: Array.isArray(item.features) ? item.features : [],
+        images: Array.isArray(item.images) ? item.images : []
       }));
 
       setListings(result);
