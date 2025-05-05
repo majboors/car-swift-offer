@@ -57,11 +57,12 @@ export const AdminUsers = () => {
       }
 
       // Create a set of admin user IDs for faster lookups
-      const adminIds = new Set((admins || []).map(admin => admin.user_id));
+      const adminIds = new Set(admins ? admins.map(admin => admin.user_id) : []);
       
       // Get all users using proper type parameters for the RPC call
-      // Important: Pass empty object as parameter and specify the return type
-      const { data, error } = await supabase.rpc<RpcUser[]>('get_all_users', {});
+      // Specify both parameter and return types for the RPC call
+      const { data, error } = await supabase
+        .rpc<RpcUser[], EmptyParams>('get_all_users', {});
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -100,15 +101,17 @@ export const AdminUsers = () => {
       if (currentStatus) {
         // Remove admin status
         const params: AdminUserIdParams = { user_id_input: userId };
-        // Specify void as the return type since the function doesn't return data
-        const { error } = await supabase.rpc<void>('remove_admin', params);
+        // Specify both parameter and return types for the RPC call
+        const { error } = await supabase
+          .rpc<void, AdminUserIdParams>('remove_admin', params);
 
         if (error) throw error;
       } else {
         // Add admin status
         const params: AdminUserIdParams = { user_id_input: userId };
-        // Specify void as the return type since the function doesn't return data
-        const { error } = await supabase.rpc<void>('add_admin', params);
+        // Specify both parameter and return types for the RPC call
+        const { error } = await supabase
+          .rpc<void, AdminUserIdParams>('add_admin', params);
 
         if (error) throw error;
       }
