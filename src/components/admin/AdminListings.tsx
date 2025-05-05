@@ -6,7 +6,7 @@ import { EditListingDialog } from "./listings/EditListingDialog";
 import { ErrorAlert } from "./listings/ErrorAlert";
 import { ListingTable } from "./listings/ListingTable";
 import { ListingTableHeader } from "./listings/ListingTableHeader";
-import { Listing, RpcListing, EmptyParams } from "@/types/admin";
+import { Listing, EmptyParams } from "@/types/admin";
 
 export const AdminListings: React.FC = () => {
   const [listings, setListings] = useState<Listing[]>([]);
@@ -20,28 +20,38 @@ export const AdminListings: React.FC = () => {
     setLoading(true);
     setFetchError(null);
 
-    const { data, error } = await supabase
-      .rpc<RpcListing[], EmptyParams>("get_car_listings_with_users", {});
+    try {
+      // Use a properly typed RPC call
+      const { data, error } = await supabase
+        .rpc('get_car_listings_with_users');
 
-    if (error) {
-      setFetchError("Failed to load listings data");
+      if (error) {
+        setFetchError("Failed to load listings data");
+        console.error("Error fetching listings:", error);
+        setLoading(false);
+        return;
+      }
+
+      const result: Listing[] = (data || []).map(item => ({
+        id: item.id,
+        title: item.title,
+        make: item.make,
+        model: item.model,
+        price: item.price,
+        description: item.description,
+        created_at: item.created_at,
+        year: item.year,
+        user_id: item.user_id,
+        user_email: item.user_email
+      }));
+
+      setListings(result);
+    } catch (err) {
+      console.error("Unexpected error fetching listings:", err);
+      setFetchError("An unexpected error occurred");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const result: Listing[] = (data || []).map(item => ({
-      id: item.id,
-      title: item.title,
-      make: item.make,
-      model: item.model,
-      price: item.price,
-      description: item.description,
-      created_at: item.created_at,
-      // map other fields as needed
-    }));
-
-    setListings(result);
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -113,9 +123,9 @@ export const AdminListings: React.FC = () => {
   };
 
   const filteredListings = listings.filter(l =>
-    l.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    l.make.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    l.model.toLowerCase().includes(searchTerm.toLowerCase())
+    l.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    l.make?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    l.model?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (

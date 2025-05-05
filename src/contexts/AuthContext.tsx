@@ -27,6 +27,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!user) return false;
     
     try {
+      console.log("Checking admin status for user:", user.id);
+      
       const { data, error } = await supabase
         .from('admins')
         .select('*')
@@ -39,6 +41,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       
       const isUserAdmin = !!data;
+      console.log("Admin check result:", isUserAdmin, "data:", data);
+      
       setIsAdmin(isUserAdmin);
       return isUserAdmin;
     } catch (error) {
