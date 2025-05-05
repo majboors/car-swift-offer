@@ -66,8 +66,9 @@ export const AdminListings: React.FC = () => {
         location: item.location || '',
         contact_email: item.contact_email || '',
         contact_phone: item.contact_phone || '',
-        features: Array.isArray(item.features) ? item.features : [],
-        images: Array.isArray(item.images) ? item.images : []
+        // Convert features and images to string arrays or empty arrays if null
+        features: Array.isArray(item.features) ? item.features.map(f => String(f)) : [],
+        images: Array.isArray(item.images) ? item.images.map(img => String(img)) : []
       }));
 
       setListings(result);
