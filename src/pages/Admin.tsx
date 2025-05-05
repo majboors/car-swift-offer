@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -127,11 +126,11 @@ const Admin = () => {
           const [aMonth, aYear] = a.name.split(' ');
           const [bMonth, bYear] = b.name.split(' ');
           
-          // Compare years first
+          // Compare years first - using parseInt to ensure numeric comparison
           const yearDiff = parseInt(aYear) - parseInt(bYear);
           if (yearDiff !== 0) return yearDiff;
           
-          // If years are the same, compare months
+          // If years are the same, compare months by their index in the months array
           return months.indexOf(aMonth) - months.indexOf(bMonth);
         });
       
@@ -219,4 +218,3 @@ const Admin = () => {
 };
 
 export default Admin;
-
