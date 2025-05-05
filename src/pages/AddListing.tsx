@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -242,12 +243,27 @@ const AddListing = () => {
       setActiveTab("details");
       return;
     }
+
+    // Validate required fields
+    if (!formData.make || !formData.model) {
+      toast({
+        title: "Required fields missing",
+        description: "Make and Model are required fields.",
+        variant: "destructive",
+      });
+      setActiveTab("details");
+      return;
+    }
     
     setLoading(true);
     
     try {
+      console.log("Form data being submitted:", formData);
+      console.log("Selected features:", selectedFeatures);
+      
       // Upload images first
       const imageUrls = await uploadImages();
+      console.log("Uploaded image URLs:", imageUrls);
       
       // Prepare features data
       const featuresData = Object.entries(selectedFeatures).reduce((acc, [category, features]) => {
@@ -257,10 +273,12 @@ const AddListing = () => {
         return acc;
       }, {});
       
+      console.log("Processed features data:", featuresData);
+      
       // Format the data
       const listingData = {
         user_id: user.id,
-        title: formData.car_name || formData.title, // Use car_name as title if available
+        title: formData.car_name || formData.title || `${formData.year} ${formData.make} ${formData.model}`, // Ensure title isn't empty
         car_name: formData.car_name,
         make: formData.make,
         model: formData.model,
@@ -278,6 +296,8 @@ const AddListing = () => {
         features: Object.keys(featuresData).length > 0 ? featuresData : null,
         images: imageUrls,
       };
+
+      console.log("Final listing data to be inserted:", listingData);
       
       // Insert the listing
       const { data, error } = await supabase
@@ -287,6 +307,8 @@ const AddListing = () => {
         .single();
         
       if (error) throw error;
+
+      console.log("Listing created successfully:", data);
       
       toast({
         title: "Success!",
@@ -295,6 +317,7 @@ const AddListing = () => {
       
       navigate(`/listing/${data.id}`);
     } catch (error: any) {
+      console.error("Error adding listing:", error);
       toast({
         title: "Error adding listing",
         description: error.message,
@@ -383,6 +406,8 @@ const AddListing = () => {
       contact_phone: '0412345678',
     });
     
+    console.log("Test data populated:", formData);
+    
     // Select some features for testing
     setSelectedFeatures({
       'Audio, Visual & Communication': ['Bluetooth', 'Navigation System', 'Smartphone Integration', 'USB Port', 'Apple CarPlay', 'Android Auto'],
@@ -391,6 +416,8 @@ const AddListing = () => {
       'Safety & Security': ['ABS', 'Airbags', 'Electronic Stability Control', 'Lane Departure Warning', 'Parking Sensors', 'Reversing Camera'],
       'Seating': ['Electric Seats', 'Heated Seats', 'Leather Seats']
     });
+    
+    console.log("Test features populated:", selectedFeatures);
   };
   
   // Function to handle the test submission
@@ -408,23 +435,16 @@ const AddListing = () => {
     setLoading(true);
     
     try {
-      // Populate test data
+      // Populate test data first
       populateTestData();
       
       // Fetch placeholder images
       const testImages = await fetchPlaceholderImages();
-      
-      // Make sure price is set properly
-      if (!formData.price || parseFloat(formData.price) <= 0) {
-        // If price isn't set in populateTestData, set a default price
-        setFormData(prev => ({
-          ...prev,
-          price: '49990'
-        }));
-      }
+      console.log("Test images fetched:", testImages.length);
       
       // Upload images
       const imageUrls = await uploadImages(testImages);
+      console.log("Test images uploaded:", imageUrls);
       
       // Prepare features data
       const featuresData = Object.entries(selectedFeatures).reduce((acc, [category, features]) => {
@@ -434,27 +454,31 @@ const AddListing = () => {
         return acc;
       }, {});
       
-      // Format the listing data with guaranteed price value
+      console.log("Test features data prepared:", featuresData);
+      
+      // Format the listing data
       const listingData = {
         user_id: user.id,
-        title: formData.title || formData.car_name,
-        car_name: formData.car_name,
-        make: formData.make,
-        model: formData.model,
-        year: parseInt(formData.year.toString()),
-        price: 49990, // Hard-coded price to ensure it's never null
-        mileage: formData.mileage ? parseInt(formData.mileage) : null,
-        color: formData.color || null,
-        transmission: formData.transmission || null,
-        fuel_type: formData.fuel_type || null,
-        body_type: formData.body_type || null,
-        description: formData.description || null,
-        location: formData.location || null,
-        contact_email: formData.contact_email || null,
-        contact_phone: formData.contact_phone || null,
-        features: Object.keys(featuresData).length > 0 ? featuresData : null,
+        title: '2022 Tesla Model 3 Long Range - Excellent Condition',
+        car_name: '2022 Tesla Model 3 Long Range',
+        make: 'Tesla',
+        model: 'Model 3',
+        year: 2022,
+        price: 49990, 
+        mileage: 15000,
+        color: 'Midnight Silver',
+        transmission: 'Automatic',
+        fuel_type: 'Electric',
+        body_type: 'Sedan',
+        description: 'This Tesla Model 3 Long Range is in excellent condition with only 15,000 km. Features include Autopilot, premium interior, and glass roof. Full service history available. Car is located in Sydney and available for inspection.',
+        location: 'Sydney, NSW',
+        contact_email: user?.email || 'test@example.com',
+        contact_phone: '0412345678',
+        features: featuresData,
         images: imageUrls,
       };
+      
+      console.log("Final test listing data:", listingData);
       
       // Insert the listing
       const { data, error } = await supabase
@@ -463,7 +487,12 @@ const AddListing = () => {
         .select('id')
         .single();
         
-      if (error) throw error;
+      if (error) {
+        console.error("Error inserting test listing:", error);
+        throw error;
+      }
+      
+      console.log("Test listing created successfully:", data);
       
       toast({
         title: "Test Listing Created!",
@@ -472,6 +501,7 @@ const AddListing = () => {
       
       navigate(`/listing/${data.id}`);
     } catch (error: any) {
+      console.error("Error adding test listing:", error);
       toast({
         title: "Error adding test listing",
         description: error.message,

@@ -79,11 +79,18 @@ const CarListingPage = () => {
                 : []
               : [];
           
-          setListing({
+          const processedListing: CarListing = {
             ...data,
             features: processedFeatures,
-            images: processedImages
-          } as CarListing);
+            images: processedImages,
+            make: data.make || '',
+            model: data.model || '',
+            title: data.title || `${data.year || ''} ${data.make || ''} ${data.model || ''}`.trim(),
+            year: data.year || new Date().getFullYear()
+          };
+          
+          console.log("Processed listing for display:", processedListing);
+          setListing(processedListing);
           
           // Initialize image load error array
           if (processedImages.length > 0) {
