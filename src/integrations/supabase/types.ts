@@ -104,14 +104,54 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_admin: {
+        Args: { user_id_input: string }
+        Returns: undefined
+      }
       get_all_users: {
         Args: Record<PropertyKey, never>
         Returns: {
           id: string
           email: string
           created_at: string
-          username: string
+          last_sign_in_at: string
+          is_admin: boolean
         }[]
+      }
+      get_car_listings_with_users: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          user_id: string
+          year: number
+          price: number
+          mileage: number
+          images: Json
+          created_at: string
+          updated_at: string
+          features: Json
+          transmission: string
+          fuel_type: string
+          body_type: string
+          description: string
+          location: string
+          title: string
+          make: string
+          model: string
+          contact_email: string
+          contact_phone: string
+          car_name: string
+          color: string
+          user_email: string
+        }[]
+      }
+      is_admin: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
+      remove_admin: {
+        Args: { user_id_input: string }
+        Returns: undefined
       }
     }
     Enums: {

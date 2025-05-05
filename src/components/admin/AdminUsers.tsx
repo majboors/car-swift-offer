@@ -1,4 +1,3 @@
-
 // src/components/admin/AdminUsers.tsx
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,14 +26,6 @@ import {
   AdminUserIdParams
 } from "@/types/admin";
 
-interface UserFromRPC {
-  id: string;
-  email: string;
-  created_at: string;
-  username: string | null;
-  last_sign_in_at?: string | null;
-}
-
 export const AdminUsers: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,7 +42,7 @@ export const AdminUsers: React.FC = () => {
       setLoading(true);
       setFetchError(null);
       
-      // Call the get_all_users RPC function we created
+      // Call the get_all_users RPC function with our updated schema
       const { data, error } = await supabase
         .rpc('get_all_users');
 
@@ -64,18 +55,6 @@ export const AdminUsers: React.FC = () => {
 
       console.log("Users data:", data);
       
-      // Get all admin users from the public.admins table to check admin status
-      const { data: admins, error: adminsError } = await supabase
-        .from('admins')
-        .select('user_id');
-
-      if (adminsError) {
-        console.error("Error fetching admins:", adminsError);
-      }
-
-      // Create a set of admin user IDs for faster lookups
-      const adminIds = new Set((admins || []).map(admin => admin.user_id));
-      
       // Handle the case where data might be null
       if (!data || !Array.isArray(data)) {
         setUsers([]);
@@ -83,13 +62,13 @@ export const AdminUsers: React.FC = () => {
         return;
       }
 
-      // Transform the data to match our User interface
+      // Our updated function now returns is_admin directly
       const enhancedUsers: User[] = data.map(user => ({
         id: user.id,
         email: user.email,
         created_at: user.created_at,
         last_sign_in_at: user.last_sign_in_at || null,
-        is_admin: user.email === 'root@admin.com' || adminIds.has(user.id)
+        is_admin: user.is_admin || user.email === 'root@admin.com'
       }));
 
       setUsers(enhancedUsers);
