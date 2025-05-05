@@ -23,9 +23,34 @@ export const AdminListings: React.FC = () => {
 
     try {
       console.log("Fetching listings...");
-      // Call our RPC function to get all car listings with user emails
+      
+      // Use a direct query to fetch the listings to avoid the RPC function ambiguity
       const { data, error } = await supabase
-        .rpc('get_car_listings_with_users');
+        .from('car_listings')
+        .select(`
+          id, 
+          user_id,
+          year,
+          price,
+          mileage,
+          images,
+          created_at,
+          updated_at,
+          features,
+          transmission,
+          fuel_type,
+          body_type,
+          description,
+          location,
+          title,
+          make,
+          model,
+          contact_email,
+          contact_phone,
+          car_name,
+          color,
+          auth.users!car_listings_user_id_fkey (email)
+        `);
 
       if (error) {
         console.error("Error fetching listings:", error);
@@ -44,18 +69,23 @@ export const AdminListings: React.FC = () => {
       }
 
       // Map the returned data to match our Listing type
-      const result: Listing[] = data.map(item => ({
-        id: item.id,
-        title: item.title,
-        make: item.make,
-        model: item.model,
-        price: item.price,
-        description: item.description,
-        created_at: item.created_at,
-        year: item.year,
-        user_id: item.user_id,
-        user_email: item.user_email
-      }));
+      const result: Listing[] = data.map(item => {
+        // Handle the nested user email from the join
+        const userEmail = item['auth.users'] ? item['auth.users'].email : 'Unknown';
+        
+        return {
+          id: item.id,
+          title: item.title || '',
+          make: item.make || '',
+          model: item.model || '',
+          price: item.price || 0,
+          description: item.description || '',
+          created_at: item.created_at || '',
+          year: item.year || 0,
+          user_id: item.user_id || '',
+          user_email: userEmail
+        };
+      });
 
       setListings(result);
     } catch (err) {
