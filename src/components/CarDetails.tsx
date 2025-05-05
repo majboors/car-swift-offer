@@ -19,7 +19,7 @@ interface CarDetailsProps {
     location: string | null;
     contact_email: string | null;
     contact_phone: string | null;
-    features: string[] | null;
+    features: any; // Could be string[], object, or null
   }
 }
 
@@ -116,7 +116,7 @@ const CarDetails = ({ listing }: CarDetailsProps) => {
           <CardContent className="pt-6">
             <h2 className="text-xl font-bold mb-3">Features</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {featuresList.map((feature, index) => (
+              {featuresList.map((feature: string, index: number) => (
                 <div key={index} className="flex items-center">
                   <CheckCircle2 className="h-4 w-4 mr-2 text-green-500" />
                   <span>{feature}</span>

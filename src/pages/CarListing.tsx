@@ -70,14 +70,24 @@ const CarListingPage = () => {
             }
           }
           
+          // Ensure images is always an array
+          const processedImages = Array.isArray(data.images) 
+            ? data.images 
+            : data.images 
+              ? Array.isArray(JSON.parse(String(data.images))) 
+                ? JSON.parse(String(data.images))
+                : []
+              : [];
+          
           setListing({
             ...data,
-            features: processedFeatures
-          });
+            features: processedFeatures,
+            images: processedImages
+          } as CarListing);
           
           // Initialize image load error array
-          if (data.images && Array.isArray(data.images)) {
-            setImageLoadErrors(new Array(data.images.length).fill(false));
+          if (processedImages.length > 0) {
+            setImageLoadErrors(new Array(processedImages.length).fill(false));
           }
         } else {
           toast({
