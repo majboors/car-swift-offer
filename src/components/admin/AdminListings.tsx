@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -26,8 +25,9 @@ export const AdminListings = () => {
       setFetchError(null);
       
       // Use the database function to get all listings with user emails
+      // Specify RpcListing[] as the return type
       const { data, error: listingsError } = await supabase
-        .rpc('get_car_listings_with_users' as never);
+        .rpc<RpcListing[]>('get_car_listings_with_users', {});
 
       if (listingsError) {
         console.error("Error fetching listings:", listingsError);
@@ -37,8 +37,7 @@ export const AdminListings = () => {
       }
       
       // Type assertion to ensure TypeScript understands the data structure
-      const listingsData = data as RpcListing[] | null;
-      setListings(listingsData || []);
+      setListings(data || []);
     } catch (error) {
       console.error("Error in fetchListings:", error);
       setFetchError("An unexpected error occurred");
@@ -58,20 +57,21 @@ export const AdminListings = () => {
     }
 
     try {
-      const { error } = await supabase
+      supabase
         .from("car_listings")
         .delete()
-        .eq("id", id);
+        .eq("id", id)
+        .then(({ error }) => {
+          if (error) {
+            throw error;
+          }
 
-      if (error) {
-        throw error;
-      }
-
-      setListings(listings.filter(listing => listing.id !== id));
-      toast({
-        title: "Success",
-        description: "Listing deleted successfully",
-      });
+          setListings(listings.filter(listing => listing.id !== id));
+          toast({
+            title: "Success",
+            description: "Listing deleted successfully",
+          });
+        });
     } catch (error: any) {
       console.error("Error deleting listing:", error);
       toast({

@@ -28,6 +28,20 @@ export interface RpcUser {
   [key: string]: any;
 }
 
+export interface RpcListing {
+  id: string;
+  title: string;
+  make: string;
+  model: string;
+  year: number;
+  price: number;
+  created_at: string;
+  user_id: string;
+  user_email?: string;
+  description?: string;
+  [key: string]: any;
+}
+
 // Parameter types for each RPC function
 export type AdminUserIdParams = {
   user_id_input: string;

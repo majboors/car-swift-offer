@@ -24,7 +24,8 @@ import {
 import { 
   User, 
   AdminUserIdParams,
-  EmptyParams
+  EmptyParams,
+  RpcUser
 } from "@/types/admin";
 
 export const AdminUsers = () => {
@@ -59,7 +60,8 @@ export const AdminUsers = () => {
       const adminIds = new Set((admins || []).map(admin => admin.user_id));
       
       // Get all users using proper type parameters for the RPC call
-      const { data, error } = await supabase.rpc('get_all_users');
+      // Important: Pass empty object as parameter and specify the return type
+      const { data, error } = await supabase.rpc<RpcUser[]>('get_all_users', {});
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -98,13 +100,15 @@ export const AdminUsers = () => {
       if (currentStatus) {
         // Remove admin status
         const params: AdminUserIdParams = { user_id_input: userId };
-        const { error } = await supabase.rpc('remove_admin', params);
+        // Specify void as the return type since the function doesn't return data
+        const { error } = await supabase.rpc<void>('remove_admin', params);
 
         if (error) throw error;
       } else {
         // Add admin status
         const params: AdminUserIdParams = { user_id_input: userId };
-        const { error } = await supabase.rpc('add_admin', params);
+        // Specify void as the return type since the function doesn't return data
+        const { error } = await supabase.rpc<void>('add_admin', params);
 
         if (error) throw error;
       }
@@ -249,5 +253,16 @@ export const AdminUsers = () => {
         </Table>
       </div>
     </div>
+  );
+
+  // This function was referenced in the original code but wasn't shown in the snippet
+  function handleAddUserSuccess() {
+    setDialogOpen(false);
+    fetchUsers();
+  }
+
+  // This was referenced in the return but wasn't shown in the snippet
+  const filteredUsers = users.filter(user => 
+    user.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 };
