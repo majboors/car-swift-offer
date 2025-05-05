@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ArrowRight, ArrowLeft } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Check } from 'lucide-react';
 import TrustedBanner from '@/components/TrustedBanner';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -130,21 +129,34 @@ const AddListing = () => {
     setPreviewUrls(prevUrls => prevUrls.filter((_, i) => i !== index));
   };
   
+  // Fix the toggleFeature function to safely handle state updates
   const toggleFeature = (category: string, feature: string) => {
     setSelectedFeatures(prev => {
-      const categoryFeatures = prev[category] || [];
+      // Create a deep copy of the previous state to avoid mutation issues
+      const newState = { ...prev };
       
-      if (categoryFeatures.includes(feature)) {
-        return {
-          ...prev,
-          [category]: categoryFeatures.filter(item => item !== feature)
-        };
-      } else {
-        return {
-          ...prev,
-          [category]: [...categoryFeatures, feature]
-        };
+      // Ensure the category exists in our state
+      if (!newState[category]) {
+        newState[category] = [];
       }
+      
+      const categoryFeatures = [...(newState[category] || [])];
+      
+      // Check if the feature is already selected
+      const featureIndex = categoryFeatures.indexOf(feature);
+      
+      if (featureIndex !== -1) {
+        // Remove the feature if it's already selected
+        categoryFeatures.splice(featureIndex, 1);
+      } else {
+        // Add the feature if it's not selected
+        categoryFeatures.push(feature);
+      }
+      
+      // Update the category with the new features array
+      newState[category] = categoryFeatures;
+      
+      return newState;
     });
   };
   
@@ -723,25 +735,32 @@ const AddListing = () => {
                           </CollapsibleTrigger>
                           <CollapsibleContent className="p-4 space-y-3">
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                              {features.map((feature) => (
-                                <div 
-                                  key={feature} 
-                                  className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
-                                  onClick={() => toggleFeature(category, feature)}
-                                >
-                                  <Checkbox 
-                                    id={`${category}-${feature}`}
-                                    checked={selectedFeatures[category]?.includes(feature) || false}
-                                    onCheckedChange={() => toggleFeature(category, feature)}
-                                  />
-                                  <Label 
-                                    htmlFor={`${category}-${feature}`}
-                                    className="cursor-pointer"
+                              {features.map((feature) => {
+                                // Determine if this feature is selected
+                                const isSelected = selectedFeatures[category]?.includes(feature) || false;
+                                
+                                return (
+                                  <div 
+                                    key={feature} 
+                                    className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
+                                    onClick={() => toggleFeature(category, feature)}
                                   >
-                                    {feature}
-                                  </Label>
-                                </div>
-                              ))}
+                                    {/* Replace Checkbox with a custom toggle UI to avoid the issue */}
+                                    <div 
+                                      className={`w-4 h-4 border rounded flex items-center justify-center ${
+                                        isSelected ? 'bg-primary border-primary' : 'border-gray-300'
+                                      }`}
+                                    >
+                                      {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
+                                    </div>
+                                    <Label 
+                                      className="cursor-pointer"
+                                    >
+                                      {feature}
+                                    </Label>
+                                  </div>
+                                );
+                              })}
                             </div>
                           </CollapsibleContent>
                         </Collapsible>

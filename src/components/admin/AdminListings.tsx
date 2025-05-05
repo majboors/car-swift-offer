@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -44,24 +43,15 @@ export const AdminListings: React.FC = () => {
       // Get all unique user IDs from the listings
       const userIds = [...new Set(listingsData.map(listing => listing.user_id))];
       
-      // Fetch user emails in a separate query
-      const { data: usersData, error: usersError } = await supabase
-        .from('users')
-        .select('id, email')
-        .in('id', userIds);
+      // Fetch user emails from auth.users using a stored procedure or a direct query to auth schema
+      // This will require admin privileges or a server-side function
       
-      // Create a map of user IDs to emails
+      // For now, we'll use a simplified approach without the join
+      // In a production environment, you should use a server-side function to securely fetch this data
+      
       const userEmailMap = new Map();
       
-      if (usersData) {
-        usersData.forEach(user => {
-          userEmailMap.set(user.id, user.email);
-        });
-      } else if (usersError) {
-        console.error("Error fetching user emails:", usersError);
-      }
-
-      // Map the listings data to include user emails
+      // Map the listings data without user emails for now
       const result: Listing[] = listingsData.map(item => ({
         id: item.id,
         title: item.title || '',
@@ -72,7 +62,7 @@ export const AdminListings: React.FC = () => {
         created_at: item.created_at || '',
         year: item.year || 0,
         user_id: item.user_id || '',
-        user_email: userEmailMap.get(item.user_id) || 'Unknown'
+        user_email: 'User ID: ' + item.user_id.substring(0, 8) + '...' // Display partial user ID as placeholder
       }));
 
       setListings(result);
