@@ -66,7 +66,7 @@ export const AdminUsers = () => {
       
       // Use the database functions to get all users via RPC without specifying parameters
       const { data, error } = await supabase
-        .rpc<RpcUser[]>('get_all_users');
+        .rpc<RpcUser[], EmptyParams>('get_all_users');
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -107,13 +107,13 @@ export const AdminUsers = () => {
       if (currentStatus) {
         // Call the remove_admin RPC function with proper type specification
         const { error } = await supabase
-          .rpc<null, AdminUserParams>('remove_admin', { user_id_input: userId });
+          .rpc<void, AdminUserParams>('remove_admin', { user_id_input: userId });
 
         if (error) throw error;
       } else {
         // Call the add_admin RPC function with proper type specification
         const { error } = await supabase
-          .rpc<null, AdminUserParams>('add_admin', { user_id_input: userId });
+          .rpc<void, AdminUserParams>('add_admin', { user_id_input: userId });
 
         if (error) throw error;
       }
