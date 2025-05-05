@@ -1,5 +1,5 @@
-
-import { useState, useEffect } from "react";
+// src/components/admin/AdminUsers.tsx
+import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,127 +10,103 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableHead as Th,
+  TableCell as Td,
 } from "@/components/ui/table";
 import { toast } from "@/components/ui/use-toast";
 import { Loader } from "lucide-react";
 import { AddUserForm } from "./AddUserForm";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
 } from "@/components/ui/dialog";
-import { 
-  User, 
+import {
+  User,
   AdminUserIdParams,
   EmptyParams,
   RpcUser
 } from "@/types/admin";
 
-export const AdminUsers = () => {
+export const AdminUsers: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    setFetchError(null);
+
+    const { data: admins, error: adminsError } = await supabase
+      .from<{ user_id: string }>("admins")
+      .select("user_id");
+
+    if (adminsError) {
+      setFetchError("Failed to load admin data");
+      setLoading(false);
+      return;
+    }
+
+    const adminIds = new Set<string>(admins.map(a => a.user_id));
+
+    const { data, error } = await supabase
+      .rpc<RpcUser[], EmptyParams>("get_all_users", {});
+
+    if (error) {
+      setFetchError("Failed to load users data");
+      setLoading(false);
+      return;
+    }
+
+    if (!data) {
+      setUsers([]);
+      setLoading(false);
+      return;
+    }
+
+    const enhancedUsers: User[] = data.map(u => ({
+      id: u.id,
+      email: u.email,
+      created_at: u.created_at,
+      last_sign_in_at: u.last_sign_in_at,
+      is_admin: adminIds.has(u.id)
+    }));
+
+    setUsers(enhancedUsers);
+    setLoading(false);
+  };
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      setFetchError(null);
-      
-      // Get all admin users from the public.admins table
-      const { data: admins, error: adminsError } = await supabase
-        .from('admins')
-        .select('user_id');
-
-      if (adminsError) {
-        console.error("Error fetching admins:", adminsError);
-        setFetchError("Failed to load admin data");
-        setLoading(false);
-        return;
-      }
-
-      // Create a set of admin user IDs for faster lookups
-      const adminIds = new Set(admins ? admins.map(admin => admin.user_id) : []);
-      
-      // Get all users using proper type parameters for the RPC call
-      // Specify both parameter and return types for the RPC call
-      const { data, error } = await supabase
-        .rpc<RpcUser[], EmptyParams>('get_all_users', {});
-
-      if (error) {
-        console.error("Error fetching users:", error);
-        setFetchError("Failed to load users data");
-        setLoading(false);
-        return;
-      }
-      
-      // Handle the case where data might be null
-      if (!data || !Array.isArray(data)) {
-        setUsers([]);
-        setLoading(false);
-        return;
-      }
-
-      // Transform the data to match our User interface
-      const enhancedUsers: User[] = data.map(user => ({
-        id: user.id,
-        email: user.email,
-        created_at: user.created_at,
-        last_sign_in_at: user.last_sign_in_at,
-        is_admin: adminIds.has(user.id)
-      }));
-
-      setUsers(enhancedUsers);
-    } catch (error) {
-      console.error("Error in fetchUsers:", error);
-      setFetchError("An unexpected error occurred");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
-        // Remove admin status
-        const params: AdminUserIdParams = { user_id_input: userId };
-        // Specify both parameter and return types for the RPC call
-        const { error } = await supabase
-          .rpc<void, AdminUserIdParams>('remove_admin', params);
-
-        if (error) throw error;
+        await supabase.rpc<void, AdminUserIdParams>("remove_admin", { user_id_input: userId });
       } else {
-        // Add admin status
-        const params: AdminUserIdParams = { user_id_input: userId };
-        // Specify both parameter and return types for the RPC call
-        const { error } = await supabase
-          .rpc<void, AdminUserIdParams>('add_admin', params);
-
-        if (error) throw error;
+        await supabase.rpc<void, AdminUserIdParams>("add_admin", { user_id_input: userId });
       }
 
-      // Update local state
-      setUsers(users.map(user => 
-        user.id === userId ? { ...user, is_admin: !currentStatus } : user
-      ));
+      setUsers(prev =>
+        prev.map(u =>
+          u.id === userId ? { ...u, is_admin: !currentStatus } : u
+        )
+      );
 
       toast({
         title: "Success",
-        description: `User ${currentStatus ? "removed from" : "added to"} administrators`,
+        description: `User ${currentStatus ? "removed from" : "added to"} administrators`
       });
-    } catch (error: any) {
-      console.error("Error toggling admin status:", error);
+    } catch (err: any) {
       toast({
         title: "Error",
-        description: error.message || `Failed to ${currentStatus ? "remove" : "add"} admin status`,
-        variant: "destructive",
+        description: err.message || `Failed to ${currentStatus ? "remove" : "add"} admin status`,
+        variant: "destructive"
       });
     }
   };
@@ -140,8 +116,8 @@ export const AdminUsers = () => {
     fetchUsers();
   };
 
-  const filteredUsers = users.filter(user => 
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredUsers = users.filter(u =>
+    u.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -152,13 +128,12 @@ export const AdminUsers = () => {
           <Input
             placeholder="Search users by email..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={e => setSearchTerm(e.target.value)}
             className="w-80"
           />
-          
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="default">Add New User</Button>
+              <Button>Add New User</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
@@ -167,19 +142,14 @@ export const AdminUsers = () => {
               <AddUserForm onSuccess={handleAddUserSuccess} />
             </DialogContent>
           </Dialog>
-
-          <Button 
-            onClick={fetchUsers} 
-            variant="outline"
-            disabled={loading}
-          >
+          <Button onClick={fetchUsers} variant="outline" disabled={loading}>
             {loading ? (
               <>
                 <Loader className="mr-2 h-4 w-4 animate-spin" />
                 Loading...
               </>
             ) : (
-              'Refresh'
+              "Refresh"
             )}
           </Button>
         </div>
@@ -188,7 +158,9 @@ export const AdminUsers = () => {
       {fetchError && (
         <div className="bg-destructive/15 p-4 rounded-md mb-4 text-destructive">
           <p className="font-medium">Error: {fetchError}</p>
-          <p className="text-sm mt-1">Please try refreshing or check your authentication status</p>
+          <p className="text-sm mt-1">
+            Please try refreshing or check your authentication status
+          </p>
         </div>
       )}
 
@@ -196,60 +168,60 @@ export const AdminUsers = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Email</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead>Last Sign In</TableHead>
-              <TableHead>Admin Status</TableHead>
-              <TableHead>Actions</TableHead>
+              <Th>Email</Th>
+              <Th>Created At</Th>
+              <Th>Last Sign In</Th>
+              <Th>Admin Status</Th>
+              <Th>Actions</Th>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8">
+                <Td colSpan={5} className="text-center py-8">
                   <div className="flex flex-col items-center justify-center">
                     <Loader className="h-8 w-8 animate-spin text-primary mb-2" />
                     <span>Loading users...</span>
                   </div>
-                </TableCell>
+                </Td>
               </TableRow>
             ) : filteredUsers.length > 0 ? (
-              filteredUsers.map((user) => (
+              filteredUsers.map(user => (
                 <TableRow key={user.id}>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{new Date(user.created_at).toLocaleString()}</TableCell>
-                  <TableCell>
+                  <Td>{user.email}</Td>
+                  <Td>{new Date(user.created_at).toLocaleString()}</Td>
+                  <Td>
                     {user.last_sign_in_at
                       ? new Date(user.last_sign_in_at).toLocaleString()
                       : "Never"}
-                  </TableCell>
-                  <TableCell>
-                    <span 
+                  </Td>
+                  <Td>
+                    <span
                       className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        user.is_admin 
-                          ? "bg-green-100 text-green-800" 
+                        user.is_admin
+                          ? "bg-green-100 text-green-800"
                           : "bg-gray-100 text-gray-800"
                       }`}
                     >
                       {user.is_admin ? "Admin" : "User"}
                     </span>
-                  </TableCell>
-                  <TableCell>
-                    <Button 
-                      variant={user.is_admin ? "destructive" : "outline"} 
+                  </Td>
+                  <Td>
+                    <Button
+                      variant={user.is_admin ? "destructive" : "outline"}
                       size="sm"
                       onClick={() => toggleAdminStatus(user.id, user.is_admin)}
                     >
                       {user.is_admin ? "Revoke Admin" : "Make Admin"}
                     </Button>
-                  </TableCell>
+                  </Td>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-4">
-                  {fetchError ? 'Error loading users' : 'No users found'}
-                </TableCell>
+                <Td colSpan={5} className="text-center py-4">
+                  {fetchError ? "Error loading users" : "No users found"}
+                </Td>
               </TableRow>
             )}
           </TableBody>
