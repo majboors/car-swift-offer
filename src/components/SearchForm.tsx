@@ -2,9 +2,11 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Search } from "lucide-react";
 
 const SearchForm = () => {
+  const [searchParams] = useSearchParams();
   const [carData, setCarData] = useState([]);
   const [selectedMake, setSelectedMake] = useState("");
   const [selectedModel, setSelectedModel] = useState("");
@@ -15,6 +17,14 @@ const SearchForm = () => {
   const [availableBodyTypes, setAvailableBodyTypes] = useState([]);
   
   const navigate = useNavigate();
+  
+  // Initialize search query from URL params if available
+  useEffect(() => {
+    const queryParam = searchParams.get('query');
+    if (queryParam) {
+      setSearchQuery(queryParam);
+    }
+  }, [searchParams]);
   
   // Fetch car data from public.json
   useEffect(() => {
@@ -146,20 +156,9 @@ const SearchForm = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <svg 
+          <Search 
             className="absolute left-3 top-3 w-4 h-4 text-gray-500"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
+          />
         </div>
         
         <Button 
