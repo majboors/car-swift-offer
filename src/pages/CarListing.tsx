@@ -89,14 +89,17 @@ const CarListingPage = () => {
           
           if (data.user_id) {
             try {
-              // Get the user email from auth.users via a function
+              // Use a direct query to fetch email since get_user_email RPC isn't available in TypeScript yet
               const { data: userData, error: userError } = await supabase
-                .rpc('get_user_email', { user_id_input: data.user_id });
+                .from('auth_users_view')
+                .select('email')
+                .eq('id', data.user_id)
+                .maybeSingle();
                 
               if (userError) {
                 console.error("Error fetching seller email:", userError);
-              } else if (userData) {
-                sellerName = userData || "Anonymous";
+              } else if (userData && userData.email) {
+                sellerName = userData.email;
               }
             } catch (error) {
               console.error("Error fetching seller details:", error);
