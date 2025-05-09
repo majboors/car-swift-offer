@@ -173,9 +173,11 @@ const PackageSelection = ({ onSelect, selectedPackageId }: PackageSelectionProps
     const hasTooltip = feature in featureTooltips;
     
     return (
-      <div className="flex items-start gap-2">
+      <div className="flex items-start gap-3">
         <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-        <span className="text-sm">{feature}</span>
+        <div className="flex-grow">
+          <span className="text-sm">{feature}</span>
+        </div>
         {hasTooltip && (
           <TooltipProvider>
             <Tooltip>
@@ -211,58 +213,64 @@ const PackageSelection = ({ onSelect, selectedPackageId }: PackageSelectionProps
 
   return (
     <TooltipProvider>
-      <div className="py-6">
-        <div className="mb-8">
+      <div className="py-8">
+        <div className="mb-10">
           <h3 className="text-2xl font-semibold mb-3">Select a Package</h3>
           <p className="text-gray-500">Choose a package to enhance your listing visibility</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {packages.map((pkg, index) => (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {packages.filter(pkg => pkg.price > 0).map((pkg, index) => (
             <Card 
               key={pkg.id || `pkg-${index}`} 
-              className={`relative overflow-hidden transition-all h-full flex flex-col ${
+              className={`relative overflow-hidden transition-all min-h-[520px] flex flex-col ${
                 selectedPackageId === pkg.id 
                   ? 'ring-2 ring-[#007ac8] shadow-lg' 
                   : 'hover:shadow-md'
               }`}
             >
               {pkg.level === 3 && (
-                <div className="absolute top-0 right-0 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-1 text-xs font-semibold">
+                <div className="absolute top-0 right-0 bg-purple-500 text-white px-6 py-1 text-sm font-semibold">
                   Best Value
                 </div>
               )}
               
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-xl">{pkg.name}</CardTitle>
-                    <CardDescription>
-                      {pkg.duration_days}-day visibility
-                    </CardDescription>
-                  </div>
-                  {index > 0 && packageIcons[index - 1]}
+              <CardHeader className="pb-4">
+                <div className="flex flex-col">
+                  <CardTitle className="text-2xl font-bold">{pkg.name}</CardTitle>
+                  <CardDescription className="text-base mt-1">
+                    {pkg.duration_days}-day visibility
+                  </CardDescription>
                 </div>
               </CardHeader>
               
-              <CardContent className="flex-grow">
-                <div className="mb-6">
-                  <span className="text-3xl font-bold">${pkg.price.toFixed(2)}</span>
+              <CardContent className="flex-grow pb-4">
+                <div className="mb-8">
+                  <span className="text-4xl font-bold">${pkg.price.toFixed(2)}</span>
                 </div>
                 
-                <div className="space-y-3">
-                  {pkg.features.map((feature, idx) => (
-                    <div key={idx}>
-                      {renderFeature(feature)}
-                    </div>
-                  ))}
+                <div className="space-y-4">
+                  {pkg.features
+                    .filter(feature => 
+                      feature !== "AI-powered one-click listing" && 
+                      feature !== "Listing stays until sold" &&
+                      feature !== "Standard search visibility" &&
+                      feature !== "Secure messaging" &&
+                      feature !== "ID-verified posting"
+                    )
+                    .map((feature, idx) => (
+                      <div key={idx}>
+                        {renderFeature(feature)}
+                      </div>
+                    ))
+                  }
                 </div>
               </CardContent>
               
-              <CardFooter className="mt-auto pt-6">
+              <CardFooter className="mt-auto pt-8 pb-6">
                 <Button 
                   onClick={() => onSelect(pkg.id || `pkg-${index}`, pkg.level)}
-                  className={`w-full ${
+                  className={`w-full py-6 text-base ${
                     selectedPackageId === pkg.id 
                       ? 'bg-[#007ac8] hover:bg-[#0069b4]' 
                       : 'bg-white text-[#007ac8] border border-[#007ac8] hover:bg-[#f0f9ff]'
@@ -275,18 +283,16 @@ const PackageSelection = ({ onSelect, selectedPackageId }: PackageSelectionProps
           ))}
         </div>
 
-        {/* Only show standard option if there are packages beyond free tier */}
-        {packages.some(pkg => pkg.price > 0) && (
-          <div className="mt-8 text-center">
-            <Button
-              variant="outline"
-              onClick={() => onSelect('', 0)} 
-              className={`min-w-[200px] ${!selectedPackageId ? 'border-[#007ac8] text-[#007ac8]' : ''}`}
-            >
-              Continue with standard listing
-            </Button>
-          </div>
-        )}
+        {/* Standard option at the bottom */}
+        <div className="mt-8 text-center">
+          <Button
+            variant="outline"
+            onClick={() => onSelect('', 0)} 
+            className={`min-w-[200px] py-5 ${!selectedPackageId ? 'border-[#007ac8] text-[#007ac8]' : ''}`}
+          >
+            Continue with standard listing
+          </Button>
+        </div>
       </div>
     </TooltipProvider>
   );
