@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -216,34 +215,25 @@ const SearchResults = () => {
         );
       }
       
-      // Apply feature filters - Fixed approach for JSON structure
+      // Fixed approach for feature filtering using PostgREST's built-in operators
       if (Object.keys(selectedFeatures).length > 0) {
-        // Create an array to collect all filters
-        const filterConditions = [];
-        
         // Handle each feature category separately
         Object.entries(selectedFeatures).forEach(([category, selectedFeatureList]) => {
           if (selectedFeatureList.length > 0) {
-            // For each selected feature in this category, add a condition
+            // For each selected feature, we add a filter condition
             selectedFeatureList.forEach(feature => {
-              // We need to check if the feature exists in the features->category array
-              // Using containment operator @> for JSONB arrays
-              const featurePath = `features->${JSON.stringify(category)}`;
+              // We need to use a different approach that's compatible with PostgREST's query syntax
+              // Using the contains operator to check if a specific feature exists in the category array
+              const featurePath = category.replace(/\s+/g, ' ');
+              const featureValue = feature.replace(/\s+/g, ' ');
               
-              // Add to our filter conditions to be applied later
-              filterConditions.push({
-                column: featurePath,
-                operator: '@>',
-                value: JSON.stringify([feature])
-              });
+              console.log(`Adding filter for feature: ${featurePath} - ${featureValue}`);
+              
+              // Check if the feature exists in the JSONB array at the specified path
+              // Using the PostgreSQL JSON containment operator: ?
+              query = query.contains(`features:${featurePath}`, [featureValue]);
             });
           }
-        });
-        
-        // Apply all the gathered filter conditions
-        filterConditions.forEach(condition => {
-          console.log(`Applying filter: ${condition.column} ${condition.operator} ${condition.value}`);
-          query = query.filter(condition.column, condition.operator, condition.value);
         });
       }
       
