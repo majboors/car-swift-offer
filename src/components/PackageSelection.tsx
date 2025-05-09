@@ -173,14 +173,14 @@ const PackageSelection = ({ onSelect, selectedPackageId }: PackageSelectionProps
     const hasTooltip = feature in featureTooltips;
     
     return (
-      <div className="flex items-start">
-        <Check className="h-5 w-5 text-green-500 mr-2 shrink-0 mt-0.5" />
+      <div className="flex items-start gap-2">
+        <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
         <span className="text-sm">{feature}</span>
         {hasTooltip && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Info className="h-4 w-4 ml-1 text-blue-500 cursor-help" />
+                <Info className="h-4 w-4 text-blue-500 cursor-help shrink-0 mt-1" />
               </TooltipTrigger>
               <TooltipContent className="max-w-xs whitespace-pre-line">
                 <p>{featureTooltips[feature]}</p>
@@ -211,24 +211,24 @@ const PackageSelection = ({ onSelect, selectedPackageId }: PackageSelectionProps
 
   return (
     <TooltipProvider>
-      <div className="py-4">
-        <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">Select a Package</h3>
+      <div className="py-6">
+        <div className="mb-8">
+          <h3 className="text-2xl font-semibold mb-3">Select a Package</h3>
           <p className="text-gray-500">Choose a package to enhance your listing visibility</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {packages.map((pkg, index) => (
             <Card 
               key={pkg.id || `pkg-${index}`} 
-              className={`relative overflow-hidden transition-all ${
+              className={`relative overflow-hidden transition-all h-full flex flex-col ${
                 selectedPackageId === pkg.id 
                   ? 'ring-2 ring-[#007ac8] shadow-lg' 
                   : 'hover:shadow-md'
               }`}
             >
               {pkg.level === 3 && (
-                <div className="absolute top-0 right-0 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 text-xs font-semibold transform rotate-0 translate-x-0 -translate-y-0">
+                <div className="absolute top-0 right-0 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-1 text-xs font-semibold">
                   Best Value
                 </div>
               )}
@@ -245,21 +245,21 @@ const PackageSelection = ({ onSelect, selectedPackageId }: PackageSelectionProps
                 </div>
               </CardHeader>
               
-              <CardContent>
-                <div className="mb-4">
+              <CardContent className="flex-grow">
+                <div className="mb-6">
                   <span className="text-3xl font-bold">${pkg.price.toFixed(2)}</span>
                 </div>
                 
-                <ul className="space-y-2">
-                  {pkg.features.map((feature, index) => (
-                    <li key={index} className="flex items-start">
+                <div className="space-y-3">
+                  {pkg.features.map((feature, idx) => (
+                    <div key={idx}>
                       {renderFeature(feature)}
-                    </li>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </CardContent>
               
-              <CardFooter>
+              <CardFooter className="mt-auto pt-6">
                 <Button 
                   onClick={() => onSelect(pkg.id || `pkg-${index}`, pkg.level)}
                   className={`w-full ${
@@ -277,7 +277,7 @@ const PackageSelection = ({ onSelect, selectedPackageId }: PackageSelectionProps
 
         {/* Only show standard option if there are packages beyond free tier */}
         {packages.some(pkg => pkg.price > 0) && (
-          <div className="mt-6 text-center">
+          <div className="mt-8 text-center">
             <Button
               variant="outline"
               onClick={() => onSelect('', 0)} 
