@@ -183,9 +183,10 @@ const SearchResults = () => {
     console.log("Fetching listings with package priority...");
     
     try {
+      // Directly select package_level to make sure we're getting it
       let query = supabase
         .from("car_listings")
-        .select("*", { count: "exact" });
+        .select("*, package_level", { count: "exact" });
       
       // Apply basic filters
       if (make) {
@@ -266,6 +267,13 @@ const SearchResults = () => {
         throw error;
       }
       
+      // Log raw data to inspect package_level values
+      console.log("Raw data from database:", data?.map(item => ({
+        id: item.id,
+        title: item.title,
+        package_level: item.package_level
+      })));
+      
       // Post-process search for keywords in features - do this client-side since we can't reliably query JSON
       let filteredData = data || [];
       
@@ -336,11 +344,15 @@ const SearchResults = () => {
       
       // Custom sort that prioritizes package_level first, followed by the selected sort option
       filteredData.sort((a, b) => {
+        // Ensure package_level is treated as a number with default of 0
+        const levelA = typeof a.package_level === 'number' ? a.package_level : 0;
+        const levelB = typeof b.package_level === 'number' ? b.package_level : 0;
+        
         // Log the package levels to verify sorting
-        console.log(`Sorting: Item A package level: ${a.package_level}, Item B package level: ${b.package_level}`);
+        console.log(`Sorting: Item A package level: ${levelA} (${a.title}), Item B package level: ${levelB} (${b.title})`);
         
         // First prioritize by package level (higher levels first)
-        const packageDiff = (b.package_level || 0) - (a.package_level || 0);
+        const packageDiff = levelB - levelA;
         if (packageDiff !== 0) {
           console.log(`Package diff: ${packageDiff}, returning it`);
           return packageDiff;
@@ -373,7 +385,7 @@ const SearchResults = () => {
       
       // Debug log to check package levels in the paginated results
       paginatedData.forEach((item, index) => {
-        console.log(`Result ${index}: package_level = ${item.package_level}`);
+        console.log(`Result ${index}: package_level = ${item.package_level || 0}, title = ${item.title}`);
       });
       
       setTotalResults(total);
@@ -524,13 +536,20 @@ const SearchResults = () => {
   });
   
   // Get package level name
-  const getPackageName = (level: number): string => {
+  const getPackageName = (level: number | null | undefined): string => {
+    if (!level) return "";
     switch(level) {
       case 3: return "Premium";
       case 2: return "Enhanced";
       case 1: return "Standard";
       default: return "";
     }
+  };
+  
+  // Debug function to check if a car is premium
+  const isPremium = (car: any): boolean => {
+    console.log(`Checking if premium: ${car.title}, package_level=${car.package_level}`);
+    return car.package_level === 3;
   };
   
   return (
@@ -867,7 +886,7 @@ const SearchResults = () => {
                   <Link to={`/listing/${car.id}`} key={car.id}>
                     <Card className={cn(
                       "h-full hover:shadow-lg transition-shadow",
-                      car.package_level === 3 ? "border-2 border-[#8B5CF6] shadow-md" : "border border-transparent hover:border-[#007ac8]"
+                      isPremium(car) ? "border-2 border-[#8B5CF6] shadow-md" : "border border-transparent hover:border-[#007ac8]"
                     )}>
                       <div className="aspect-[4/3] relative">
                         <img 
@@ -878,7 +897,7 @@ const SearchResults = () => {
                         <div className="absolute top-0 right-0 bg-[#007ac8] text-white px-3 py-1 m-2 rounded-md font-semibold">
                           {car.year}
                         </div>
-                        {car.package_level === 3 && (
+                        {isPremium(car) && (
                           <div className="absolute top-0 left-0 m-2">
                             <Badge 
                               variant="premium" 
@@ -905,6 +924,13 @@ const SearchResults = () => {
                         <p className="text-lg text-[#007ac8] font-bold mt-2">
                           {formatPrice(car.price)}
                         </p>
+                        
+                        {/* Display package level for debugging */}
+                        {isPremium(car) && (
+                          <div className="mt-2 text-xs text-[#8B5CF6] font-medium">
+                            {getPackageName(car.package_level)} Listing
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   </Link>
