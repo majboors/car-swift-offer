@@ -278,9 +278,9 @@ const SearchResults = () => {
           if (!listing.features) return false;
           
           // Check each selected feature category
-          for (const [category, selectedFeatures] of Object.entries(selectedFeatures)) {
+          for (const [category, featureList] of Object.entries(selectedFeatures)) {
             // If this category has no selected features, skip it
-            if (!selectedFeatures.length) continue;
+            if (!featureList.length) continue;
             
             // Get the features in this category for the current listing
             const listingFeatures = listing.features[category];
@@ -289,7 +289,7 @@ const SearchResults = () => {
             if (!listingFeatures || !Array.isArray(listingFeatures)) return false;
             
             // Check if ANY of the selected features in this category are present
-            const hasAnyFeature = selectedFeatures.some(selectedFeature => 
+            const hasAnyFeature = featureList.some(selectedFeature => 
               listingFeatures.includes(selectedFeature)
             );
             
