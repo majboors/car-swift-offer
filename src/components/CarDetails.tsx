@@ -1,4 +1,3 @@
-
 import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, User } from "lucide-react";
@@ -41,7 +40,7 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
   console.log("CarDetails: listing user_id:", listing.user_id);
   console.log("CarDetails: features data:", listing.features);
   
-  // Improved function to flatten features object into an array
+  // Enhanced function to flatten features object into an array
   const getFeaturesList = () => {
     // Early exit if features is null, undefined, or an empty object
     if (!listing.features) return null;
@@ -66,20 +65,35 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
     if (typeof listing.features === 'object') {
       try {
         // Convert from potential JSON format if it's a string
-        const featuresObj = typeof listing.features === 'string' 
-          ? JSON.parse(listing.features) 
-          : listing.features;
+        let featuresObj = listing.features;
         
-        console.log("Parsed features object:", featuresObj);
+        // Handle if features is a JSON string
+        if (typeof listing.features === 'string') {
+          try {
+            featuresObj = JSON.parse(listing.features);
+            console.log("Successfully parsed features from string:", featuresObj);
+          } catch (parseError) {
+            console.error("Failed to parse features string:", parseError);
+            // Keep original since parse failed
+            featuresObj = listing.features;
+          }
+        }
+        
+        console.log("Processed features object:", featuresObj);
         
         // Handle empty object after parsing
         if (!featuresObj || Object.keys(featuresObj).length === 0) {
-          console.log("Features object is empty after parsing, returning null");
+          console.log("Features object is empty after processing, returning null");
           return null;
         }
         
         // Flatten the object structure into a single array of features
         const allFeatures = [];
+        
+        // Handle if featuresObj is actually a string (shouldn't happen but just in case)
+        if (typeof featuresObj === 'string') {
+          return [featuresObj]; // Return as single item array
+        }
         
         for (const category in featuresObj) {
           const categoryFeatures = featuresObj[category];
@@ -91,13 +105,23 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
           } else if (typeof categoryFeatures === 'string') {
             // If the category contains a single feature as string
             allFeatures.push(categoryFeatures);
+          } else if (typeof categoryFeatures === 'object' && categoryFeatures !== null) {
+            // If category contains nested objects (shouldn't happen normally but just in case)
+            const nestedKeys = Object.keys(categoryFeatures);
+            nestedKeys.forEach(key => {
+              if (typeof categoryFeatures[key] === 'string') {
+                allFeatures.push(categoryFeatures[key]);
+              } else if (Array.isArray(categoryFeatures[key])) {
+                allFeatures.push(...categoryFeatures[key]);
+              }
+            });
           }
         }
         
         console.log("All features flattened:", allFeatures);
         return allFeatures.length > 0 ? allFeatures : null;
       } catch (e) {
-        console.error("Error parsing features:", e);
+        console.error("Error processing features:", e);
         return null;
       }
     }
@@ -106,7 +130,7 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
   };
 
   const featuresList = getFeaturesList();
-  console.log("Processed features list:", featuresList);
+  console.log("Final processed features list:", featuresList);
   
   return (
     <div>

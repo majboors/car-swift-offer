@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -75,7 +74,7 @@ const SearchResults = () => {
       bodyTypeInput: bodyType,
       searchInput: searchQuery,
     }
-  });
+  };
   
   // Pagination
   const itemsPerPage = 12;
@@ -199,7 +198,7 @@ const SearchResults = () => {
         query = query.ilike("body_type", `%${bodyType}%`);
       }
       
-      // Apply text search if provided - enhanced to search in more fields with better matching
+      // Enhanced text search implementation - improved to search in more fields with better matching
       if (searchQuery) {
         // Split the search query into keywords for better partial matching
         const keywords = searchQuery.toLowerCase().split(/\s+/).filter(word => word.length > 0);
@@ -215,7 +214,9 @@ const SearchResults = () => {
                    `fuel_type.ilike.%${keyword}%,` +
                    `transmission.ilike.%${keyword}%,` +
                    `car_name.ilike.%${keyword}%,` +
-                   `color.ilike.%${keyword}%`;
+                   `color.ilike.%${keyword}%,` +
+                   // Add new condition for detailed deep text search
+                   `features::text.ilike.%${keyword}%`;
           });
           
           // Combine all keyword filters with OR
@@ -223,7 +224,7 @@ const SearchResults = () => {
           query = query.or(combinedFilter);
           
           console.log("Search using keywords:", keywords);
-          console.log("Combined filter:", combinedFilter);
+          console.log("Enhanced combined filter:", combinedFilter);
         }
       }
       
