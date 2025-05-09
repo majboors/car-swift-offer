@@ -120,6 +120,13 @@ const Admin = () => {
         monthCount[monthYear] = (monthCount[monthYear] || 0) + 1;
       });
       
+      // Helper function to safely get month index with error handling
+      const getMonthIndex = (monthName: string | undefined): number => {
+        if (!monthName) return -1;
+        const index = months.indexOf(monthName);
+        return index !== -1 ? index : -1;
+      };
+      
       // Convert to array and sort chronologically
       const listingsByMonth = Object.entries(monthCount)
         .map(([name, value]) => ({ name, count: value }))
@@ -127,7 +134,7 @@ const Admin = () => {
           const [aMonth, aYear] = a.name.split(' ');
           const [bMonth, bYear] = b.name.split(' ');
           
-          // Convert string years to numbers for arithmetic comparison
+          // Convert string years to numbers for comparison
           const aYearNum = parseInt(aYear || '0', 10);
           const bYearNum = parseInt(bYear || '0', 10);
           
@@ -136,12 +143,12 @@ const Admin = () => {
             return aYearNum - bYearNum;
           }
           
-          // Fixed: Use Number() to explicitly convert month indices to numbers
-          // This fixes the TypeScript error for arithmetic operations
-          const aMonthIndex = Number(months.indexOf(aMonth || ''));
-          const bMonthIndex = Number(months.indexOf(bMonth || ''));
+          // Get month indices with error handling
+          const aMonthIndex = getMonthIndex(aMonth);
+          const bMonthIndex = getMonthIndex(bMonth);
           
-          return aMonthIndex - bMonthIndex;
+          // Safe comparison using explicit numbers
+          return (aMonthIndex as number) - (bMonthIndex as number);
         });
       
       // Calculate active users (users who have logged in)
