@@ -264,23 +264,27 @@ const CarListingPage = () => {
           <div>
             <CarDetails listing={listing} />
             
+            {/* Always show contact button when not own listing */}
             {!isOwnListing && (
-              <Button 
-                className="w-full bg-[#007ac8] hover:bg-[#0069b4] mt-6 flex items-center gap-2"
-                onClick={toggleChat}
-              >
-                {showChat ? (
-                  <>
-                    <X className="h-4 w-4" />
-                    Close Chat
-                  </>
-                ) : (
-                  <>
-                    <MessageSquareIcon className="h-4 w-4" />
-                    Contact Seller
-                  </>
-                )}
-              </Button>
+              <div className="mt-6">
+                <Button 
+                  className="w-full bg-[#007ac8] hover:bg-[#0069b4] text-white flex items-center justify-center gap-2 py-3"
+                  onClick={toggleChat}
+                  size="lg"
+                >
+                  {showChat ? (
+                    <>
+                      <X className="h-5 w-5" />
+                      Close Chat
+                    </>
+                  ) : (
+                    <>
+                      <MessageSquareIcon className="h-5 w-5" />
+                      Contact Seller
+                    </>
+                  )}
+                </Button>
+              </div>
             )}
             
             {/* Chat component - Make sure it's visible when showChat is true */}
@@ -296,11 +300,11 @@ const CarListingPage = () => {
           </div>
         </div>
         
-        {/* Add floating chat button for better mobile visibility */}
+        {/* Always visible floating chat button on mobile */}
         {!isOwnListing && !showChat && (
-          <div className="fixed bottom-6 right-6 lg:hidden z-10">
+          <div className="fixed bottom-6 right-6 z-50">
             <Button 
-              className="rounded-full w-14 h-14 shadow-lg bg-[#007ac8] hover:bg-[#0069b4]"
+              className="rounded-full w-16 h-16 shadow-lg bg-[#007ac8] hover:bg-[#0069b4] text-white"
               onClick={toggleChat}
             >
               <MessageSquareIcon className="h-6 w-6" />
