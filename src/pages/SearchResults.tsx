@@ -74,7 +74,7 @@ const SearchResults = () => {
       bodyTypeInput: bodyType,
       searchInput: searchQuery,
     }
-  });
+  };
   
   // Pagination
   const itemsPerPage = 12;
@@ -476,6 +476,15 @@ const SearchResults = () => {
   // Get unique car makes
   const carMakes = [...new Set(carData.map(item => item.car))].sort();
   
+  // Add debug logging to help identify the issue
+  console.log("Search results state:", {
+    loading,
+    totalResults,
+    carListingsLength: carListings.length,
+    currentPage,
+    totalPages
+  });
+  
   return (
     <div className="flex flex-col min-h-screen">
       <TrustedBanner />
@@ -804,7 +813,7 @@ const SearchResults = () => {
               <div className="flex justify-center items-center h-64">
                 <Loader className="w-8 h-8 animate-spin text-blue-600" />
               </div>
-            ) : carListings.length > 0 ? (
+            ) : totalResults > 0 && carListings.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {carListings.map((car) => (
                   <Link to={`/listing/${car.id}`} key={car.id}>
