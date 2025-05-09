@@ -93,16 +93,11 @@ export const Chat: React.FC<ChatProps> = ({
     };
   }, [listingId, user?.id, receiverId]);
   
-  // Scroll to bottom whenever messages change, but only if we're near the bottom already
+  // Scroll to bottom whenever messages change
   useEffect(() => {
-    // Only autoscroll if user is already at the bottom or this is a new message they sent
-    if (messagesContainerRef.current) {
-      const container = messagesContainerRef.current;
-      const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
-      
-      if (isNearBottom || sending) {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }
+    // Check if we're in the sending state or if the messages changed
+    if (sending || messages.length > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, sending]);
   
@@ -258,4 +253,3 @@ export const Chat: React.FC<ChatProps> = ({
 };
 
 export default Chat;
-
