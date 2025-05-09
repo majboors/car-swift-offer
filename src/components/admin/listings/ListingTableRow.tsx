@@ -44,7 +44,8 @@ export const ListingTableRow = ({
       <TableCell>{listing.user_email || "Unknown"}</TableCell>
       <TableCell>
         <div className="flex gap-1 flex-wrap">
-          {listing.status === 'pending' && onApprove && (
+          {/* Show approve button for both pending and rejected listings */}
+          {(listing.status === 'pending' || listing.status === 'rejected') && onApprove && (
             <Button 
               variant="outline" 
               size="sm"
@@ -55,6 +56,7 @@ export const ListingTableRow = ({
             </Button>
           )}
           
+          {/* Show reject button only for pending listings */}
           {listing.status === 'pending' && onReject && (
             <Button 
               variant="outline" 
