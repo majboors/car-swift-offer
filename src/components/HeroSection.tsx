@@ -6,7 +6,7 @@ const HeroSection = () => {
     <section className="relative bg-gradient-to-r from-gray-900 to-gray-800 text-white">
       <div className="absolute inset-0">
         <img
-          src="https://i.ibb.co/93nCxsDG/upscalemedia-transformed.jpg"
+          src="/output.png"
           alt="Hero background"
           className="w-full h-full object-cover opacity-30"
         />
