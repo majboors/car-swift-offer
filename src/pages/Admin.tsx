@@ -1,4 +1,4 @@
-
+// src/pages/Admin.tsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,17 +12,31 @@ import { toast } from "@/components/ui/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { supabase } from "@/integrations/supabase/client";
 
+interface CountData {
+  name: string;
+  count: number;
+}
+
+interface DashboardData {
+  listingsByMake: CountData[];
+  listingsByBodyType: CountData[];
+  listingsByMonth: CountData[];
+  totalUsers: number;
+  totalListings: number;
+  activeUsers: number;
+}
+
 const Admin = () => {
   const { user, session, isAdmin, checkAdminStatus } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-  const [dashboardData, setDashboardData] = useState({
+  const [dashboardData, setDashboardData] = useState<DashboardData>({
     listingsByMake: [],
     listingsByBodyType: [],
     listingsByMonth: [],
     totalUsers: 0,
     totalListings: 0,
-    activeUsers: 0
+    activeUsers: 0,
   });
 
   useEffect(() => {
@@ -40,11 +54,9 @@ const Admin = () => {
 
       try {
         console.log("Admin page - Checking for user:", user.id);
-        
-        // Check admin status
         const isUserAdmin = await checkAdminStatus();
         console.log("Admin check result:", isUserAdmin);
-        
+
         if (!isUserAdmin) {
           console.log("User is not an admin, redirecting to home page");
           toast({
@@ -75,105 +87,86 @@ const Admin = () => {
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch listings data
       const { data: listings, error: listingsError } = await supabase
-        .from('car_listings')
-        .select('*');
-
+        .from("car_listings")
+        .select("*");
       if (listingsError) throw listingsError;
 
-      // Fetch users data
-      const { data: users, error: usersError } = await supabase
-        .rpc('get_all_users');
-
+      const { data: users, error: usersError } = await supabase.rpc("get_all_users");
       if (usersError) throw usersError;
-      
+
       // Process listings by make
-      const makeCount = {};
-      listings?.forEach(listing => {
-        const make = listing.make || 'Unknown';
+      const makeCount: Record<string, number> = {};
+      listings?.forEach((listing) => {
+        const make = listing.make || "Unknown";
         makeCount[make] = (makeCount[make] || 0) + 1;
       });
-      
-      const listingsByMake = Object.entries(makeCount)
-        .map(([name, value]) => ({ name, count: value }))
+
+      const listingsByMake: CountData[] = Object.entries(makeCount)
+        .map(([name, count]) => ({ name, count }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 5);
-      
+
       // Process listings by body type
-      const bodyTypeCount = {};
-      listings?.forEach(listing => {
-        const bodyType = listing.body_type || 'Other';
+      const bodyTypeCount: Record<string, number> = {};
+      listings?.forEach((listing) => {
+        const bodyType = listing.body_type || "Other";
         bodyTypeCount[bodyType] = (bodyTypeCount[bodyType] || 0) + 1;
       });
-      
-      const listingsByBodyType = Object.entries(bodyTypeCount)
-        .map(([name, value]) => ({ name, count: value }));
-      
+
+      const listingsByBodyType: CountData[] = Object.entries(bodyTypeCount).map(
+        ([name, count]) => ({ name, count })
+      );
+
       // Process listings by month
-      const monthCount = {};
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      
-      listings?.forEach(listing => {
+      const monthCount: Record<string, number> = {};
+      const months = [
+        "Jan","Feb","Mar","Apr","May","Jun",
+        "Jul","Aug","Sep","Oct","Nov","Dec",
+      ];
+
+      listings?.forEach((listing) => {
         const date = new Date(listing.created_at);
         const monthYear = `${months[date.getMonth()]} ${date.getFullYear()}`;
         monthCount[monthYear] = (monthCount[monthYear] || 0) + 1;
       });
-      
-      // Helper function to safely get month index with error handling
-      const getMonthIndex = (monthName: string | undefined): number => {
-        if (!monthName) return -1;
-        const index = months.indexOf(monthName);
-        return index !== -1 ? index : -1;
+
+      const getMonthIndex = (monthName: string): number => {
+        const idx = months.indexOf(monthName);
+        return idx !== -1 ? idx : -1;
       };
-      
-      // Convert to array and sort chronologically
-      const listingsByMonth = Object.entries(monthCount)
-        .map(([name, value]) => ({ name, count: value }))
+
+      const listingsByMonth: CountData[] = Object.entries(monthCount)
+        .map(([name, count]) => ({ name, count }))
         .sort((a, b) => {
-          const [aMonth, aYear] = a.name.split(' ');
-          const [bMonth, bYear] = b.name.split(' ');
-          
-          // Convert string years to numbers for comparison
-          const aYearNum = parseInt(aYear || '0', 10);
-          const bYearNum = parseInt(bYear || '0', 10);
-          
-          // Compare years first
-          if (aYearNum !== bYearNum) {
-            return aYearNum - bYearNum;
-          }
-          
-          // Get month indices with error handling
-          const aMonthIndex = getMonthIndex(aMonth);
-          const bMonthIndex = getMonthIndex(bMonth);
-          
-          // Safe comparison using explicit numbers
-          return (aMonthIndex as number) - (bMonthIndex as number);
+          const [aMonth, aYear] = a.name.split(" ");
+          const [bMonth, bYear] = b.name.split(" ");
+          const aYearNum = parseInt(aYear, 10);
+          const bYearNum = parseInt(bYear, 10);
+          if (aYearNum !== bYearNum) return aYearNum - bYearNum;
+          return getMonthIndex(aMonth) - getMonthIndex(bMonth);
         });
-      
-      // Calculate active users (users who have logged in)
-      const activeUsers = users?.filter(user => user.last_sign_in_at !== null).length || 0;
-      
+
+      const activeUsers = users?.filter((u) => u.last_sign_in_at !== null).length || 0;
+
       setDashboardData({
         listingsByMake,
         listingsByBodyType,
         listingsByMonth,
         totalUsers: users?.length || 0,
         totalListings: listings?.length || 0,
-        activeUsers
+        activeUsers,
       });
-      
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
       toast({
         title: "Error",
         description: "Could not load dashboard data",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
-  // If still loading, show loading spinner
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -183,7 +176,6 @@ const Admin = () => {
     );
   }
 
-  // If not admin, will redirect in useEffect
   if (!isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -209,22 +201,21 @@ const Admin = () => {
             Refresh Stats
           </Button>
         </div>
-        
-        {/* Dashboard Overview */}
+
         <div className="mb-8">
           <DashboardCharts {...dashboardData} />
         </div>
-        
+
         <Tabs defaultValue="listings" className="mt-6">
           <TabsList className="mb-6 grid w-full grid-cols-2 max-w-md">
             <TabsTrigger value="listings">Manage Listings</TabsTrigger>
             <TabsTrigger value="users">Manage Users</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="listings">
             <AdminListings />
           </TabsContent>
-          
+
           <TabsContent value="users">
             <AdminUsers />
           </TabsContent>
