@@ -1,3 +1,4 @@
+
 import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, User } from "lucide-react";
@@ -45,6 +46,10 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
     // Early exit if features is null, undefined, or an empty object
     if (!listing.features) return null;
     
+    // Additional debugging for features
+    console.log("Features type:", typeof listing.features);
+    console.log("Features raw value:", listing.features);
+    
     // Handle empty object case
     if (typeof listing.features === 'object' && 
         Object.keys(listing.features).length === 0) {
@@ -65,6 +70,8 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
           ? JSON.parse(listing.features) 
           : listing.features;
         
+        console.log("Parsed features object:", featuresObj);
+        
         // Handle empty object after parsing
         if (!featuresObj || Object.keys(featuresObj).length === 0) {
           console.log("Features object is empty after parsing, returning null");
@@ -76,6 +83,8 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
         
         for (const category in featuresObj) {
           const categoryFeatures = featuresObj[category];
+          console.log(`Processing category: ${category}, features:`, categoryFeatures);
+          
           if (Array.isArray(categoryFeatures)) {
             // If the category contains an array of features
             allFeatures.push(...categoryFeatures);
@@ -85,6 +94,7 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
           }
         }
         
+        console.log("All features flattened:", allFeatures);
         return allFeatures.length > 0 ? allFeatures : null;
       } catch (e) {
         console.error("Error parsing features:", e);

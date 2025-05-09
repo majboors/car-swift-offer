@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -442,8 +441,20 @@ const AddListing = () => {
     setLoading(true);
     
     try {
-      // Populate test data first
+      // Populate test data first - this will update state but won't be immediately available
       populateTestData();
+      
+      // Instead of relying on the state update from populateTestData,
+      // we'll create the features object directly here
+      const testFeatures = {
+        'Audio, Visual & Communication': ['Bluetooth', 'Navigation System', 'Smartphone Integration', 'USB Port', 'Apple CarPlay', 'Android Auto'],
+        'Comfort & Convenience': ['Automatic Climate Control', 'Cruise Control', 'Electric Parking Brake', 'Keyless Entry', 'Push Button Start'],
+        'Interior': ['Adjustable Steering Column', 'Cup Holders', 'Front Center Armrest', 'Leather Steering Wheel'],
+        'Safety & Security': ['ABS', 'Airbags', 'Electronic Stability Control', 'Lane Departure Warning', 'Parking Sensors', 'Reversing Camera'],
+        'Seating': ['Electric Seats', 'Heated Seats', 'Leather Seats']
+      };
+      
+      console.log("Direct test features object:", testFeatures);
       
       // Fetch placeholder images
       const testImages = await fetchPlaceholderImages();
@@ -453,17 +464,7 @@ const AddListing = () => {
       const imageUrls = await uploadImages(testImages);
       console.log("Test images uploaded:", imageUrls);
       
-      // Prepare features data
-      const featuresData = Object.entries(selectedFeatures).reduce((acc, [category, features]) => {
-        if (features.length > 0) {
-          return { ...acc, [category]: features };
-        }
-        return acc;
-      }, {});
-      
-      console.log("Test features data prepared:", featuresData);
-      
-      // Format the listing data
+      // Format the listing data using our direct features object, not relying on state
       const listingData = {
         user_id: user.id,
         title: '2022 Tesla Model 3 Long Range - Excellent Condition',
@@ -481,12 +482,13 @@ const AddListing = () => {
         location: 'Sydney, NSW',
         contact_email: user?.email || 'test@example.com',
         contact_phone: '0412345678',
-        features: featuresData,
+        features: testFeatures, // Using our direct features object
         images: imageUrls,
         status: 'pending', // Set status as pending for test listings
       };
       
-      console.log("Final test listing data:", listingData);
+      console.log("Final test listing data with features:", listingData);
+      console.log("Features object structure:", JSON.stringify(listingData.features, null, 2));
       
       // Insert the listing
       const { data, error } = await supabase
