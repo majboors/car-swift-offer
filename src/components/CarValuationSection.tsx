@@ -8,7 +8,7 @@ const CarValuationSection = () => {
     <section className="relative mb-12">
       <div className="w-full relative">
         <img
-          src="/lovable-uploads/dbf5324a-2c9d-40f6-a1e6-76153c4ea546.png"
+          src="https://i.ibb.co/L7XWZBx/Chat-GPT-Image-May-9-2025-at-09-16-29-PM.png"
           alt="Background image of person with car"
           className="w-full h-[500px] object-cover"
         />
