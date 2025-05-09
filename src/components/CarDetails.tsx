@@ -71,13 +71,6 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
 
   const featuresList = getFeaturesList();
   
-  // Handle button click for anonymous users
-  const handleInquiryClick = () => {
-    if (onContactClick) {
-      onContactClick();
-    }
-  };
-  
   return (
     <div>
       <h1 className="text-3xl font-bold mb-2">{listing.title}</h1>
@@ -85,7 +78,7 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
         {formatCurrency(listing.price)}
       </p>
       
-      {/* Seller information - New section */}
+      {/* Seller information with Inquire Now button */}
       {listing.seller_name && (
         <div className="flex items-center mb-6 bg-gray-50 p-3 rounded-lg">
           <div className="bg-gray-200 rounded-full p-2 mr-3">
@@ -97,9 +90,9 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
           </div>
           
           {/* "Inquire Now" button - only show if not owner's listing */}
-          {!isOwnListing && onContactClick && (
+          {onContactClick && (
             <Button 
-              onClick={handleInquiryClick}
+              onClick={onContactClick}
               className="bg-[#007ac8] hover:bg-[#0069b4] text-white"
             >
               Inquire Now

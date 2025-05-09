@@ -90,14 +90,18 @@ const CarListingPage = () => {
           
           if (data.user_id) {
             try {
-              // Get user email from auth.users via RPC function
-              const { data: userData } = await supabase
-                .rpc('get_user_email', { user_id_input: data.user_id });
-                
-              if (userData) {
-                sellerName = userData || `User ${data.user_id.substring(0, 6)}`;
-              } else {
+              // Get user email directly from the database via our custom RPC function
+              const { data: emailData, error: emailError } = await supabase
+                .rpc('get_user_email', { 
+                  user_id_input: data.user_id
+                });
+              
+              if (emailError) {
+                console.error("Error fetching seller email:", emailError);
                 sellerName = `User ${data.user_id.substring(0, 6)}`;
+              } else if (emailData) {
+                // Use the email as the seller name or create a username from it
+                sellerName = emailData.split('@')[0] || `User ${data.user_id.substring(0, 6)}`;
               }
             } catch (error) {
               console.error("Error fetching seller details:", error);
@@ -166,9 +170,13 @@ const CarListingPage = () => {
     });
   };
 
-  const toggleChat = () => {
+  const handleContactClick = () => {
     if (!user) {
       // Redirect to auth page if user is not logged in
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to contact the seller.",
+      });
       navigate(`/auth?redirect=${encodeURIComponent(window.location.pathname)}`);
     } else {
       setShowChat(!showChat);
@@ -277,7 +285,7 @@ const CarListingPage = () => {
           <div>
             <CarDetails 
               listing={listing} 
-              onContactClick={!isOwnListing ? toggleChat : undefined} 
+              onContactClick={!isOwnListing ? handleContactClick : undefined} 
             />
           </div>
         </div>
@@ -287,7 +295,7 @@ const CarListingPage = () => {
           <div className="fixed bottom-6 right-6 z-50 md:hidden">
             <Button 
               className="rounded-full w-16 h-16 shadow-lg bg-[#007ac8] hover:bg-[#0069b4] text-white"
-              onClick={toggleChat}
+              onClick={handleContactClick}
             >
               <MessageSquareIcon className="h-6 w-6" />
             </Button>

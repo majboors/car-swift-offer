@@ -193,6 +193,10 @@ export type Database = {
           unread_count: number
         }[]
       }
+      get_user_email: {
+        Args: { user_id_input: string }
+        Returns: string
+      }
       is_admin: {
         Args: { user_id: string }
         Returns: boolean
