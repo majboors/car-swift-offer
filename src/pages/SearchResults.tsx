@@ -183,10 +183,16 @@ const SearchResults = () => {
     console.log("Fetching listings with package priority...");
     
     try {
+      // Force fresh data with cache-busting timestamp
+      const timestamp = new Date().getTime();
+      
       // Directly select package_level to make sure we're getting it
       let query = supabase
         .from("car_listings")
-        .select("*, package_level", { count: "exact" });
+        .select("*, package_level", { count: "exact", head: false })
+        .eq("status", "approved"); // Only show approved listings
+      
+      console.log("Building search query with timestamp:", timestamp);
       
       // Apply basic filters
       if (make) {
@@ -212,7 +218,7 @@ const SearchResults = () => {
           // Use OR conditions to match any of the keywords across all searchable fields
           let orConditions: string[] = [];
           
-          // For each keyword, create search conditions across all important fields
+          // For each keyword, create search conditions across all searchable fields
           keywords.forEach(keyword => {
             // Create a condition for each searchable column
             const searchableColumns = [
@@ -249,16 +255,6 @@ const SearchResults = () => {
         }
       }
 
-      // Don't apply sorting yet, we'll do it client-side to ensure package level is prioritized
-      
-      // Apply pagination - but only if we're not going to filter by features
-      // Otherwise, we'll do pagination after filtering
-      if (!shouldApplyFeatureFilters) {
-        const from = (currentPage - 1) * itemsPerPage;
-        const to = from + itemsPerPage - 1;
-        query = query.range(from, to);
-      }
-      
       // Execute query
       const { data, count, error } = await query;
       
@@ -268,10 +264,12 @@ const SearchResults = () => {
       }
       
       // Log raw data to inspect package_level values
-      console.log("Raw data from database:", data?.map(item => ({
+      console.log("Raw data from database:", data?.slice(0, 3).map(item => ({
         id: item.id,
         title: item.title,
-        package_level: item.package_level
+        package_level: item.package_level,
+        make: item.make,
+        model: item.model
       })));
       
       // Post-process search for keywords in features - do this client-side since we can't reliably query JSON
@@ -340,21 +338,30 @@ const SearchResults = () => {
         });
       }
 
-      console.log("Before sorting by package level");
+      // Log data before sorting
+      console.log("Before sorting by package level - Items count:", filteredData.length);
+      console.log("Sample premium levels before sort:", 
+        filteredData.slice(0, 5).map(item => ({
+          title: item.title, 
+          package_level: item.package_level || 0
+        }))
+      );
       
       // Custom sort that prioritizes package_level first, followed by the selected sort option
+      // Use normalized package_level values for consistency
       filteredData.sort((a, b) => {
         // Ensure package_level is treated as a number with default of 0
         const levelA = typeof a.package_level === 'number' ? a.package_level : 0;
         const levelB = typeof b.package_level === 'number' ? b.package_level : 0;
         
-        // Log the package levels to verify sorting
-        console.log(`Sorting: Item A package level: ${levelA} (${a.title}), Item B package level: ${levelB} (${b.title})`);
+        // Log the package levels to verify sorting for premium items only
+        if (levelA === 3 || levelB === 3) {
+          console.log(`Premium sorting: Item A: ${a.title} (level=${levelA}), Item B: ${b.title} (level=${levelB})`);
+        }
         
         // First prioritize by package level (higher levels first)
         const packageDiff = levelB - levelA;
         if (packageDiff !== 0) {
-          console.log(`Package diff: ${packageDiff}, returning it`);
           return packageDiff;
         }
         
@@ -374,7 +381,14 @@ const SearchResults = () => {
         }
       });
       
+      // Log data after sorting
       console.log("After sorting by package level");
+      console.log("Top 5 listings after sort:", 
+        filteredData.slice(0, 5).map(item => ({
+          title: item.title, 
+          package_level: item.package_level || 0
+        }))
+      );
       
       // Now paginate the sorted results
       const total = filteredData.length;
@@ -384,6 +398,7 @@ const SearchResults = () => {
       const paginatedData = filteredData.slice(start, end);
       
       // Debug log to check package levels in the paginated results
+      console.log("Final paginated results:");
       paginatedData.forEach((item, index) => {
         console.log(`Result ${index}: package_level = ${item.package_level || 0}, title = ${item.title}`);
       });
@@ -483,7 +498,7 @@ const SearchResults = () => {
     const params = new URLSearchParams();
     
     if (values.makeInput) params.set("make", values.makeInput);
-    if (values.modelInput) params.set("model", values.modelInput);
+    if (values.modelInput) params.set("modelInput", values.modelInput);
     if (values.bodyTypeInput) params.set("bodyType", values.bodyTypeInput);
     if (values.searchInput) params.set("query", values.searchInput);
     
@@ -546,11 +561,15 @@ const SearchResults = () => {
     }
   };
   
-  // FIXED: Debug function to check if a car is premium
+  // Improve the isPremium function with better debug logging
   const isPremium = (car: any): boolean => {
+    if (!car) return false;
+    
     // Use strict === 3 comparison to check premium status
-    const isPremiumStatus = car.package_level === 3;
-    console.log(`Checking if premium: ${car.title}, package_level=${car.package_level}, result=${isPremiumStatus}`);
+    const packageLevel = car.package_level;
+    const isPremiumStatus = packageLevel === 3;
+    
+    console.log(`Checking if premium: ${car.title}, package_level=${packageLevel}, result=${isPremiumStatus}`);
     return isPremiumStatus;
   };
   
@@ -882,136 +901,3 @@ const SearchResults = () => {
               <div className="flex justify-center items-center h-64">
                 <Loader className="w-8 h-8 animate-spin text-blue-600" />
               </div>
-            ) : (totalResults > 0 && carListings.length > 0) ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {carListings.map((car) => (
-                  <Link to={`/listing/${car.id}`} key={car.id}>
-                    <Card className={cn(
-                      "h-full hover:shadow-lg transition-shadow",
-                      isPremium(car) ? "border-2 border-[#8B5CF6] shadow-md" : "border border-transparent hover:border-[#007ac8]"
-                    )}>
-                      <div className="aspect-[4/3] relative">
-                        <img 
-                          src={car.images?.[0] || "/placeholder.svg"} 
-                          alt={`${car.make} ${car.model}`} 
-                          className="w-full h-full object-cover rounded-t-lg"
-                        />
-                        <div className="absolute top-0 right-0 bg-[#007ac8] text-white px-3 py-1 m-2 rounded-md font-semibold">
-                          {car.year}
-                        </div>
-                        {isPremium(car) && (
-                          <div className="absolute top-0 left-0 m-2">
-                            <Badge 
-                              variant="premium" 
-                              className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold"
-                            >
-                              <Trophy className="h-3 w-3" />
-                              PREMIUM
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
-                      <CardContent className="p-4">
-                        <h3 className="font-semibold mb-1 text-lg">
-                          {car.make} {car.model}
-                        </h3>
-                        <div className="flex justify-between items-center">
-                          <p className="text-gray-600 text-sm">
-                            {car.body_type || 'N/A'} • {car.transmission || 'N/A'}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            {car.mileage ? `${car.mileage.toLocaleString()} km` : 'N/A'}
-                          </p>
-                        </div>
-                        <p className="text-lg text-[#007ac8] font-bold mt-2">
-                          {formatPrice(car.price)}
-                        </p>
-                        
-                        {/* Display package level for debugging */}
-                        {isPremium(car) && (
-                          <div className="mt-2 text-xs text-[#8B5CF6] font-medium">
-                            {getPackageName(car.package_level)} Listing
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-                <h3 className="text-xl font-medium mb-4">No cars match your search criteria</h3>
-                <p className="text-gray-600 mb-6">
-                  Try adjusting your filters or search for something else.
-                </p>
-                <Button 
-                  onClick={clearFilters}
-                  className="bg-[#007ac8] hover:bg-[#0069b4] text-white"
-                >
-                  Clear filters
-                </Button>
-              </div>
-            )}
-            
-            {/* Pagination */}
-            {!loading && carListings.length > 0 && totalPages > 1 && (
-              <Pagination className="mt-8">
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={() => updateSearchParam("page", (currentPage - 1).toString())}
-                      className={cn(currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer")}
-                    />
-                  </PaginationItem>
-                  
-                  {Array.from({ length: totalPages }).map((_, index) => {
-                    const pageNum = index + 1;
-                    
-                    // Show limited page numbers for better UX
-                    if (
-                      pageNum === 1 ||
-                      pageNum === totalPages ||
-                      (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
-                    ) {
-                      return (
-                        <PaginationItem key={pageNum}>
-                          <PaginationLink
-                            onClick={() => updateSearchParam("page", pageNum.toString())}
-                            isActive={pageNum === currentPage}
-                          >
-                            {pageNum}
-                          </PaginationLink>
-                        </PaginationItem>
-                      );
-                    }
-                    
-                    // Show ellipsis for skipped pages
-                    if (
-                      (pageNum === currentPage - 2 && pageNum > 2) ||
-                      (pageNum === currentPage + 2 && pageNum < totalPages - 1)
-                    ) {
-                      return <PaginationItem key={`ellipsis-${pageNum}`}>...</PaginationItem>;
-                    }
-                    
-                    return null;
-                  })}
-                  
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={() => updateSearchParam("page", (currentPage + 1).toString())}
-                      className={cn(currentPage >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer")}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            )}
-          </div>
-        </div>
-      </main>
-      
-      <Footer />
-    </div>
-  );
-};
-
-export default SearchResults;

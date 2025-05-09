@@ -110,6 +110,9 @@ const SearchForm = () => {
       searchParams.append("query", normalizedQuery);
     }
     
+    // Add a timestamp parameter to force refresh of data and prevent caching issues
+    searchParams.append("t", Date.now().toString());
+    
     // Add a parameter to exclude featured listings so normal search results don't show them twice
     // They will be shown as special "featured" results at the top
     searchParams.append("showFeatured", "false");
