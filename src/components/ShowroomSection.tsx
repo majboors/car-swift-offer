@@ -18,6 +18,16 @@ interface CarListing {
   showcase: boolean;
 }
 
+// Separate interface for fallback cars to avoid type conflicts
+interface FallbackCar {
+  image: string;
+  title: string;
+  year: number;
+  make: string;
+  model: string;
+  price: number;
+}
+
 const ShowroomSection = () => {
   const [showcaseListings, setShowcaseListings] = useState<CarListing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +57,10 @@ const ShowroomSection = () => {
             make: item.make,
             model: item.model,
             price: item.price,
-            images: Array.isArray(item.images) ? item.images : [],
+            // Handle images properly - convert from any[] to string[]
+            images: Array.isArray(item.images) 
+              ? item.images.map(img => String(img))
+              : [],
             showcase: true
           }));
           setShowcaseListings(formattedListings);
@@ -68,7 +81,7 @@ const ShowroomSection = () => {
   }, []);
 
   // Fallback showcase cars when none are set from the admin
-  const fallbackCars = [
+  const fallbackCars: FallbackCar[] = [
     {
       image: "/lovable-uploads/81f60840-ae50-493d-83c5-1fd76ee68afa.png",
       title: "2025 Kia K4 Sport+",

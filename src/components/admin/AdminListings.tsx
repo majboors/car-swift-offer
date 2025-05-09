@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -381,6 +382,7 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
             onDelete={handleDelete}
             onApprove={handleApprove}
             onReject={handleReject}
+            onShowcaseToggle={handleShowcaseToggle}
           />
         </TabsContent>
       </Tabs>

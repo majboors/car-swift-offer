@@ -25,7 +25,7 @@ export interface Listing {
   package_level?: number | null;
   featured?: boolean;
   top_search?: boolean;
-  showcase?: boolean; // New property for showcase section
+  showcase?: boolean; // Property for showcase section
 }
 
 // Add User interface for AdminUsers component
