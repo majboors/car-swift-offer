@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,6 +51,7 @@ const SearchResults = () => {
   const make = searchParams.get("make") || "";
   const model = searchParams.get("model") || "";
   const bodyType = searchParams.get("bodyType") || "";
+  const searchQuery = searchParams.get("query") || "";
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const currentSort = (searchParams.get("sort") as SortOption) || "newest";
   
@@ -72,6 +72,7 @@ const SearchResults = () => {
       makeInput: make,
       modelInput: model,
       bodyTypeInput: bodyType,
+      searchInput: searchQuery,
     }
   });
   
@@ -126,7 +127,8 @@ const SearchResults = () => {
     form.setValue("makeInput", make);
     form.setValue("modelInput", model);
     form.setValue("bodyTypeInput", bodyType);
-  }, [make, model, bodyType, form]);
+    form.setValue("searchInput", searchQuery);
+  }, [make, model, bodyType, searchQuery, form]);
   
   // Fetch available features from car listings
   const fetchAvailableFeatures = async () => {
@@ -193,6 +195,11 @@ const SearchResults = () => {
         query = query.ilike("body_type", `%${bodyType}%`);
       }
       
+      // Apply text search if provided
+      if (searchQuery) {
+        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,make.ilike.%${searchQuery}%,model.ilike.%${searchQuery}%`);
+      }
+      
       // Apply feature filters
       Object.entries(selectedFeatures).forEach(([category, selectedFeatureList]) => {
         if (selectedFeatureList.length > 0) {
@@ -256,7 +263,7 @@ const SearchResults = () => {
   // Fetch listings when search parameters change
   useEffect(() => {
     fetchListings();
-  }, [make, model, bodyType, currentPage, currentSort, selectedFeatures]);
+  }, [make, model, bodyType, currentPage, currentSort, selectedFeatures, searchQuery]);
   
   // Toggle feature selection
   const toggleFeature = (category: string, feature: string) => {
@@ -307,6 +314,7 @@ const SearchResults = () => {
     if (make) params.set("make", make);
     if (model) params.set("model", model);
     if (bodyType) params.set("bodyType", bodyType);
+    if (searchQuery) params.set("query", searchQuery);
     params.set("page", "1");
     setSearchParams(params);
   };
@@ -318,6 +326,7 @@ const SearchResults = () => {
     if (values.makeInput) params.set("make", values.makeInput);
     if (values.modelInput) params.set("model", values.modelInput);
     if (values.bodyTypeInput) params.set("bodyType", values.bodyTypeInput);
+    if (values.searchInput) params.set("query", values.searchInput);
     
     params.set("page", "1");
     params.set("sort", currentSort);
@@ -341,6 +350,8 @@ const SearchResults = () => {
       form.setValue("bodyTypeInput", "");
     } else if (param === "bodyType") {
       form.setValue("bodyTypeInput", "");
+    } else if (param === "query") {
+      form.setValue("searchInput", "");
     }
   };
   
@@ -365,7 +376,7 @@ const SearchResults = () => {
         {/* Breadcrumbs */}
         <Breadcrumb className="mb-6">
           <BreadcrumbItem>
-            <BreadcrumbLink as={Link} href="/">
+            <BreadcrumbLink href="/" as={Link} to="/">
               Home
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -378,9 +389,9 @@ const SearchResults = () => {
         {/* Search Summary */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-2">
-            {make || model || bodyType ? (
+            {make || model || bodyType || searchQuery ? (
               <>
-                {make} {model} {bodyType} Cars
+                {make} {model} {bodyType} {searchQuery && `"${searchQuery}"`} Cars
               </>
             ) : (
               "All Cars"
@@ -424,6 +435,14 @@ const SearchResults = () => {
                 </button>
               </div>
             )}
+            {searchQuery && (
+              <div className="bg-[#E5DEFF] text-[#6E59A5] rounded-full px-3 py-1 text-sm flex items-center">
+                <span>Search: {searchQuery}</span>
+                <button onClick={() => clearSearchParam("query")} className="ml-2">
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
         
@@ -432,7 +451,7 @@ const SearchResults = () => {
           <h2 className="text-lg font-semibold mb-4">Refine Search</h2>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(updateSearch)} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <FormField
                   control={form.control}
                   name="makeInput"
@@ -524,6 +543,26 @@ const SearchResults = () => {
                   )}
                 />
               </div>
+              
+              {/* Text search field */}
+              <FormField
+                control={form.control}
+                name="searchInput"
+                render={({ field }) => (
+                  <FormItem className="mb-4">
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          placeholder="Search by make, model, or description..."
+                          className="pl-10"
+                          {...field}
+                        />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                      </div>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
               
               <Button 
                 type="submit" 

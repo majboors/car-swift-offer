@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 
 const SearchForm = () => {
@@ -8,6 +9,7 @@ const SearchForm = () => {
   const [selectedMake, setSelectedMake] = useState("");
   const [selectedModel, setSelectedModel] = useState("");
   const [selectedBodyType, setSelectedBodyType] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   
   const [availableModels, setAvailableModels] = useState([]);
   const [availableBodyTypes, setAvailableBodyTypes] = useState([]);
@@ -77,6 +79,7 @@ const SearchForm = () => {
     if (selectedMake) searchParams.append("make", selectedMake);
     if (selectedModel) searchParams.append("model", selectedModel);
     if (selectedBodyType) searchParams.append("bodyType", selectedBodyType);
+    if (searchQuery) searchParams.append("query", searchQuery);
     
     // Redirect to search results page with query parameters
     navigate({
@@ -134,6 +137,31 @@ const SearchForm = () => {
             ))}
           </select>
         </div>
+        
+        {/* Text search field */}
+        <div className="mb-4 relative">
+          <Input
+            placeholder="Search by make, model, or keywords..."
+            className="pl-10"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <svg 
+            className="absolute left-3 top-3 w-4 h-4 text-gray-500"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={2} 
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </div>
+        
         <Button 
           type="submit" 
           className="bg-[#007ac8] hover:bg-[#0069b4] text-white w-full md:w-auto"
