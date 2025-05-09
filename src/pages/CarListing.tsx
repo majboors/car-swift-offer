@@ -83,6 +83,12 @@ const CarListingPage = () => {
             }
           }
           
+          // Make sure features is not null/undefined, default to empty object
+          if (processedFeatures === null || processedFeatures === undefined) {
+            console.log("Features is null/undefined, defaulting to empty object");
+            processedFeatures = {};
+          }
+          
           // Ensure images is always an array
           const processedImages = Array.isArray(data.images) 
             ? data.images 

@@ -1,4 +1,3 @@
-
 import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, User } from "lucide-react";
@@ -43,13 +42,19 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
   
   // Improved function to flatten features object into an array
   const getFeaturesList = () => {
-    if (!listing.features) {
+    // Early exit if features is null, undefined, or an empty object
+    if (!listing.features) return null;
+    
+    // Handle empty object case
+    if (typeof listing.features === 'object' && 
+        Object.keys(listing.features).length === 0) {
+      console.log("Features is an empty object, returning null");
       return null;
     }
 
     // If features is already a flat array
     if (Array.isArray(listing.features)) {
-      return listing.features;
+      return listing.features.length > 0 ? listing.features : null;
     }
 
     // If features is an object of categories
@@ -60,26 +65,30 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
           ? JSON.parse(listing.features) 
           : listing.features;
         
-        // Flatten the object structure into a single array of features
-        if (featuresObj && Object.keys(featuresObj).length > 0) {
-          // Handle both nested arrays and direct value structures
-          const allFeatures = [];
-          
-          for (const category in featuresObj) {
-            const categoryFeatures = featuresObj[category];
-            if (Array.isArray(categoryFeatures)) {
-              // If the category contains an array of features
-              allFeatures.push(...categoryFeatures);
-            } else if (typeof categoryFeatures === 'string') {
-              // If the category contains a single feature as string
-              allFeatures.push(categoryFeatures);
-            }
-          }
-          
-          return allFeatures.length > 0 ? allFeatures : null;
+        // Handle empty object after parsing
+        if (!featuresObj || Object.keys(featuresObj).length === 0) {
+          console.log("Features object is empty after parsing, returning null");
+          return null;
         }
+        
+        // Flatten the object structure into a single array of features
+        const allFeatures = [];
+        
+        for (const category in featuresObj) {
+          const categoryFeatures = featuresObj[category];
+          if (Array.isArray(categoryFeatures)) {
+            // If the category contains an array of features
+            allFeatures.push(...categoryFeatures);
+          } else if (typeof categoryFeatures === 'string') {
+            // If the category contains a single feature as string
+            allFeatures.push(categoryFeatures);
+          }
+        }
+        
+        return allFeatures.length > 0 ? allFeatures : null;
       } catch (e) {
         console.error("Error parsing features:", e);
+        return null;
       }
     }
 
@@ -167,7 +176,7 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
         </div>
       </div>
 
-      {/* Features section - improved to handle different data structures */}
+      {/* Features section - only show if featuresList exists and is not empty */}
       {featuresList && featuresList.length > 0 && (
         <Card className="mb-6">
           <CardContent className="pt-6">
