@@ -37,536 +37,909 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
-import { ChevronDown, Filter, Loader, Search, X, Package2 } from "lucide-react";
+import { ChevronDown, Filter, Loader, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 
+type SortOption = "price_low" | "price_high" | "year_new" | "year_old" | "newest";
+
 const SearchResults = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [listings, setListings] = useState([]);
-  const [premiumListings, setPremiumListings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [totalCount, setTotalCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchText, setSearchText] = useState(searchParams.get("query") || "");
-  const [selectedMake, setSelectedMake] = useState(searchParams.get("make") || "");
-  const [selectedModel, setSelectedModel] = useState(searchParams.get("model") || "");
-  const [selectedBodyType, setSelectedBodyType] = useState(searchParams.get("bodyType") || "");
-  const [priceRange, setPriceRange] = useState({ min: "", max: "" });
-  const [yearRange, setYearRange] = useState({ min: "", max: "" });
-  const [transmission, setTransmission] = useState("");
-  const [fuelType, setFuelType] = useState("");
-  const [sortBy, setSortBy] = useState("newest");
-  const [showFilters, setShowFilters] = useState(false);
-  
-  // For mobile filter toggle
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  
   const { toast } = useToast();
-  const itemsPerPage = 10; // Number of listings per page
   
+  // Search parameters
+  const make = searchParams.get("make") || "";
+  const model = searchParams.get("model") || "";
+  const bodyType = searchParams.get("bodyType") || "";
+  const searchQuery = searchParams.get("query") || "";
+  const currentPage = parseInt(searchParams.get("page") || "1", 10);
+  const currentSort = (searchParams.get("sort") as SortOption) || "newest";
+  
+  // State
+  const [loading, setLoading] = useState(true);
+  const [totalResults, setTotalResults] = useState(0);
+  const [carListings, setCarListings] = useState<any[]>([]);
+  const [features, setFeatures] = useState<Record<string, string[]>>({});
+  const [selectedFeatures, setSelectedFeatures] = useState<Record<string, string[]>>({});
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [carData, setCarData] = useState<any[]>([]);
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
+  const [availableBodyTypes, setAvailableBodyTypes] = useState<string[]>([]);
+
+  // Form for editing search queries
   const form = useForm({
     defaultValues: {
-      search: searchText
+      makeInput: make,
+      modelInput: model,
+      bodyTypeInput: bodyType,
+      searchInput: searchQuery,
     }
   });
   
+  // Pagination
+  const itemsPerPage = 12;
+  const totalPages = Math.ceil(totalResults / itemsPerPage);
+
+  // Fetch car data for form options
   useEffect(() => {
-    fetchListings();
-  }, [currentPage, searchParams]);
+    fetch('/public.json')
+      .then(response => response.json())
+      .then(data => {
+        setCarData(data);
+      })
+      .catch(error => console.error('Error loading car data:', error));
+  }, []);
   
+  // Update available models when make changes
+  useEffect(() => {
+    if (make) {
+      const models = [...new Set(
+        carData
+          .filter(item => item.car === make)
+          .map(item => item.model)
+      )].sort();
+      
+      setAvailableModels(models);
+    } else {
+      setAvailableModels([]);
+    }
+  }, [make, carData]);
+  
+  // Update available body types when model changes
+  useEffect(() => {
+    if (make && model) {
+      const car = carData.find(
+        item => item.car === make && item.model === model
+      );
+      
+      if (car) {
+        setAvailableBodyTypes(car.body_type);
+      } else {
+        setAvailableBodyTypes([]);
+      }
+    } else {
+      setAvailableBodyTypes([]);
+    }
+  }, [model, make, carData]);
+
+  // Update form values when search params change
+  useEffect(() => {
+    form.setValue("makeInput", make);
+    form.setValue("modelInput", model);
+    form.setValue("bodyTypeInput", bodyType);
+    form.setValue("searchInput", searchQuery);
+  }, [make, model, bodyType, searchQuery, form]);
+  
+  // Fetch available features from car listings
+  const fetchAvailableFeatures = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("car_listings")
+        .select("features");
+      
+      if (error) {
+        console.error("Error fetching features:", error);
+        return;
+      }
+      
+      // Extract all unique features
+      const allFeatures: Record<string, Set<string>> = {};
+      
+      data.forEach(listing => {
+        if (listing.features && typeof listing.features === 'object') {
+          // Handle features as a JSON object
+          Object.entries(listing.features).forEach(([category, featureList]) => {
+            if (!allFeatures[category]) {
+              allFeatures[category] = new Set();
+            }
+            
+            if (Array.isArray(featureList)) {
+              featureList.forEach(feature => {
+                if (typeof feature === 'string') {
+                  allFeatures[category].add(feature);
+                }
+              });
+            }
+          });
+        }
+      });
+      
+      // Convert sets to arrays
+      const processedFeatures: Record<string, string[]> = {};
+      Object.entries(allFeatures).forEach(([category, featureSet]) => {
+        processedFeatures[category] = Array.from(featureSet).sort();
+      });
+      
+      setFeatures(processedFeatures);
+    } catch (error) {
+      console.error("Error processing features:", error);
+    }
+  };
+  
+  // Fetch car listings matching search criteria
   const fetchListings = async () => {
     setLoading(true);
+    
     try {
-      const showFeatured = searchParams.get("showFeatured") !== "false";
-      
-      // Construct the search query
       let query = supabase
         .from("car_listings")
-        .select("*, users(full_name)")
-        .eq("is_active", true)
-        .order("created_at", { ascending: false });
+        .select("*", { count: "exact" });
       
-      // Apply search filters from URL parameters
-      const searchQuery = searchParams.get("query");
-      const makeFilter = searchParams.get("make");
-      const modelFilter = searchParams.get("model");
-      const bodyTypeFilter = searchParams.get("bodyType");
+      // Apply basic filters
+      if (make) {
+        query = query.ilike("make", `%${make}%`);
+      }
       
+      if (model) {
+        query = query.ilike("model", `%${model}%`);
+      }
+      
+      if (bodyType) {
+        query = query.ilike("body_type", `%${bodyType}%`);
+      }
+      
+      // Enhanced text search implementation with better partial matching
       if (searchQuery) {
-        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,make.ilike.%${searchQuery}%,model.ilike.%${searchQuery}%`);
+        // Split the search query into keywords for better partial matching
+        const keywords = searchQuery.toLowerCase().split(/\s+/).filter(word => word.length > 0);
+        
+        if (keywords.length > 0) {
+          console.log("Search using keywords:", keywords);
+          
+          // Use OR conditions to match any of the keywords across all searchable fields
+          let orConditions: string[] = [];
+          
+          // For each keyword, create search conditions across all important fields
+          keywords.forEach(keyword => {
+            // Create a condition for each searchable column
+            const searchableColumns = [
+              "title", "description", "make", "model", "body_type", 
+              "fuel_type", "transmission", "car_name", "color"
+            ];
+            
+            searchableColumns.forEach(column => {
+              orConditions.push(`${column}.ilike.%${keyword}%`);
+            });
+          });
+          
+          // Join all conditions with commas for the OR query
+          if (orConditions.length > 0) {
+            const combinedFilter = orConditions.join(',');
+            console.log("Enhanced combined filter:", combinedFilter);
+            query = query.or(combinedFilter);
+          }
+          
+          console.log("Final query to be executed:", query);
+        }
       }
       
-      if (makeFilter) {
-        query = query.eq("make", makeFilter);
+      // Handle feature filtering - completely client-side approach
+      let shouldApplyFeatureFilters = false;
+      
+      if (Object.keys(selectedFeatures).length > 0) {
+        // Check if we have any selected features
+        for (const category in selectedFeatures) {
+          if (selectedFeatures[category].length > 0) {
+            shouldApplyFeatureFilters = true;
+            break;
+          }
+        }
       }
       
-      if (modelFilter) {
-        query = query.eq("model", modelFilter);
+      // Apply sorting
+      switch (currentSort) {
+        case "price_low":
+          query = query.order("price", { ascending: true });
+          break;
+        case "price_high":
+          query = query.order("price", { ascending: false });
+          break;
+        case "year_new":
+          query = query.order("year", { ascending: false });
+          break;
+        case "year_old":
+          query = query.order("year", { ascending: true });
+          break;
+        case "newest":
+        default:
+          query = query.order("created_at", { ascending: false });
       }
       
-      if (bodyTypeFilter) {
-        query = query.eq("body_type", bodyTypeFilter);
+      // Apply pagination - but only if we're not going to filter by features
+      // Otherwise, we'll do pagination after filtering
+      if (!shouldApplyFeatureFilters) {
+        const from = (currentPage - 1) * itemsPerPage;
+        const to = from + itemsPerPage - 1;
+        query = query.range(from, to);
       }
-
-      // First fetch all premium (package level 3) listings regardless of pagination
-      let premiumQuery = query.eq("package_level", 3);
-      const { data: premiumData } = await premiumQuery;
-      setPremiumListings(premiumData || []);
       
-      // Then fetch regular listings (excluding premium ones for this page)
-      // Apply pagination to regular listings
-      const startIdx = (currentPage - 1) * itemsPerPage;
-      let regularQuery = query.neq("package_level", 3).range(startIdx, startIdx + itemsPerPage - 1);
+      // Execute query
+      const { data, count, error } = await query;
       
-      // Execute the queries
-      const { data: regularData, error, count } = await regularQuery;
+      if (error) {
+        console.error("Error details:", error);
+        throw error;
+      }
       
-      if (error) throw error;
+      // Post-process search for keywords in features - do this client-side since we can't reliably query JSON
+      let filteredData = data || [];
       
-      // Get total count for pagination
-      const { count: totalCount } = await query.neq("package_level", 3).count();
-      setTotalCount(totalCount || 0);
+      // If we have a search query, also filter for matches in the features object
+      if (searchQuery && filteredData.length > 0) {
+        const keywords = searchQuery.toLowerCase().split(/\s+/).filter(word => word.length > 0);
+        
+        if (keywords.length > 0) {
+          // Add this for debugging
+          console.log("Filtering for keywords in features:", keywords);
+          console.log("Initial data count:", filteredData.length);
+          
+          // Additional client-side filtering for features
+          const additionalMatches = filteredData.filter(listing => {
+            if (listing.features) {
+              const featuresStr = JSON.stringify(listing.features).toLowerCase();
+              // Check if any keyword is in the features JSON
+              return keywords.some(keyword => featuresStr.includes(keyword));
+            }
+            return false;  // Don't include if no features
+          });
+          
+          // Add any matches from features to the results if they're not already included
+          additionalMatches.forEach(match => {
+            if (!filteredData.some(item => item.id === match.id)) {
+              filteredData.push(match);
+            }
+          });
+          
+          console.log("After including feature matches:", filteredData.length);
+        }
+      }
       
-      // Set listings data
-      setListings(regularData || []);
+      // If we need to filter by features, do it in memory and then paginate the results
+      if (shouldApplyFeatureFilters && filteredData.length > 0) {
+        console.log("Applying client-side feature filters");
+        
+        filteredData = filteredData.filter(listing => {
+          // Check if the listing has features
+          if (!listing.features) return false;
+          
+          // Check each selected feature category
+          for (const [category, featureList] of Object.entries(selectedFeatures)) {
+            // If this category has no selected features, skip it
+            if (!featureList.length) continue;
+            
+            // Get the features in this category for the current listing
+            const listingFeatures = listing.features[category];
+            
+            // If the listing doesn't have this category, it doesn't match
+            if (!listingFeatures || !Array.isArray(listingFeatures)) return false;
+            
+            // Check if ANY of the selected features in this category are present
+            const hasAnyFeature = featureList.some(selectedFeature => 
+              listingFeatures.includes(selectedFeature)
+            );
+            
+            // If none of the features match, this listing doesn't match
+            if (!hasAnyFeature) return false;
+          }
+          
+          // If we got here, all category checks passed
+          return true;
+        });
+        
+        // Now apply pagination to the filtered results
+        const total = filteredData.length;
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = Math.min(start + itemsPerPage, total);
+        
+        setTotalResults(total);
+        setCarListings(filteredData.slice(start, end));
+      } else {
+        // No feature filtering, just use the data from the query
+        setCarListings(filteredData);
+        setTotalResults(count || filteredData.length || 0);  // Use filteredData.length as fallback
+      }
       
-    } catch (error) {
+      // Debug log to check the results
+      console.log("Search results:", {
+        totalResults: count || filteredData.length || 0,
+        displayedResults: filteredData.length,
+        carListings: filteredData.length > 0 ? "Has data" : "No data"
+      });
+      
+    } catch (error: any) {
       console.error("Error fetching listings:", error);
       toast({
         title: "Error",
-        description: "Failed to fetch listings. Please try again.",
-        variant: "destructive"
+        description: "Failed to load car listings. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
   };
   
-  const handleSearch = (formValues) => {
-    const newParams = new URLSearchParams(searchParams);
+  // Initialize
+  useEffect(() => {
+    fetchAvailableFeatures();
+  }, []);
+  
+  // Fetch listings when search parameters change
+  useEffect(() => {
+    fetchListings();
+  }, [make, model, bodyType, currentPage, currentSort, selectedFeatures, searchQuery]);
+  
+  // Toggle feature selection
+  const toggleFeature = (category: string, feature: string) => {
+    console.log(`Toggling feature: ${category} - ${feature}`);
     
-    if (formValues.search) {
-      newParams.set("query", formValues.search);
+    setSelectedFeatures(prev => {
+      const current = {...prev};
+      
+      if (!current[category]) {
+        current[category] = [];
+      }
+      
+      if (current[category].includes(feature)) {
+        current[category] = current[category].filter(f => f !== feature);
+      } else {
+        current[category] = [...current[category], feature];
+      }
+      
+      console.log("Updated selected features:", current);
+      return current;
+    });
+    
+    // Reset to page 1 when filters change
+    if (currentPage !== 1) {
+      updateSearchParam("page", "1");
+    }
+  };
+  
+  // Update search parameters
+  const updateSearchParam = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams);
+    
+    if (value) {
+      params.set(key, value);
     } else {
-      newParams.delete("query");
+      params.delete(key);
     }
     
-    setSearchParams(newParams);
-    setCurrentPage(1); // Reset to first page on new search
+    setSearchParams(params);
   };
   
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
+  // Handle sorting change
+  const handleSortChange = (option: SortOption) => {
+    updateSearchParam("sort", option);
   };
   
+  // Clear all filters
   const clearFilters = () => {
-    setSearchParams(new URLSearchParams());
-    setSelectedMake("");
-    setSelectedModel("");
-    setSelectedBodyType("");
-    setPriceRange({ min: "", max: "" });
-    setYearRange({ min: "", max: "" });
-    setTransmission("");
-    setFuelType("");
-    setSearchText("");
-    form.reset({ search: "" });
+    setSelectedFeatures({});
+    const params = new URLSearchParams();
+    if (make) params.set("make", make);
+    if (model) params.set("model", model);
+    if (bodyType) params.set("bodyType", bodyType);
+    if (searchQuery) params.set("query", searchQuery);
+    params.set("page", "1");
+    setSearchParams(params);
   };
   
-  const totalPages = Math.ceil(totalCount / itemsPerPage);
+  // Update search queries
+  const updateSearch = (values: any) => {
+    const params = new URLSearchParams();
+    
+    if (values.makeInput) params.set("make", values.makeInput);
+    if (values.modelInput) params.set("model", values.modelInput);
+    if (values.bodyTypeInput) params.set("bodyType", values.bodyTypeInput);
+    if (values.searchInput) params.set("query", values.searchInput);
+    
+    params.set("page", "1");
+    params.set("sort", currentSort);
+    
+    setSearchParams(params);
+  };
   
-  // Get unique makes, models, body types for filters
-  const uniqueMakes = [...new Set(listings.map(listing => listing.make))];
+  // Clear a specific search param
+  const clearSearchParam = (param: string) => {
+    const params = new URLSearchParams(searchParams);
+    params.delete(param);
+    setSearchParams(params);
+    
+    // Update form
+    if (param === "make") {
+      form.setValue("makeInput", "");
+      form.setValue("modelInput", "");
+      form.setValue("bodyTypeInput", "");
+    } else if (param === "model") {
+      form.setValue("modelInput", "");
+      form.setValue("bodyTypeInput", "");
+    } else if (param === "bodyType") {
+      form.setValue("bodyTypeInput", "");
+    } else if (param === "query") {
+      form.setValue("searchInput", "");
+    }
+  };
   
-  // Helper function to format price
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-AU', {
-      style: 'currency',
+  // Format price for display
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-AU', { 
+      style: 'currency', 
       currency: 'AUD',
-      maximumFractionDigits: 0,
+      maximumFractionDigits: 0
     }).format(price);
   };
   
+  // Get unique car makes
+  const carMakes = [...new Set(carData.map(item => item.car))].sort();
+  
+  // Add debug logging to help identify the issue
+  console.log("Search results state:", {
+    loading,
+    totalResults,
+    carListingsLength: carListings.length,
+    currentPage,
+    totalPages
+  });
+  
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen">
+      <TrustedBanner />
       <Navbar />
       
-      {/* Search header */}
-      <div className="bg-[#007ac8] text-white py-8">
-        <div className="container mx-auto px-4">
-          <Form {...form} onSubmit={form.handleSubmit(handleSearch)}>
-            <div className="flex flex-col md:flex-row gap-4">
+      <main className="flex-grow container mx-auto px-4 py-8">
+        {/* Breadcrumbs */}
+        <Breadcrumb className="mb-6">
+          <BreadcrumbItem>
+            <BreadcrumbLink as={Link} to="/">
+              Home
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink>Search Results</BreadcrumbLink>
+          </BreadcrumbItem>
+        </Breadcrumb>
+        
+        {/* Search Summary */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold mb-2">
+            {make || model || bodyType || searchQuery ? (
+              <>
+                {make} {model} {bodyType} {searchQuery && `"${searchQuery}"`} Cars
+              </>
+            ) : (
+              "All Cars"
+            )}
+          </h1>
+          
+          <p className="text-gray-600 mb-4">
+            {loading ? (
+              <span className="flex items-center">
+                <Loader className="w-4 h-4 animate-spin mr-2" />
+                Searching...
+              </span>
+            ) : (
+              `${totalResults} cars found`
+            )}
+          </p>
+          
+          {/* Active filters pills */}
+          <div className="flex flex-wrap gap-2 mt-2">
+            {make && (
+              <div className="bg-[#E5DEFF] text-[#6E59A5] rounded-full px-3 py-1 text-sm flex items-center">
+                <span>Make: {make}</span>
+                <button onClick={() => clearSearchParam("make")} className="ml-2">
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+            {model && (
+              <div className="bg-[#E5DEFF] text-[#6E59A5] rounded-full px-3 py-1 text-sm flex items-center">
+                <span>Model: {model}</span>
+                <button onClick={() => clearSearchParam("model")} className="ml-2">
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+            {bodyType && (
+              <div className="bg-[#E5DEFF] text-[#6E59A5] rounded-full px-3 py-1 text-sm flex items-center">
+                <span>Body type: {bodyType}</span>
+                <button onClick={() => clearSearchParam("bodyType")} className="ml-2">
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+            {searchQuery && (
+              <div className="bg-[#E5DEFF] text-[#6E59A5] rounded-full px-3 py-1 text-sm flex items-center">
+                <span>Search: {searchQuery}</span>
+                <button onClick={() => clearSearchParam("query")} className="ml-2">
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Search Form */}
+        <div className="bg-white rounded-lg shadow-md p-5 mb-6">
+          <h2 className="text-lg font-semibold mb-4">Refine Search</h2>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(updateSearch)} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <FormField
+                  control={form.control}
+                  name="makeInput"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <div className="relative">
+                          <select
+                            className="w-full p-2 border rounded-md pr-8 appearance-none"
+                            {...field}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              const newMake = e.target.value;
+                              if (newMake !== make) {
+                                form.setValue("modelInput", "");
+                                form.setValue("bodyTypeInput", "");
+                              }
+                            }}
+                          >
+                            <option value="">All makes</option>
+                            {carMakes.map((carMake) => (
+                              <option key={carMake} value={carMake}>
+                                {carMake}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none text-gray-500" />
+                        </div>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="modelInput"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <div className="relative">
+                          <select
+                            className="w-full p-2 border rounded-md pr-8 appearance-none"
+                            {...field}
+                            disabled={!form.watch("makeInput")}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              if (e.target.value !== model) {
+                                form.setValue("bodyTypeInput", "");
+                              }
+                            }}
+                          >
+                            <option value="">All models</option>
+                            {availableModels.map((model) => (
+                              <option key={model} value={model}>
+                                {model}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none text-gray-500" />
+                        </div>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="bodyTypeInput"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <div className="relative">
+                          <select
+                            className="w-full p-2 border rounded-md pr-8 appearance-none"
+                            {...field}
+                            disabled={!form.watch("modelInput")}
+                          >
+                            <option value="">All body types</option>
+                            {availableBodyTypes.map((bodyType) => (
+                              <option key={bodyType} value={bodyType}>
+                                {bodyType}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none text-gray-500" />
+                        </div>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              {/* Text search field */}
               <FormField
                 control={form.control}
-                name="search"
+                name="searchInput"
                 render={({ field }) => (
-                  <FormItem className="flex-grow">
+                  <FormItem className="mb-4">
                     <FormControl>
                       <div className="relative">
-                        <Input 
-                          placeholder="Search for cars..." 
-                          className="pl-10 h-12 bg-white text-black" 
+                        <Input
+                          placeholder="Search by make, model, features (electric, leather seats, etc)..."
+                          className="pl-10"
                           {...field}
                         />
-                        <Search className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                       </div>
                     </FormControl>
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="h-12 px-6 bg-white text-[#007ac8] hover:bg-gray-100">
-                Search
+              
+              <Button 
+                type="submit" 
+                className="bg-[#007ac8] hover:bg-[#0069b4] text-white"
+              >
+                <Search className="h-4 w-4 mr-2" />
+                Update Search
               </Button>
-            </div>
+            </form>
           </Form>
         </div>
-      </div>
-      
-      {/* Breadcrumb */}
-      <div className="bg-white border-b">
-        <div className="container mx-auto px-4 py-2">
-          <Breadcrumb className="text-sm">
-            <BreadcrumbItem>
-              <BreadcrumbLink as={Link} to="/">Home</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink>Search Results</BreadcrumbLink>
-            </BreadcrumbItem>
-          </Breadcrumb>
-        </div>
-      </div>
-      
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex flex-col md:flex-row gap-6">
-          {/* Filters sidebar - desktop */}
-          <div className="hidden md:block w-64 shrink-0">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-lg font-semibold">Filters</h2>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={clearFilters}
-                    className="text-sm text-gray-500 hover:text-gray-700"
-                  >
-                    Clear all
-                  </Button>
-                </div>
-                
-                <Accordion type="multiple" className="space-y-4">
-                  {/* Make filter */}
-                  <AccordionItem value="make" className="border-b-0">
-                    <AccordionTrigger className="py-2 text-sm font-medium">
-                      Make
+        
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Mobile Filter Toggle */}
+          <Button 
+            variant="outline" 
+            className="lg:hidden flex items-center justify-between w-full mb-4"
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          >
+            <span className="flex items-center">
+              <Filter className="w-4 h-4 mr-2" /> Filters
+            </span>
+            <ChevronDown className={cn(
+              "w-4 h-4 transition-transform",
+              isSidebarOpen ? "transform rotate-180" : ""
+            )} />
+          </Button>
+          
+          {/* Sidebar Filters */}
+          <div className={cn(
+            "w-full lg:w-64 lg:flex flex-col",
+            isSidebarOpen ? "flex" : "hidden"
+          )}>
+            <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold">Filters</h2>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={clearFilters}
+                  className="text-sm text-blue-600"
+                >
+                  Clear all
+                </Button>
+              </div>
+              
+              <Separator className="mb-4" />
+              
+              {/* Feature filters */}
+              {Object.entries(features).map(([category, featureList]) => (
+                <Accordion type="single" collapsible key={category} className="mb-2">
+                  <AccordionItem value={category} className="border-b-0">
+                    <AccordionTrigger className="py-2 font-medium">
+                      {category}
                     </AccordionTrigger>
-                    <AccordionContent className="pt-1 pb-3">
-                      <div className="space-y-2">
-                        {uniqueMakes.map((make) => (
-                          <div key={make} className="flex items-center">
+                    <AccordionContent>
+                      <div className="space-y-2 pl-2">
+                        {featureList.map((feature) => (
+                          <div key={feature} className="flex items-center space-x-2">
                             <Checkbox 
-                              id={`make-${make}`} 
-                              checked={selectedMake === make}
-                              onCheckedChange={() => {
-                                const newParams = new URLSearchParams(searchParams);
-                                if (selectedMake === make) {
-                                  newParams.delete("make");
-                                  setSelectedMake("");
-                                } else {
-                                  newParams.set("make", make);
-                                  setSelectedMake(make);
-                                }
-                                setSearchParams(newParams);
-                              }}
+                              id={`${category}-${feature}`}
+                              checked={selectedFeatures[category]?.includes(feature) || false}
+                              onCheckedChange={() => toggleFeature(category, feature)}
                             />
                             <label 
-                              htmlFor={`make-${make}`}
-                              className="ml-2 text-sm"
+                              htmlFor={`${category}-${feature}`} 
+                              className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                             >
-                              {make}
+                              {feature}
                             </label>
                           </div>
                         ))}
                       </div>
                     </AccordionContent>
                   </AccordionItem>
-                  
-                  {/* Price Range filter */}
-                  <AccordionItem value="price" className="border-b-0">
-                    <AccordionTrigger className="py-2 text-sm font-medium">
-                      Price Range
-                    </AccordionTrigger>
-                    <AccordionContent className="pt-1 pb-3">
-                      <div className="flex gap-2">
-                        <Input 
-                          placeholder="Min"
-                          value={priceRange.min}
-                          onChange={(e) => setPriceRange({...priceRange, min: e.target.value})}
-                          className="text-sm"
-                        />
-                        <span className="flex items-center">-</span>
-                        <Input 
-                          placeholder="Max"
-                          value={priceRange.max}
-                          onChange={(e) => setPriceRange({...priceRange, max: e.target.value})}
-                          className="text-sm"
-                        />
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                  
-                  {/* Year Range filter */}
-                  <AccordionItem value="year" className="border-b-0">
-                    <AccordionTrigger className="py-2 text-sm font-medium">
-                      Year
-                    </AccordionTrigger>
-                    <AccordionContent className="pt-1 pb-3">
-                      <div className="flex gap-2">
-                        <Input 
-                          placeholder="From"
-                          value={yearRange.min}
-                          onChange={(e) => setYearRange({...yearRange, min: e.target.value})}
-                          className="text-sm"
-                        />
-                        <span className="flex items-center">-</span>
-                        <Input 
-                          placeholder="To"
-                          value={yearRange.max}
-                          onChange={(e) => setYearRange({...yearRange, max: e.target.value})}
-                          className="text-sm"
-                        />
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
                 </Accordion>
-              </CardContent>
-            </Card>
+              ))}
+              
+              {Object.keys(features).length === 0 && !loading && (
+                <p className="text-sm text-gray-500">No filter options available</p>
+              )}
+            </div>
           </div>
           
-          {/* Mobile filters button */}
-          <div className="md:hidden mb-4">
-            <Button 
-              className="w-full flex justify-between items-center"
-              variant="outline"
-              onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
-            >
-              <span className="flex items-center">
-                <Filter className="mr-2 h-4 w-4" />
-                Filters
-              </span>
-              <ChevronDown className={`h-4 w-4 transition-transform ${mobileFiltersOpen ? 'transform rotate-180' : ''}`} />
-            </Button>
-            
-            {mobileFiltersOpen && (
-              <Card className="mt-2">
-                <CardContent className="p-4">
-                  {/* Mobile filters content */}
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-medium">Filters</h3>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={clearFilters}
-                      className="text-xs"
-                    >
-                      Clear all
-                    </Button>
-                  </div>
-                  
-                  {/* Mobile filters */}
-                  {/* You can add mobile-optimized filters here */}
-                </CardContent>
-              </Card>
-            )}
-          </div>
-          
-          {/* Main content */}
-          <div className="flex-grow">
-            {/* Sort and results count */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
-              <p className="text-gray-600 mb-2 md:mb-0">
-                {loading ? "Loading..." : `${totalCount} results found`}
-              </p>
-              <div className="flex items-center">
-                <span className="text-sm text-gray-600 mr-2">Sort by:</span>
+          {/* Search Results */}
+          <div className="flex-1">
+            {/* Sort Options */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 bg-white rounded-lg shadow-md p-3">
+              <div className="flex items-center space-x-2 mb-4 sm:mb-0">
+                <span className="text-sm font-medium">Sort by:</span>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="flex items-center">
-                      {sortBy === "newest" ? "Newest" : 
-                       sortBy === "oldest" ? "Oldest" : 
-                       sortBy === "price_low_high" ? "Price: Low to High" :
-                       "Price: High to Low"}
+                    <Button variant="outline" className="border border-gray-300">
+                      {currentSort === "newest" && "Newest"}
+                      {currentSort === "price_low" && "Price: Low to High"}
+                      {currentSort === "price_high" && "Price: High to Low"}
+                      {currentSort === "year_new" && "Year: Newest First"}
+                      {currentSort === "year_old" && "Year: Oldest First"}
                       <ChevronDown className="ml-2 h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => setSortBy("newest")}>
+                  <DropdownMenuContent className="w-56">
+                    <DropdownMenuItem onClick={() => handleSortChange("newest")} 
+                      className={cn(currentSort === "newest" && "bg-slate-100")}>
                       Newest
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setSortBy("oldest")}>
-                      Oldest
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setSortBy("price_low_high")}>
+                    <DropdownMenuItem onClick={() => handleSortChange("price_low")}
+                      className={cn(currentSort === "price_low" && "bg-slate-100")}>
                       Price: Low to High
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setSortBy("price_high_low")}>
+                    <DropdownMenuItem onClick={() => handleSortChange("price_high")}
+                      className={cn(currentSort === "price_high" && "bg-slate-100")}>
                       Price: High to Low
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleSortChange("year_new")}
+                      className={cn(currentSort === "year_new" && "bg-slate-100")}>
+                      Year: Newest First
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleSortChange("year_old")}
+                      className={cn(currentSort === "year_old" && "bg-slate-100")}>
+                      Year: Oldest First
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
             </div>
             
-            {/* Premium listings section */}
-            {premiumListings.length > 0 && (
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold mb-3 flex items-center">
-                  <Package2 className="mr-2 h-5 w-5 text-[#007ac8]" />
-                  Premium Listings
-                </h2>
-                <div className="space-y-4">
-                  {premiumListings.map(listing => (
-                    <Link to={`/listing/${listing.id}`} key={listing.id}>
-                      <Card className="overflow-hidden hover:shadow-md transition-shadow border-2 border-[#007ac8]/20">
-                        <div className="flex flex-col md:flex-row">
-                          <div className="md:w-1/3 relative">
-                            {/* Listing image */}
-                            <img 
-                              src={listing.images?.[0] || "/placeholder.svg"} 
-                              alt={listing.title}
-                              className="w-full h-48 md:h-full object-cover"
-                            />
-                            
-                            {/* Premium badge */}
-                            <div className="absolute top-2 left-2 bg-[#007ac8] text-white px-2 py-1 rounded-md text-xs font-medium flex items-center">
-                              <Package2 className="mr-1 h-3 w-3" />
-                              Premium
-                            </div>
-                          </div>
-                          
-                          <div className="p-4 md:p-6 md:w-2/3">
-                            <h3 className="text-xl font-bold mb-2">{listing.title}</h3>
-                            <p className="text-lg font-bold text-[#007ac8] mb-2">
-                              {formatPrice(listing.price)}
-                            </p>
-                            
-                            <div className="flex flex-wrap gap-x-6 gap-y-2 mb-4 text-sm text-gray-600">
-                              <div>{listing.year}</div>
-                              <div>{listing.make} {listing.model}</div>
-                              {listing.mileage && <div>{listing.mileage.toLocaleString()} km</div>}
-                              {listing.transmission && <div>{listing.transmission}</div>}
-                              {listing.fuel_type && <div>{listing.fuel_type}</div>}
-                            </div>
-                            
-                            <div className="flex items-center text-sm text-gray-500">
-                              <div>{listing.location || 'Location not specified'}</div>
-                            </div>
-                          </div>
+            {/* Results Grid */}
+            {loading ? (
+              <div className="flex justify-center items-center h-64">
+                <Loader className="w-8 h-8 animate-spin text-blue-600" />
+              </div>
+            ) : (totalResults > 0 && carListings.length > 0) ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {carListings.map((car) => (
+                  <Link to={`/listing/${car.id}`} key={car.id}>
+                    <Card className="h-full hover:shadow-lg transition-shadow border border-transparent hover:border-[#007ac8]">
+                      <div className="aspect-[4/3] relative">
+                        <img 
+                          src={car.images?.[0] || "/placeholder.svg"} 
+                          alt={`${car.make} ${car.model}`} 
+                          className="w-full h-full object-cover rounded-t-lg"
+                        />
+                        <div className="absolute top-0 right-0 bg-[#007ac8] text-white px-3 py-1 m-2 rounded-md font-semibold">
+                          {car.year}
                         </div>
-                      </Card>
-                    </Link>
-                  ))}
-                </div>
-                
-                <Separator className="my-6" />
+                      </div>
+                      <CardContent className="p-4">
+                        <h3 className="font-semibold mb-1 text-lg">
+                          {car.make} {car.model}
+                        </h3>
+                        <div className="flex justify-between items-center">
+                          <p className="text-gray-600 text-sm">
+                            {car.body_type || 'N/A'} • {car.transmission || 'N/A'}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {car.mileage ? `${car.mileage.toLocaleString()} km` : 'N/A'}
+                          </p>
+                        </div>
+                        <p className="text-lg text-[#007ac8] font-bold mt-2">
+                          {formatPrice(car.price)}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+                <h3 className="text-xl font-medium mb-4">No cars match your search criteria</h3>
+                <p className="text-gray-600 mb-6">
+                  Try adjusting your filters or search for something else.
+                </p>
+                <Button 
+                  onClick={clearFilters}
+                  className="bg-[#007ac8] hover:bg-[#0069b4] text-white"
+                >
+                  Clear filters
+                </Button>
               </div>
             )}
             
-            {/* Loading state */}
-            {loading ? (
-              <div className="flex justify-center py-12">
-                <Loader className="h-8 w-8 animate-spin text-gray-400" />
-              </div>
-            ) : (
-              <>
-                {/* Regular listings */}
-                {listings.length === 0 ? (
-                  <div className="text-center py-12">
-                    <h3 className="text-lg font-medium mb-2">No listings found</h3>
-                    <p className="text-gray-500">Try adjusting your search criteria</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {listings.map(listing => (
-                      <Link to={`/listing/${listing.id}`} key={listing.id}>
-                        <Card className="overflow-hidden hover:shadow-md transition-shadow">
-                          <div className="flex flex-col md:flex-row">
-                            <div className="md:w-1/3">
-                              <img 
-                                src={listing.images?.[0] || "/placeholder.svg"} 
-                                alt={listing.title}
-                                className="w-full h-48 md:h-full object-cover"
-                              />
-                            </div>
-                            
-                            <div className="p-4 md:p-6 md:w-2/3">
-                              <h3 className="text-xl font-bold mb-2">{listing.title}</h3>
-                              <p className="text-lg font-bold text-[#007ac8] mb-2">
-                                {formatPrice(listing.price)}
-                              </p>
-                              
-                              <div className="flex flex-wrap gap-x-6 gap-y-2 mb-4 text-sm text-gray-600">
-                                <div>{listing.year}</div>
-                                <div>{listing.make} {listing.model}</div>
-                                {listing.mileage && <div>{listing.mileage.toLocaleString()} km</div>}
-                                {listing.transmission && <div>{listing.transmission}</div>}
-                                {listing.fuel_type && <div>{listing.fuel_type}</div>}
-                              </div>
-                              
-                              <div className="flex items-center text-sm text-gray-500">
-                                <div>{listing.location || 'Location not specified'}</div>
-                              </div>
-                            </div>
-                          </div>
-                        </Card>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-                
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <Pagination className="mt-8">
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious 
-                          onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                          className={cn(currentPage === 1 && "pointer-events-none opacity-50")}
-                        />
-                      </PaginationItem>
-                      
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                        <PaginationItem key={page}>
-                          <PaginationLink 
-                            isActive={page === currentPage}
-                            onClick={() => handlePageChange(page)}
+            {/* Pagination */}
+            {!loading && carListings.length > 0 && totalPages > 1 && (
+              <Pagination className="mt-8">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() => updateSearchParam("page", (currentPage - 1).toString())}
+                      className={cn(currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer")}
+                    />
+                  </PaginationItem>
+                  
+                  {Array.from({ length: totalPages }).map((_, index) => {
+                    const pageNum = index + 1;
+                    
+                    // Show limited page numbers for better UX
+                    if (
+                      pageNum === 1 ||
+                      pageNum === totalPages ||
+                      (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                    ) {
+                      return (
+                        <PaginationItem key={pageNum}>
+                          <PaginationLink
+                            onClick={() => updateSearchParam("page", pageNum.toString())}
+                            isActive={pageNum === currentPage}
                           >
-                            {page}
+                            {pageNum}
                           </PaginationLink>
                         </PaginationItem>
-                      ))}
-                      
-                      <PaginationItem>
-                        <PaginationNext 
-                          onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                          className={cn(currentPage === totalPages && "pointer-events-none opacity-50")}
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
-                )}
-              </>
+                      );
+                    }
+                    
+                    // Show ellipsis for skipped pages
+                    if (
+                      (pageNum === currentPage - 2 && pageNum > 2) ||
+                      (pageNum === currentPage + 2 && pageNum < totalPages - 1)
+                    ) {
+                      return <PaginationItem key={`ellipsis-${pageNum}`}>...</PaginationItem>;
+                    }
+                    
+                    return null;
+                  })}
+                  
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() => updateSearchParam("page", (currentPage + 1).toString())}
+                      className={cn(currentPage >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer")}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             )}
           </div>
         </div>
-      </div>
+      </main>
       
       <Footer />
     </div>
   );
 };
 
-// Add default export to fix the import issue
 export default SearchResults;
