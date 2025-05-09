@@ -110,6 +110,8 @@ const SearchForm = () => {
       searchParams.append("query", normalizedQuery);
     }
     
+    console.log("Submitting search with params:", Object.fromEntries(searchParams.entries()));
+    
     // Redirect to search results page with query parameters
     navigate({
       pathname: "/search",

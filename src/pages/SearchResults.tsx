@@ -216,16 +216,16 @@ const SearchResults = () => {
         );
       }
       
-      // Apply feature filters
+      // Apply feature filters - Fixed approach for feature filtering
       if (Object.keys(selectedFeatures).length > 0) {
-        // We need to build separate filters for each feature and apply them
+        // Handle each feature category separately
         Object.entries(selectedFeatures).forEach(([category, selectedFeatureList]) => {
           if (selectedFeatureList.length > 0) {
-            // Create a filter for each selected feature
+            // For each selected feature in this category
             selectedFeatureList.forEach(feature => {
-              // Use the proper filter format for JSONB containment
-              const jsonPath = `features:${category}`;
-              query = query.contains(jsonPath, [feature]);
+              // Use the contains filter with proper JSON path format
+              // This uses the correct PostgreSQL JSONB syntax
+              query = query.filter(`features->>'${category}'`, 'cs', `{${JSON.stringify(feature).slice(1, -1)}}`);
             });
           }
         });
@@ -255,7 +255,7 @@ const SearchResults = () => {
       const to = from + itemsPerPage - 1;
       
       // Log the query for debugging
-      console.log("Query to be executed:", query);
+      console.log("Final query to be executed:", query);
       
       // Execute query
       const { data, count, error } = await query
