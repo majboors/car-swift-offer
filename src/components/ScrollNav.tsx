@@ -2,7 +2,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
-import { Bell, LayoutDashboard } from "lucide-react";
+import { Bell, LayoutDashboard, MessageSquare } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   NavigationMenu,
@@ -118,9 +118,21 @@ const ScrollNav: React.FC<{ visible: boolean }> = ({ visible }) => {
             ) : user ? (
               <div className="flex items-center gap-2">
                 {/* Dashboard Link */}
-                <Link to="/dashboard" className="flex items-center gap-1 text-xs text-gray-700 hover:text-primary">
-                  <LayoutDashboard className="h-3 w-3" />
+                <Link 
+                  to="/dashboard" 
+                  className="flex items-center gap-1 text-xs text-gray-700 hover:text-primary px-2 py-1 rounded-md hover:bg-gray-100"
+                >
+                  <LayoutDashboard className="h-4 w-4" />
                   <span>Dashboard</span>
+                </Link>
+                
+                {/* Messages Link */}
+                <Link 
+                  to="/dashboard/threads" 
+                  className="flex items-center gap-1 text-xs text-gray-700 hover:text-primary px-2 py-1 rounded-md hover:bg-gray-100"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  <span>Messages</span>
                 </Link>
                 
                 <Link to="/add-listing">

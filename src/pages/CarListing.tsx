@@ -10,6 +10,12 @@ import CarDetails from '@/components/CarDetails';
 import { Chat } from '@/components/chat/Chat';
 import { MessageSquareIcon, X as XIcon } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface CarListing {
   id: string;
@@ -44,6 +50,7 @@ const CarListingPage = () => {
   const [imageLoadErrors, setImageLoadErrors] = useState<boolean[]>([]);
   const [showChat, setShowChat] = useState(false);
   const [showFloatingChat, setShowFloatingChat] = useState(false);
+  const [showChatDialog, setShowChatDialog] = useState(false);
   
   // Calculate if it's the user's own listing
   const isOwnListing = user && listing && user.id === listing.user_id;
@@ -183,6 +190,7 @@ const CarListingPage = () => {
       // If we're opening the main chat, close the floating one
       if (!showChat) {
         setShowFloatingChat(false);
+        setShowChatDialog(false);
       }
     }
   };
@@ -196,11 +204,9 @@ const CarListingPage = () => {
       });
       navigate(`/auth?redirect=${encodeURIComponent(window.location.pathname)}`);
     } else {
-      setShowFloatingChat(!showFloatingChat);
-      // If we're opening the floating chat, close the main one
-      if (!showFloatingChat) {
-        setShowChat(false);
-      }
+      // Open the dialog instead of showing the floating chat directly
+      setShowChatDialog(true);
+      setShowChat(false);
     }
   };
 
@@ -312,10 +318,10 @@ const CarListingPage = () => {
         </div>
         
         {/* Floating chat button on mobile - only for logged in users who don't own the listing */}
-        {!isOwnListing && !showChat && !showFloatingChat && (
+        {!isOwnListing && !showChat && (
           <div className="fixed bottom-6 right-6 z-50">
             <Button 
-              className="rounded-full w-16 h-16 shadow-lg bg-[#007ac8] hover:bg-[#0069b4] text-white"
+              className="rounded-full w-16 h-16 shadow-lg bg-primary hover:bg-primary/90 text-white"
               onClick={toggleFloatingChat}
             >
               <MessageSquareIcon className="h-6 w-6" />
@@ -323,30 +329,27 @@ const CarListingPage = () => {
           </div>
         )}
 
-        {/* New Floating Chat Panel */}
-        {showFloatingChat && user && !isOwnListing && (
-          <div className="fixed bottom-6 right-6 z-50 w-80 rounded-lg shadow-xl">
-            <div className="flex justify-between items-center bg-primary text-white p-2 rounded-t-lg">
-              <h3 className="text-sm font-medium">Chat with Seller</h3>
-              <button 
-                onClick={toggleFloatingChat} 
-                className="p-1 rounded-full hover:bg-primary-dark"
-              >
-                <XIcon className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="h-80 bg-white rounded-b-lg overflow-hidden">
-              <Chat 
-                listingId={listing.id} 
-                receiverId={listing.user_id}
-                onClose={toggleFloatingChat} 
-                className="h-full border-0"
-              />
-            </div>
-          </div>
-        )}
+        {/* Chat Dialog (Modal) */}
+        <Dialog open={showChatDialog} onOpenChange={setShowChatDialog}>
+          <DialogContent className="sm:max-w-md p-0 gap-0 h-[500px]">
+            <DialogHeader className="p-4 bg-primary text-white">
+              <DialogTitle>Chat with Seller</DialogTitle>
+            </DialogHeader>
+            {user && !isOwnListing && (
+              <div className="h-full">
+                <Chat 
+                  listingId={listing.id} 
+                  receiverId={listing.user_id}
+                  onClose={() => setShowChatDialog(false)}
+                  isPopup={true}
+                  className="h-full border-0"
+                />
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
         
-        {/* Main Chat component - only shown when user is logged in */}
+        {/* Main Chat component at the bottom of the page - only shown when user is logged in */}
         {showChat && user && !isOwnListing && (
           <div className="mt-6 border rounded-lg shadow-md">
             <Chat 

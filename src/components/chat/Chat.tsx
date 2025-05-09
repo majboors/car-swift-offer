@@ -21,13 +21,15 @@ interface ChatProps {
   receiverId?: string;
   onClose?: () => void;
   className?: string;
+  isPopup?: boolean;
 }
 
 export const Chat: React.FC<ChatProps> = ({ 
   listingId, 
   receiverId,
   onClose,
-  className = ''
+  className = '',
+  isPopup = false
 }) => {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -35,6 +37,7 @@ export const Chat: React.FC<ChatProps> = ({
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [pollingInterval, setPollingInterval] = useState<number | null>(null);
   
   const fetchMessages = async () => {
@@ -90,10 +93,18 @@ export const Chat: React.FC<ChatProps> = ({
     };
   }, [listingId, user?.id, receiverId]);
   
-  // Scroll to bottom whenever messages change
+  // Scroll to bottom whenever messages change, but only if we're near the bottom already
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    // Only autoscroll if user is already at the bottom or this is a new message they sent
+    if (messagesContainerRef.current) {
+      const container = messagesContainerRef.current;
+      const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+      
+      if (isNearBottom || sending) {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [messages, sending]);
   
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,7 +135,13 @@ export const Chat: React.FC<ChatProps> = ({
       }
       
       setNewMessage('');
-      fetchMessages(); // Fetch messages immediately after sending
+      await fetchMessages(); // Fetch messages immediately after sending
+
+      // Force scroll to bottom after sending a message
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+      
     } catch (error: any) {
       toast({
         title: "Error sending message",
@@ -149,12 +166,12 @@ export const Chat: React.FC<ChatProps> = ({
   };
 
   return (
-    <aside className={`flex flex-col border rounded-lg shadow-md bg-white ${className}`}>
+    <aside className={`flex flex-col border rounded-lg shadow-md bg-white ${isPopup ? 'h-full' : ''} ${className}`}>
       {/* Chat Header */}
-      <div className="flex items-center justify-between p-3 border-b bg-gray-50">
+      <div className="flex items-center justify-between p-3 border-b bg-primary text-white">
         <h2 className="text-lg font-semibold">Conversation</h2>
         {onClose && (
-          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close chat">
+          <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-primary-dark">
             <XIcon className="h-5 w-5" />
           </Button>
         )}
@@ -162,17 +179,25 @@ export const Chat: React.FC<ChatProps> = ({
       
       {/* Messages Container */}
       <div 
+        ref={messagesContainerRef}
         className="flex-grow p-4 overflow-y-auto" 
-        style={{ maxHeight: '400px' }}
+        style={{ maxHeight: isPopup ? '350px' : '400px' }}
         role="log"
         aria-live="polite"
       >
         {loading ? (
           <div className="flex justify-center items-center h-full">
-            <p>Loading messages...</p>
+            <div className="animate-pulse flex space-x-2">
+              <div className="h-2 w-2 bg-primary rounded-full"></div>
+              <div className="h-2 w-2 bg-primary rounded-full"></div>
+              <div className="h-2 w-2 bg-primary rounded-full"></div>
+            </div>
           </div>
         ) : messages.length === 0 ? (
-          <div className="flex justify-center items-center h-full text-gray-500">
+          <div className="flex flex-col justify-center items-center h-full text-gray-500">
+            <div className="bg-gray-100 p-4 rounded-full mb-3">
+              <SendIcon className="h-6 w-6 text-primary" />
+            </div>
             <p>No messages yet. Start the conversation!</p>
           </div>
         ) : (
@@ -185,7 +210,7 @@ export const Chat: React.FC<ChatProps> = ({
                 <div 
                   className={`px-4 py-2 rounded-lg max-w-[80%] ${
                     isOwnMessage(message.sender_id)
-                      ? 'bg-blue-500 text-white'
+                      ? 'bg-primary text-white'
                       : 'bg-gray-100 text-gray-800'
                   }`}
                 >
@@ -222,6 +247,7 @@ export const Chat: React.FC<ChatProps> = ({
           type="submit" 
           disabled={sending || !newMessage.trim()}
           aria-label="Send message"
+          className="bg-primary hover:bg-primary/90"
         >
           <SendIcon className="h-4 w-4 mr-1" />
           Send
@@ -232,3 +258,4 @@ export const Chat: React.FC<ChatProps> = ({
 };
 
 export default Chat;
+
