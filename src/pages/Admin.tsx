@@ -9,7 +9,8 @@ import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminListings } from "@/components/admin/AdminListings";
 import { DashboardCharts } from "@/components/admin/DashboardCharts";
 import ManagePackages from "@/components/admin/ManagePackages";
-import { Loader, BarChart } from "lucide-react";
+import AdminNotifications from "@/components/admin/AdminNotifications";
+import { Loader, BarChart, Bell } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { supabase } from "@/integrations/supabase/client";
@@ -224,10 +225,11 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="listings" className="mt-6">
-          <TabsList className="mb-6 grid w-full grid-cols-3 max-w-md">
+          <TabsList className="mb-6 grid w-full grid-cols-4 max-w-md">
             <TabsTrigger value="listings">Manage Listings</TabsTrigger>
             <TabsTrigger value="packages">Manage Packages</TabsTrigger>
             <TabsTrigger value="users">Manage Users</TabsTrigger>
+            <TabsTrigger value="notifications">Notifications</TabsTrigger>
           </TabsList>
 
           <TabsContent value="listings">
@@ -240,6 +242,10 @@ const Admin = () => {
 
           <TabsContent value="users">
             <AdminUsers />
+          </TabsContent>
+          
+          <TabsContent value="notifications">
+            <AdminNotifications />
           </TabsContent>
         </Tabs>
       </div>

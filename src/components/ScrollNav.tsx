@@ -1,9 +1,9 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Bell, LayoutDashboard, MessageSquare } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import NotificationDropdown from "./NotificationDropdown";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -106,10 +106,7 @@ const ScrollNav: React.FC<{ visible: boolean }> = ({ visible }) => {
         {/* Right Side Utility Buttons */}
         <div className="flex flex-1 items-center justify-end space-x-2">
           <nav className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="mr-1 h-8 w-8">
-              <Bell className="h-4 w-4" />
-              <span className="sr-only">Notifications</span>
-            </Button>
+            {user && <NotificationDropdown />}
             
             {loading ? (
               <Button variant="ghost" size="sm" disabled>

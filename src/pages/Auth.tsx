@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,11 @@ import { toast } from '@/hooks/use-toast';
 import TrustedBanner from '@/components/TrustedBanner';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+const locations = [
+  'ACT', 'NSW', 'NT', 'QLD', 'SA', 'TAS', 'VIC', 'WA'
+];
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -15,7 +20,17 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [location, setLocation] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // Check for redirect parameter in URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get('redirect');
+    if (redirect) {
+      localStorage.setItem('authRedirect', redirect);
+    }
+  }, []);
   
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +44,7 @@ const Auth = () => {
           options: {
             data: {
               username,
+              location,
             }
           }
         });
@@ -54,11 +70,29 @@ const Auth = () => {
         
         console.log("Login successful:", data);
         
+        // Update user location if provided
+        if (location && data.user) {
+          const { error: profileError } = await supabase.from('user_profiles')
+            .upsert({ id: data.user.id, location, updated_at: new Date().toISOString() });
+          
+          if (profileError) {
+            console.error("Error updating location:", profileError);
+          }
+        }
+        
         toast({
           title: "Success!",
           description: "You've been logged in.",
         });
-        navigate('/');
+        
+        // Check for redirect
+        const redirect = localStorage.getItem('authRedirect');
+        if (redirect) {
+          localStorage.removeItem('authRedirect');
+          navigate(redirect);
+        } else {
+          navigate('/');
+        }
       }
     } catch (error: any) {
       console.error("Authentication error:", error);
@@ -143,6 +177,24 @@ const Auth = () => {
                   />
                 </div>
               )}
+              
+              <div className="mb-4">
+                <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+                  Your Location
+                </label>
+                <Select value={location} onValueChange={setLocation}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select your location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {locations.map((loc) => (
+                      <SelectItem key={loc} value={loc}>
+                        {loc}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               
               <div>
                 <label htmlFor="password" className="sr-only">

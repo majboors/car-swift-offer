@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { MobileSidebar } from "./MobileSidebar";
@@ -7,6 +6,8 @@ import { AdminNavLink } from "./AdminNavLink";
 import { Bell, LayoutDashboard } from "lucide-react";
 import { useState, useEffect } from "react";
 import ScrollNav from "./ScrollNav";
+import { useNotifications } from "@/contexts/NotificationsContext";
+import NotificationDropdown from "./NotificationDropdown";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -266,10 +267,7 @@ export function Navbar() {
           {/* Right Side Utility Buttons */}
           <div className="flex flex-1 items-center justify-end space-x-4">
             <nav className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="mr-2">
-                <Bell className="h-5 w-5" />
-                <span className="sr-only">Notifications</span>
-              </Button>
+              {user && <NotificationDropdown />}
               
               {loading ? (
                 <Button variant="ghost" size="sm" disabled>

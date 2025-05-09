@@ -191,6 +191,89 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_global: boolean | null
+          message: string
+          target_locations: string[] | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_global?: boolean | null
+          message: string
+          target_locations?: string[] | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_global?: boolean | null
+          message?: string
+          target_locations?: string[] | null
+          title?: string
+        }
+        Relationships: []
+      }
+      user_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          notification_id: string | null
+          read: boolean | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notification_id?: string | null
+          read?: boolean | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notification_id?: string | null
+          read?: boolean | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_notifications_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_profiles: {
+        Row: {
+          created_at: string
+          id: string
+          location: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          location?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -244,9 +327,24 @@ export type Database = {
           unread_count: number
         }[]
       }
+      get_unread_notification_count: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
       get_user_email: {
         Args: { user_id_input: string }
         Returns: string
+      }
+      get_user_notifications: {
+        Args: { p_user_id: string }
+        Returns: {
+          id: string
+          notification_id: string
+          title: string
+          message: string
+          created_at: string
+          read: boolean
+        }[]
       }
       is_admin: {
         Args: { user_id: string }
@@ -260,9 +358,23 @@ export type Database = {
         }
         Returns: undefined
       }
+      mark_notification_read: {
+        Args: { p_user_id: string; p_notification_id: string }
+        Returns: undefined
+      }
       remove_admin: {
         Args: { user_id_input: string }
         Returns: undefined
+      }
+      send_notification_to_users: {
+        Args: {
+          p_title: string
+          p_message: string
+          p_target_locations: string[]
+          p_is_global: boolean
+          p_admin_id: string
+        }
+        Returns: string
       }
     }
     Enums: {
