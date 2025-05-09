@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
+// Define the types more precisely
 interface CarListing {
   id: string;
   title: string;
@@ -50,7 +51,7 @@ const ShowroomSection = () => {
         }
 
         if (data) {
-          const formattedListings: CarListing[] = data.map(item => ({
+          const formattedListings = data.map(item => ({
             id: item.id,
             title: item.title || `${item.year} ${item.make} ${item.model}`,
             year: item.year,
@@ -59,8 +60,8 @@ const ShowroomSection = () => {
             price: item.price,
             // Handle images properly - convert from any[] to string[]
             images: Array.isArray(item.images) 
-              ? item.images.map(img => String(img))
-              : [],
+              ? item.images.map((img: any) => String(img))
+              : [] as string[],
             showcase: true
           }));
           setShowcaseListings(formattedListings);

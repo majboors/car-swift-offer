@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -79,7 +78,12 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
         features: Array.isArray(item.features) ? item.features.map(f => String(f)) : [],
         images: Array.isArray(item.images) ? item.images.map(img => String(img)) : [],
         // Add showcase flag
-        showcase: item.showcase || false,
+        showcase: typeof item.showcase === 'boolean' ? item.showcase : false,
+        // Add package level
+        package_level: item.package_level || null,
+        // Add other Boolean properties
+        featured: item.featured || false,
+        top_search: item.top_search || false,
       }));
 
       setListings(result);
