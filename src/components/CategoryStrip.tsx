@@ -2,7 +2,7 @@
 import { useState, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import { useNavigate } from "react-router-dom";
 
 const categories = [
   { name: "Family", image: "https://resource.csnstatic.com/mobile/carsales/api/home-categories/Family.png" },
@@ -19,6 +19,7 @@ const CategoryStrip = () => {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const handleScroll = () => {
     if (!carouselRef.current) return;
@@ -38,6 +39,32 @@ const CategoryStrip = () => {
     carouselRef.current.scrollBy({ left: 300, behavior: "smooth" });
   };
 
+  const handleCategoryClick = (category: string) => {
+    const searchParams = new URLSearchParams();
+    
+    // Set specific search parameters based on category
+    switch (category) {
+      case "Family":
+        searchParams.append("query", "family-friendly");
+        break;
+      case "First Car":
+        searchParams.append("query", "beginner-friendly");
+        break;
+      case "Green":
+        searchParams.append("query", "electric hybrid");
+        break;
+      default:
+        searchParams.append("query", category);
+        break;
+    }
+    
+    // Navigate to search results page with query parameters
+    navigate({
+      pathname: "/search",
+      search: searchParams.toString()
+    });
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 relative">
       <div className="relative">
@@ -48,7 +75,11 @@ const CategoryStrip = () => {
           onScroll={handleScroll}
         >
           {categories.map((category) => (
-            <div key={category.name} className="flex flex-col items-center min-w-[160px] flex-shrink-0 cursor-pointer">
+            <div 
+              key={category.name} 
+              className="flex flex-col items-center min-w-[160px] flex-shrink-0 cursor-pointer"
+              onClick={() => handleCategoryClick(category.name)}
+            >
               <div className="w-40 h-40 bg-gray-100 rounded-full flex items-center justify-center mb-3 hover:bg-gray-200 transition-colors">
                 <img 
                   src={category.image} 
