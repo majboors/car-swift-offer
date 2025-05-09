@@ -136,7 +136,8 @@ const Admin = () => {
             return aYearNum - bYearNum;
           }
           
-          // Fix: Explicitly convert month indices to numbers before arithmetic operation
+          // Fixed: Use Number() to explicitly convert month indices to numbers
+          // This fixes the TypeScript error for arithmetic operations
           const aMonthIndex = Number(months.indexOf(aMonth || ''));
           const bMonthIndex = Number(months.indexOf(bMonth || ''));
           
