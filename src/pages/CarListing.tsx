@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -262,30 +261,7 @@ const CarListingPage = () => {
           
           {/* Listing details */}
           <div>
-            <CarDetails listing={listing} />
-            
-            {/* Always show contact button when not own listing */}
-            {!isOwnListing && (
-              <div className="mt-6">
-                <Button 
-                  className="w-full bg-[#007ac8] hover:bg-[#0069b4] text-white flex items-center justify-center gap-2 py-3"
-                  onClick={toggleChat}
-                  size="lg"
-                >
-                  {showChat ? (
-                    <>
-                      <X className="h-5 w-5" />
-                      Close Chat
-                    </>
-                  ) : (
-                    <>
-                      <MessageSquareIcon className="h-5 w-5" />
-                      Contact Seller
-                    </>
-                  )}
-                </Button>
-              </div>
-            )}
+            <CarDetails listing={listing} onContactClick={!isOwnListing ? toggleChat : undefined} />
             
             {/* Chat component - Make sure it's visible when showChat is true */}
             {showChat && !isOwnListing && (

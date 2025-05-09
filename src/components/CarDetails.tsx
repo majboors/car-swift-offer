@@ -1,7 +1,9 @@
 
 import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle2, User } from "lucide-react";
+import { CheckCircle2, User, MessageSquareIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface CarDetailsProps {
   listing: {
@@ -21,10 +23,17 @@ interface CarDetailsProps {
     contact_phone: string | null;
     features: any; // Could be string[], object, or null
     seller_name?: string; // Added seller name property
-  }
+    user_id: string; // Need this to check if it's the owner's listing
+  };
+  onContactClick?: () => void;
 }
 
-const CarDetails = ({ listing }: CarDetailsProps) => {
+const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
+  const { user } = useAuth();
+  
+  // Check if this is the user's own listing
+  const isOwnListing = user && listing.user_id === user.id;
+  
   // Function to flatten features object into an array if needed
   const getFeaturesList = () => {
     if (!listing.features) return null;
@@ -69,10 +78,21 @@ const CarDetails = ({ listing }: CarDetailsProps) => {
           <div className="bg-gray-200 rounded-full p-2 mr-3">
             <User className="h-5 w-5 text-gray-600" />
           </div>
-          <div>
+          <div className="flex-grow">
             <p className="text-sm text-gray-600">Listed by</p>
             <p className="font-medium">{listing.seller_name}</p>
           </div>
+          
+          {/* Contact button - placed in the seller info section for high visibility */}
+          {!isOwnListing && onContactClick && (
+            <Button 
+              onClick={onContactClick}
+              className="bg-[#007ac8] hover:bg-[#0069b4] text-white flex items-center gap-2"
+            >
+              <MessageSquareIcon className="h-4 w-4" />
+              Contact
+            </Button>
+          )}
         </div>
       )}
       
@@ -122,6 +142,20 @@ const CarDetails = ({ listing }: CarDetailsProps) => {
             </div>
           )}
         </div>
+        
+        {/* Prominent contact seller button */}
+        {!isOwnListing && onContactClick && (
+          <div className="mt-6">
+            <Button 
+              onClick={onContactClick}
+              className="w-full bg-[#007ac8] hover:bg-[#0069b4] text-white py-3"
+              size="lg"
+            >
+              <MessageSquareIcon className="mr-2 h-5 w-5" />
+              Contact Seller
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Features section */}
@@ -167,6 +201,18 @@ const CarDetails = ({ listing }: CarDetailsProps) => {
             <p className="text-gray-600">Phone</p>
             <p className="font-medium">{listing.contact_phone}</p>
           </div>
+        )}
+        
+        {/* Another contact button at the bottom for visibility */}
+        {!isOwnListing && onContactClick && (
+          <Button 
+            onClick={onContactClick}
+            className="w-full bg-[#007ac8] hover:bg-[#0069b4] text-white py-3 mt-4"
+            size="lg"
+          >
+            <MessageSquareIcon className="mr-2 h-5 w-5" />
+            Message Seller
+          </Button>
         )}
       </div>
     </div>
