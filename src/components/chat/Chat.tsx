@@ -39,6 +39,7 @@ export const Chat: React.FC<ChatProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [pollingInterval, setPollingInterval] = useState<number | null>(null);
+  const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true);
   
   const fetchMessages = async () => {
     try {
@@ -55,6 +56,11 @@ export const Chat: React.FC<ChatProps> = ({
       }
       
       if (data) {
+        // Only set shouldScrollToBottom if we're getting new messages
+        if (data.length > messages.length) {
+          setShouldScrollToBottom(true);
+        }
+        
         setMessages(data);
         
         // Mark messages as read if the user is the receiver
@@ -93,13 +99,29 @@ export const Chat: React.FC<ChatProps> = ({
     };
   }, [listingId, user?.id, receiverId]);
   
-  // Scroll to bottom whenever messages change
+  // Handle scroll position
   useEffect(() => {
-    // Check if we're in the sending state or if the messages changed
-    if (sending || messages.length > 0) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (shouldScrollToBottom && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      setShouldScrollToBottom(false);
     }
-  }, [messages, sending]);
+  }, [messages, shouldScrollToBottom]);
+  
+  // Set up scroll detection
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    
+    const handleScroll = () => {
+      // Check if user is near bottom (within 100px)
+      const isNearBottom = 
+        container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+      setShouldScrollToBottom(isNearBottom);
+    };
+    
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, []);
   
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,6 +129,7 @@ export const Chat: React.FC<ChatProps> = ({
     if (!newMessage.trim()) return;
     
     setSending(true);
+    setShouldScrollToBottom(true);
     
     try {
       const messageData = {
@@ -131,11 +154,6 @@ export const Chat: React.FC<ChatProps> = ({
       
       setNewMessage('');
       await fetchMessages(); // Fetch messages immediately after sending
-
-      // Force scroll to bottom after sending a message
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
       
     } catch (error: any) {
       toast({
