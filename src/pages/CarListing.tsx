@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -158,6 +159,7 @@ const CarListingPage = () => {
   };
 
   const toggleChat = () => {
+    console.log("Toggle chat clicked, current state:", showChat);
     setShowChat(!showChat);
   };
 
@@ -261,9 +263,27 @@ const CarListingPage = () => {
           
           {/* Listing details */}
           <div>
-            <CarDetails listing={listing} onContactClick={!isOwnListing ? toggleChat : undefined} />
+            {/* Explicitly passing onContactClick prop */}
+            <CarDetails 
+              listing={listing} 
+              onContactClick={!isOwnListing ? toggleChat : undefined} 
+            />
             
-            {/* Chat component - Make sure it's visible when showChat is true */}
+            {/* Add a very visible contact button if not already chatting */}
+            {!isOwnListing && !showChat && (
+              <div className="mt-6">
+                <Button 
+                  onClick={toggleChat}
+                  className="w-full bg-[#007ac8] hover:bg-[#0069b4] text-white py-3"
+                  size="lg"
+                >
+                  <MessageSquareIcon className="mr-2 h-5 w-5" />
+                  Contact Seller
+                </Button>
+              </div>
+            )}
+            
+            {/* Chat component */}
             {showChat && !isOwnListing && (
               <div className="mt-6 border rounded-lg shadow-md">
                 <Chat 

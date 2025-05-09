@@ -65,12 +65,30 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
 
   const featuresList = getFeaturesList();
   
+  // Debug information to verify props
+  console.log("CarDetails: onContactClick prop exists:", !!onContactClick);
+  console.log("CarDetails: isOwnListing:", isOwnListing);
+  
   return (
     <div>
       <h1 className="text-3xl font-bold mb-2">{listing.title}</h1>
       <p className="text-2xl font-bold text-[#007ac8] mb-6">
         {formatCurrency(listing.price)}
       </p>
+      
+      {/* Prominent top contact button for increased visibility */}
+      {!isOwnListing && onContactClick && (
+        <div className="mb-6">
+          <Button 
+            onClick={onContactClick}
+            className="w-full bg-[#007ac8] hover:bg-[#0069b4] text-white py-3"
+            size="lg"
+          >
+            <MessageSquareIcon className="mr-2 h-5 w-5" />
+            Contact Seller Now
+          </Button>
+        </div>
+      )}
       
       {/* Seller information - New section */}
       {listing.seller_name && (
