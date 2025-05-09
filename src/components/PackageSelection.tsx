@@ -14,6 +14,7 @@ interface Package {
   price: number;
   duration_days: number;
   features: string[];
+  active: boolean;
 }
 
 interface PackageSelectionProps {
@@ -36,7 +37,14 @@ const PackageSelection = ({ onSelect, selectedPackageId }: PackageSelectionProps
           .order('level', { ascending: true });
           
         if (error) throw error;
-        setPackages(data || []);
+        
+        // Parse the JSON features field into array when setting packages
+        const parsedPackages = (data || []).map(pkg => ({
+          ...pkg,
+          features: Array.isArray(pkg.features) ? pkg.features : JSON.parse(pkg.features as string)
+        }));
+        
+        setPackages(parsedPackages);
       } catch (error: any) {
         console.error('Error fetching packages:', error.message);
         toast({

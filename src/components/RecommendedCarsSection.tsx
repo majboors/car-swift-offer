@@ -38,7 +38,14 @@ const RecommendedCarsSection = () => {
           .limit(20);
 
         if (error) throw error;
-        setFeaturedCars(data || []);
+        
+        // Parse images coming from the database
+        const parsedCars = (data || []).map(car => ({
+          ...car,
+          images: Array.isArray(car.images) ? car.images : (car.images ? JSON.parse(car.images as string) : null)
+        }));
+        
+        setFeaturedCars(parsedCars);
       } catch (error) {
         console.error("Error fetching featured cars:", error);
       } finally {

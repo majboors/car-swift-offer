@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -79,7 +78,14 @@ const ManagePackages = () => {
         .order("level", { ascending: true });
 
       if (error) throw error;
-      setPackages(data || []);
+      
+      // Parse the features JSON from the database
+      const parsedPackages = (data || []).map(pkg => ({
+        ...pkg,
+        features: Array.isArray(pkg.features) ? pkg.features : JSON.parse(pkg.features as string)
+      }));
+      
+      setPackages(parsedPackages);
     } catch (error: any) {
       toast({
         title: "Error",
