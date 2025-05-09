@@ -259,7 +259,10 @@ const SearchResults = () => {
         {/* Breadcrumbs */}
         <Breadcrumb className="mb-6">
           <BreadcrumbItem>
-            <BreadcrumbLink as={Link} to="/">Home</BreadcrumbLink>
+            {/* Fix: Use href instead of to, and use as Link component */}
+            <BreadcrumbLink asChild>
+              <Link to="/">Home</Link>
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
