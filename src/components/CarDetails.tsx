@@ -1,8 +1,11 @@
 import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle2, User } from "lucide-react";
+import { CheckCircle2, User, Package2, Badge } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { Badge as UIBadge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 
 interface CarDetailsProps {
   listing: {
@@ -23,12 +26,19 @@ interface CarDetailsProps {
     features: any; // Could be string[], object, or null
     seller_name?: string; // Added seller name property
     user_id: string; // Need this to check if it's the owner's listing
+    package_level?: number; // Package level
   };
   onContactClick?: () => void;
 }
 
+interface PackageInfo {
+  name: string;
+  level: number;
+}
+
 const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
   const { user } = useAuth();
+  const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
   
   // Check if this is the user's own listing
   const isOwnListing = user && listing.user_id === user.id;
@@ -39,6 +49,32 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
   if (user) console.log("CarDetails: user:", user.id);
   console.log("CarDetails: listing user_id:", listing.user_id);
   console.log("CarDetails: features data:", listing.features);
+  console.log("CarDetails: package_level:", listing.package_level);
+  
+  useEffect(() => {
+    // If the listing has a package level, fetch the package details
+    const fetchPackageInfo = async () => {
+      if (listing.package_level && listing.package_level > 0) {
+        try {
+          const { data, error } = await supabase
+            .from('listing_packages')
+            .select('name, level')
+            .eq('level', listing.package_level)
+            .single();
+            
+          if (error) throw error;
+          
+          if (data) {
+            setPackageInfo(data);
+          }
+        } catch (error) {
+          console.error("Error fetching package info:", error);
+        }
+      }
+    };
+    
+    fetchPackageInfo();
+  }, [listing.package_level]);
   
   // Enhanced function to flatten features object into an array
   const getFeaturesList = () => {
@@ -138,6 +174,19 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
       <p className="text-2xl font-bold text-[#007ac8] mb-6">
         {formatCurrency(listing.price)}
       </p>
+      
+      {/* Package badge - show if listing has a package */}
+      {packageInfo && (
+        <div className="flex mb-4">
+          <UIBadge 
+            variant="secondary"
+            className="text-sm flex items-center gap-1 bg-[#007ac8]/10 text-[#007ac8] hover:bg-[#007ac8]/20"
+          >
+            <Package2 className="h-3.5 w-3.5" />
+            {packageInfo.name} Package
+          </UIBadge>
+        </div>
+      )}
       
       {/* Seller information with Inquire Now button */}
       {listing.seller_name && (

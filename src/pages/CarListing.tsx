@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,7 +9,7 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import CarDetails from '@/components/CarDetails';
 import { Chat } from '@/components/chat/Chat';
-import { MessageSquareIcon, X as XIcon } from 'lucide-react';
+import { MessageSquareIcon } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   Dialog,
@@ -38,6 +39,7 @@ interface CarListing {
   features: any;
   user_id: string;
   seller_name?: string; // Property for seller name
+  package_level?: number; // Add package_level
 }
 
 const CarListingPage = () => {
@@ -131,7 +133,8 @@ const CarListingPage = () => {
             model: data.model || '',
             title: data.title || `${data.year || ''} ${data.make || ''} ${data.model || ''}`.trim(),
             year: data.year || new Date().getFullYear(),
-            seller_name: sellerName // Add seller name
+            seller_name: sellerName, // Add seller name
+            package_level: data.package_level || 0 // Make sure we pass package_level
           };
           
           console.log("Processed listing for display:", processedListing);
