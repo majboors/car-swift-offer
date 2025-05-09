@@ -58,9 +58,9 @@ const ShowroomSection = () => {
             make: item.make,
             model: item.model,
             price: item.price,
-            // Handle images properly - convert from any[] to string[]
+            // Convert images to string array
             images: Array.isArray(item.images) 
-              ? item.images.map((img: any) => String(img))
+              ? item.images.map(img => String(img))
               : [] as string[],
             showcase: true
           }));
