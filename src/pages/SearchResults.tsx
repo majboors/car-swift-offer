@@ -180,6 +180,7 @@ const SearchResults = () => {
   // Fetch car listings matching search criteria
   const fetchListings = async () => {
     setLoading(true);
+    console.log("Fetching listings with package priority...");
     
     try {
       let query = supabase
@@ -331,11 +332,19 @@ const SearchResults = () => {
         });
       }
 
+      console.log("Before sorting by package level");
+      
       // Custom sort that prioritizes package_level first, followed by the selected sort option
       filteredData.sort((a, b) => {
+        // Log the package levels to verify sorting
+        console.log(`Sorting: Item A package level: ${a.package_level}, Item B package level: ${b.package_level}`);
+        
         // First prioritize by package level (higher levels first)
         const packageDiff = (b.package_level || 0) - (a.package_level || 0);
-        if (packageDiff !== 0) return packageDiff;
+        if (packageDiff !== 0) {
+          console.log(`Package diff: ${packageDiff}, returning it`);
+          return packageDiff;
+        }
         
         // If same package level, apply the selected sort
         switch (currentSort) {
@@ -353,18 +362,28 @@ const SearchResults = () => {
         }
       });
       
+      console.log("After sorting by package level");
+      
       // Now paginate the sorted results
       const total = filteredData.length;
       const start = (currentPage - 1) * itemsPerPage;
       const end = Math.min(start + itemsPerPage, total);
       
+      const paginatedData = filteredData.slice(start, end);
+      
+      // Debug log to check package levels in the paginated results
+      paginatedData.forEach((item, index) => {
+        console.log(`Result ${index}: package_level = ${item.package_level}`);
+      });
+      
       setTotalResults(total);
-      setCarListings(filteredData.slice(start, end));
+      setCarListings(paginatedData);
       
       // Debug log to check the results
       console.log("Search results:", {
         totalResults: total,
-        displayedResults: filteredData.slice(start, end).length,
+        displayedResults: paginatedData.length,
+        withPackageLevel3: paginatedData.filter(item => item.package_level === 3).length,
         carListings: filteredData.length > 0 ? "Has data" : "No data"
       });
       
