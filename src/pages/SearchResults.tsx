@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -376,7 +377,7 @@ const SearchResults = () => {
         {/* Breadcrumbs */}
         <Breadcrumb className="mb-6">
           <BreadcrumbItem>
-            <BreadcrumbLink href="/" as={Link} to="/">
+            <BreadcrumbLink as={Link} to="/">
               Home
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -553,7 +554,7 @@ const SearchResults = () => {
                     <FormControl>
                       <div className="relative">
                         <Input
-                          placeholder="Search by make, model, or description..."
+                          placeholder="Search by make, model, or keywords..."
                           className="pl-10"
                           {...field}
                         />
