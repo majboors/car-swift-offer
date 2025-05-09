@@ -136,8 +136,11 @@ const Admin = () => {
             return aYearNum - bYearNum;
           }
           
-          // If years are the same, compare months by their index in the months array
-          return months.indexOf(aMonth) - months.indexOf(bMonth);
+          // Fix: Ensure the month indices are treated as numbers in the comparison
+          const aMonthIndex = months.indexOf(aMonth);
+          const bMonthIndex = months.indexOf(bMonth);
+          
+          return aMonthIndex - bMonthIndex;
         });
       
       // Calculate active users (users who have logged in)
