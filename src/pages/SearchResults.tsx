@@ -216,18 +216,34 @@ const SearchResults = () => {
         );
       }
       
-      // Apply feature filters - Fixed approach for feature filtering
+      // Apply feature filters - Fixed approach for JSON structure
       if (Object.keys(selectedFeatures).length > 0) {
+        // Create an array to collect all filters
+        const filterConditions = [];
+        
         // Handle each feature category separately
         Object.entries(selectedFeatures).forEach(([category, selectedFeatureList]) => {
           if (selectedFeatureList.length > 0) {
-            // For each selected feature in this category
+            // For each selected feature in this category, add a condition
             selectedFeatureList.forEach(feature => {
-              // Use the contains filter with proper JSON path format
-              // This uses the correct PostgreSQL JSONB syntax
-              query = query.filter(`features->>'${category}'`, 'cs', `{${JSON.stringify(feature).slice(1, -1)}}`);
+              // We need to check if the feature exists in the features->category array
+              // Using containment operator @> for JSONB arrays
+              const featurePath = `features->${JSON.stringify(category)}`;
+              
+              // Add to our filter conditions to be applied later
+              filterConditions.push({
+                column: featurePath,
+                operator: '@>',
+                value: JSON.stringify([feature])
+              });
             });
           }
+        });
+        
+        // Apply all the gathered filter conditions
+        filterConditions.forEach(condition => {
+          console.log(`Applying filter: ${condition.column} ${condition.operator} ${condition.value}`);
+          query = query.filter(condition.column, condition.operator, condition.value);
         });
       }
       
@@ -262,18 +278,19 @@ const SearchResults = () => {
         .range(from, to);
       
       if (error) {
+        console.error("Error details:", error);
         throw error;
       }
       
       setCarListings(data || []);
       setTotalResults(count || 0);
     } catch (error: any) {
+      console.error("Error fetching listings:", error);
       toast({
         title: "Error",
         description: "Failed to load car listings. Please try again.",
         variant: "destructive",
       });
-      console.error("Error fetching listings:", error);
     } finally {
       setLoading(false);
     }
@@ -291,6 +308,8 @@ const SearchResults = () => {
   
   // Toggle feature selection
   const toggleFeature = (category: string, feature: string) => {
+    console.log(`Toggling feature: ${category} - ${feature}`);
+    
     setSelectedFeatures(prev => {
       const current = {...prev};
       
@@ -304,6 +323,7 @@ const SearchResults = () => {
         current[category] = [...current[category], feature];
       }
       
+      console.log("Updated selected features:", current);
       return current;
     });
     
