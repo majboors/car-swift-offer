@@ -68,6 +68,8 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
   // Debug information to verify props
   console.log("CarDetails: onContactClick prop exists:", !!onContactClick);
   console.log("CarDetails: isOwnListing:", isOwnListing);
+  console.log("CarDetails: user:", user?.id);
+  console.log("CarDetails: listing user_id:", listing.user_id);
   
   return (
     <div>

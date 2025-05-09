@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,7 +8,7 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import CarDetails from '@/components/CarDetails';
 import { Chat } from '@/components/chat/Chat';
-import { MessageSquareIcon, X } from 'lucide-react';
+import { MessageSquareIcon } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface CarListing {
@@ -44,7 +43,7 @@ const CarListingPage = () => {
   const [imageLoadErrors, setImageLoadErrors] = useState<boolean[]>([]);
   const [showChat, setShowChat] = useState(false);
   
-  // Skip chat for own listings
+  // Calculate if it's the user's own listing
   const isOwnListing = user && listing && user.id === listing.user_id;
 
   useEffect(() => {
@@ -195,6 +194,11 @@ const CarListingPage = () => {
     );
   }
 
+  // Add additional debug logging to verify the conditions
+  console.log("CarListing - isOwnListing:", isOwnListing);
+  console.log("CarListing - user:", user?.id);
+  console.log("CarListing - listing user_id:", listing?.user_id);
+
   return (
     <div className="flex flex-col min-h-screen">
       <TrustedBanner />
@@ -263,13 +267,13 @@ const CarListingPage = () => {
           
           {/* Listing details */}
           <div>
-            {/* Explicitly passing onContactClick prop */}
+            {/* Always pass the onContactClick prop, but only when it's not the owner's listing */}
             <CarDetails 
               listing={listing} 
               onContactClick={!isOwnListing ? toggleChat : undefined} 
             />
             
-            {/* Add a very visible contact button if not already chatting */}
+            {/* Add another very visible contact button if not already chatting and not own listing */}
             {!isOwnListing && !showChat && (
               <div className="mt-6">
                 <Button 
@@ -296,7 +300,7 @@ const CarListingPage = () => {
           </div>
         </div>
         
-        {/* Always visible floating chat button on mobile */}
+        {/* Always visible floating chat button on mobile when not own listing */}
         {!isOwnListing && !showChat && (
           <div className="fixed bottom-6 right-6 z-50">
             <Button 
