@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +8,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -28,9 +30,17 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
-import { ChevronDown, Filter, Loader } from "lucide-react";
+import { ChevronDown, Filter, Loader, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
 
 type SortOption = "price_low" | "price_high" | "year_new" | "year_old" | "newest";
 
@@ -52,10 +62,71 @@ const SearchResults = () => {
   const [features, setFeatures] = useState<Record<string, string[]>>({});
   const [selectedFeatures, setSelectedFeatures] = useState<Record<string, string[]>>({});
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [carData, setCarData] = useState<any[]>([]);
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
+  const [availableBodyTypes, setAvailableBodyTypes] = useState<string[]>([]);
+
+  // Form for editing search queries
+  const form = useForm({
+    defaultValues: {
+      makeInput: make,
+      modelInput: model,
+      bodyTypeInput: bodyType,
+    }
+  });
   
   // Pagination
   const itemsPerPage = 12;
   const totalPages = Math.ceil(totalResults / itemsPerPage);
+
+  // Fetch car data for form options
+  useEffect(() => {
+    fetch('/public.json')
+      .then(response => response.json())
+      .then(data => {
+        setCarData(data);
+      })
+      .catch(error => console.error('Error loading car data:', error));
+  }, []);
+  
+  // Update available models when make changes
+  useEffect(() => {
+    if (make) {
+      const models = [...new Set(
+        carData
+          .filter(item => item.car === make)
+          .map(item => item.model)
+      )].sort();
+      
+      setAvailableModels(models);
+    } else {
+      setAvailableModels([]);
+    }
+  }, [make, carData]);
+  
+  // Update available body types when model changes
+  useEffect(() => {
+    if (make && model) {
+      const car = carData.find(
+        item => item.car === make && item.model === model
+      );
+      
+      if (car) {
+        setAvailableBodyTypes(car.body_type);
+      } else {
+        setAvailableBodyTypes([]);
+      }
+    } else {
+      setAvailableBodyTypes([]);
+    }
+  }, [model, make, carData]);
+
+  // Update form values when search params change
+  useEffect(() => {
+    form.setValue("makeInput", make);
+    form.setValue("modelInput", model);
+    form.setValue("bodyTypeInput", bodyType);
+  }, [make, model, bodyType, form]);
   
   // Fetch available features from car listings
   const fetchAvailableFeatures = async () => {
@@ -240,6 +311,39 @@ const SearchResults = () => {
     setSearchParams(params);
   };
   
+  // Update search queries
+  const updateSearch = (values: any) => {
+    const params = new URLSearchParams();
+    
+    if (values.makeInput) params.set("make", values.makeInput);
+    if (values.modelInput) params.set("model", values.modelInput);
+    if (values.bodyTypeInput) params.set("bodyType", values.bodyTypeInput);
+    
+    params.set("page", "1");
+    params.set("sort", currentSort);
+    
+    setSearchParams(params);
+  };
+  
+  // Clear a specific search param
+  const clearSearchParam = (param: string) => {
+    const params = new URLSearchParams(searchParams);
+    params.delete(param);
+    setSearchParams(params);
+    
+    // Update form
+    if (param === "make") {
+      form.setValue("makeInput", "");
+      form.setValue("modelInput", "");
+      form.setValue("bodyTypeInput", "");
+    } else if (param === "model") {
+      form.setValue("modelInput", "");
+      form.setValue("bodyTypeInput", "");
+    } else if (param === "bodyType") {
+      form.setValue("bodyTypeInput", "");
+    }
+  };
+  
   // Format price for display
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-AU', { 
@@ -248,6 +352,9 @@ const SearchResults = () => {
       maximumFractionDigits: 0
     }).format(price);
   };
+  
+  // Get unique car makes
+  const carMakes = [...new Set(carData.map(item => item.car))].sort();
   
   return (
     <div className="flex flex-col min-h-screen">
@@ -280,7 +387,7 @@ const SearchResults = () => {
             )}
           </h1>
           
-          <p className="text-gray-600">
+          <p className="text-gray-600 mb-4">
             {loading ? (
               <span className="flex items-center">
                 <Loader className="w-4 h-4 animate-spin mr-2" />
@@ -290,6 +397,143 @@ const SearchResults = () => {
               `${totalResults} cars found`
             )}
           </p>
+          
+          {/* Active filters pills */}
+          <div className="flex flex-wrap gap-2 mt-2">
+            {make && (
+              <div className="bg-[#E5DEFF] text-[#6E59A5] rounded-full px-3 py-1 text-sm flex items-center">
+                <span>Make: {make}</span>
+                <button onClick={() => clearSearchParam("make")} className="ml-2">
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+            {model && (
+              <div className="bg-[#E5DEFF] text-[#6E59A5] rounded-full px-3 py-1 text-sm flex items-center">
+                <span>Model: {model}</span>
+                <button onClick={() => clearSearchParam("model")} className="ml-2">
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+            {bodyType && (
+              <div className="bg-[#E5DEFF] text-[#6E59A5] rounded-full px-3 py-1 text-sm flex items-center">
+                <span>Body type: {bodyType}</span>
+                <button onClick={() => clearSearchParam("bodyType")} className="ml-2">
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Search Form */}
+        <div className="bg-white rounded-lg shadow-md p-5 mb-6">
+          <h2 className="text-lg font-semibold mb-4">Refine Search</h2>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(updateSearch)} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="makeInput"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <div className="relative">
+                          <select
+                            className="w-full p-2 border rounded-md pr-8 appearance-none"
+                            {...field}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              const newMake = e.target.value;
+                              if (newMake !== make) {
+                                form.setValue("modelInput", "");
+                                form.setValue("bodyTypeInput", "");
+                              }
+                            }}
+                          >
+                            <option value="">All makes</option>
+                            {carMakes.map((carMake) => (
+                              <option key={carMake} value={carMake}>
+                                {carMake}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none text-gray-500" />
+                        </div>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="modelInput"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <div className="relative">
+                          <select
+                            className="w-full p-2 border rounded-md pr-8 appearance-none"
+                            {...field}
+                            disabled={!form.watch("makeInput")}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              if (e.target.value !== model) {
+                                form.setValue("bodyTypeInput", "");
+                              }
+                            }}
+                          >
+                            <option value="">All models</option>
+                            {availableModels.map((model) => (
+                              <option key={model} value={model}>
+                                {model}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none text-gray-500" />
+                        </div>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="bodyTypeInput"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <div className="relative">
+                          <select
+                            className="w-full p-2 border rounded-md pr-8 appearance-none"
+                            {...field}
+                            disabled={!form.watch("modelInput")}
+                          >
+                            <option value="">All body types</option>
+                            {availableBodyTypes.map((bodyType) => (
+                              <option key={bodyType} value={bodyType}>
+                                {bodyType}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none text-gray-500" />
+                        </div>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <Button 
+                type="submit" 
+                className="bg-[#007ac8] hover:bg-[#0069b4] text-white"
+              >
+                <Search className="h-4 w-4 mr-2" />
+                Update Search
+              </Button>
+            </form>
+          </Form>
         </div>
         
         <div className="flex flex-col lg:flex-row gap-6">
@@ -313,7 +557,7 @@ const SearchResults = () => {
             "w-full lg:w-64 lg:flex flex-col",
             isSidebarOpen ? "flex" : "hidden"
           )}>
-            <div className="bg-white rounded-lg shadow p-4 mb-6">
+            <div className="bg-white rounded-lg shadow-md p-4 mb-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold">Filters</h2>
                 <Button 
@@ -367,20 +611,43 @@ const SearchResults = () => {
           {/* Search Results */}
           <div className="flex-1">
             {/* Sort Options */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 bg-white rounded-lg shadow-md p-3">
               <div className="flex items-center space-x-2 mb-4 sm:mb-0">
                 <span className="text-sm font-medium">Sort by:</span>
-                <select
-                  className="border rounded-md p-1 text-sm"
-                  value={currentSort}
-                  onChange={(e) => handleSortChange(e.target.value as SortOption)}
-                >
-                  <option value="newest">Newest</option>
-                  <option value="price_low">Price (Low to High)</option>
-                  <option value="price_high">Price (High to Low)</option>
-                  <option value="year_new">Year (Newest First)</option>
-                  <option value="year_old">Year (Oldest First)</option>
-                </select>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="border border-gray-300">
+                      {currentSort === "newest" && "Newest"}
+                      {currentSort === "price_low" && "Price: Low to High"}
+                      {currentSort === "price_high" && "Price: High to Low"}
+                      {currentSort === "year_new" && "Year: Newest First"}
+                      {currentSort === "year_old" && "Year: Oldest First"}
+                      <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    <DropdownMenuItem onClick={() => handleSortChange("newest")} 
+                      className={cn(currentSort === "newest" && "bg-slate-100")}>
+                      Newest
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleSortChange("price_low")}
+                      className={cn(currentSort === "price_low" && "bg-slate-100")}>
+                      Price: Low to High
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleSortChange("price_high")}
+                      className={cn(currentSort === "price_high" && "bg-slate-100")}>
+                      Price: High to Low
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleSortChange("year_new")}
+                      className={cn(currentSort === "year_new" && "bg-slate-100")}>
+                      Year: Newest First
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleSortChange("year_old")}
+                      className={cn(currentSort === "year_old" && "bg-slate-100")}>
+                      Year: Oldest First
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
             
@@ -393,26 +660,31 @@ const SearchResults = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {carListings.map((car) => (
                   <Link to={`/listing/${car.id}`} key={car.id}>
-                    <Card className="h-full hover:shadow-lg transition-shadow">
+                    <Card className="h-full hover:shadow-lg transition-shadow border border-transparent hover:border-[#007ac8]">
                       <div className="aspect-[4/3] relative">
                         <img 
                           src={car.images?.[0] || "/placeholder.svg"} 
                           alt={`${car.make} ${car.model}`} 
                           className="w-full h-full object-cover rounded-t-lg"
                         />
+                        <div className="absolute top-0 right-0 bg-[#007ac8] text-white px-3 py-1 m-2 rounded-md font-semibold">
+                          {car.year}
+                        </div>
                       </div>
                       <CardContent className="p-4">
                         <h3 className="font-semibold mb-1 text-lg">
-                          {car.year} {car.make} {car.model}
+                          {car.make} {car.model}
                         </h3>
-                        <p className="text-gray-600 text-sm mb-2">
-                          {car.body_type || 'N/A'} • {car.transmission || 'N/A'}
-                        </p>
-                        <p className="text-lg text-[#007ac8] font-bold">
+                        <div className="flex justify-between items-center">
+                          <p className="text-gray-600 text-sm">
+                            {car.body_type || 'N/A'} • {car.transmission || 'N/A'}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {car.mileage ? `${car.mileage.toLocaleString()} km` : 'N/A'}
+                          </p>
+                        </div>
+                        <p className="text-lg text-[#007ac8] font-bold mt-2">
                           {formatPrice(car.price)}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {car.mileage ? `${car.mileage.toLocaleString()} km` : 'N/A'}
                         </p>
                       </CardContent>
                     </Card>
