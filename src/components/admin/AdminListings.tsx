@@ -78,7 +78,7 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
         // Convert features and images to string arrays or empty arrays if null
         features: Array.isArray(item.features) ? item.features.map(f => String(f)) : [],
         images: Array.isArray(item.images) ? item.images.map(img => String(img)) : [],
-        // Add showcase flag - safely handle undefined values
+        // Add showcase flag - now that the column exists in the database
         showcase: item.showcase === true,
         // Add package level
         package_level: item.package_level || null,

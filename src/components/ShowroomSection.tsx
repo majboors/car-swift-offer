@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Car } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -60,7 +59,7 @@ const ShowroomSection = () => {
             price: item.price,
             // Convert images to string array
             images: Array.isArray(item.images) 
-              ? item.images.map(img => String(img))
+              ? item.images.map((img: any) => String(img))
               : [] as string[],
             showcase: true
           }));

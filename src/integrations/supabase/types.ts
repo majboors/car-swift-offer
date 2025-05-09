@@ -49,6 +49,7 @@ export type Database = {
           package_expires_at: string | null
           package_level: number | null
           price: number
+          showcase: boolean | null
           status: string
           title: string
           top_search: boolean | null
@@ -78,6 +79,7 @@ export type Database = {
           package_expires_at?: string | null
           package_level?: number | null
           price: number
+          showcase?: boolean | null
           status?: string
           title: string
           top_search?: boolean | null
@@ -107,6 +109,7 @@ export type Database = {
           package_expires_at?: string | null
           package_level?: number | null
           price?: number
+          showcase?: boolean | null
           status?: string
           title?: string
           top_search?: boolean | null
