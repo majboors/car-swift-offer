@@ -1,5 +1,6 @@
+
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import TrustedBanner from '@/components/TrustedBanner';
@@ -37,6 +38,7 @@ interface CarListing {
 const CarListingPage = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [listing, setListing] = useState<CarListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -88,16 +90,18 @@ const CarListingPage = () => {
           
           if (data.user_id) {
             try {
-              // We need a different approach since the get_user_email RPC function isn't in the TypeScript types
-              // Use a direct fetch with HTTP request to get the user email
-              const { data: userData, error: userError } = await supabase.auth.admin.getUserById(
-                data.user_id
-              );
+              // Using a simpler approach to get user information
+              const { data: userData, error: userError } = await supabase
+                .from('profiles')
+                .select('full_name, email')
+                .eq('id', data.user_id)
+                .single();
                 
               if (userError) {
-                console.error("Error fetching seller email:", userError);
-              } else if (userData?.user?.email) {
-                sellerName = userData.user.email;
+                console.error("Error fetching seller profile:", userError);
+                sellerName = `User ${data.user_id.substring(0, 6)}`;
+              } else if (userData) {
+                sellerName = userData.full_name || userData.email || `User ${data.user_id.substring(0, 6)}`;
               }
             } catch (error) {
               console.error("Error fetching seller details:", error);
@@ -158,8 +162,12 @@ const CarListingPage = () => {
   };
 
   const toggleChat = () => {
-    console.log("Toggle chat clicked, current state:", showChat);
-    setShowChat(!showChat);
+    if (!user) {
+      // Redirect to auth page if user is not logged in
+      navigate(`/auth?redirect=${encodeURIComponent(window.location.pathname)}`);
+    } else {
+      setShowChat(!showChat);
+    }
   };
 
   if (loading) {
@@ -193,11 +201,6 @@ const CarListingPage = () => {
       </div>
     );
   }
-
-  // Add additional debug logging to verify the conditions
-  console.log("CarListing - isOwnListing:", isOwnListing);
-  console.log("CarListing - user:", user?.id);
-  console.log("CarListing - listing user_id:", listing?.user_id);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -267,48 +270,33 @@ const CarListingPage = () => {
           
           {/* Listing details */}
           <div>
-            {/* Always pass the onContactClick prop, but only when it's not the owner's listing */}
             <CarDetails 
               listing={listing} 
               onContactClick={!isOwnListing ? toggleChat : undefined} 
             />
-            
-            {/* Add another very visible contact button if not already chatting and not own listing */}
-            {!isOwnListing && !showChat && (
-              <div className="mt-6">
-                <Button 
-                  onClick={toggleChat}
-                  className="w-full bg-[#007ac8] hover:bg-[#0069b4] text-white py-3"
-                  size="lg"
-                >
-                  <MessageSquareIcon className="mr-2 h-5 w-5" />
-                  Contact Seller
-                </Button>
-              </div>
-            )}
-            
-            {/* Chat component */}
-            {showChat && !isOwnListing && (
-              <div className="mt-6 border rounded-lg shadow-md">
-                <Chat 
-                  listingId={listing.id} 
-                  receiverId={listing.user_id}
-                  onClose={() => setShowChat(false)} 
-                />
-              </div>
-            )}
           </div>
         </div>
         
-        {/* Always visible floating chat button on mobile when not own listing */}
+        {/* Floating chat button on mobile - only for logged in users who don't own the listing */}
         {!isOwnListing && !showChat && (
-          <div className="fixed bottom-6 right-6 z-50">
+          <div className="fixed bottom-6 right-6 z-50 md:hidden">
             <Button 
               className="rounded-full w-16 h-16 shadow-lg bg-[#007ac8] hover:bg-[#0069b4] text-white"
               onClick={toggleChat}
             >
               <MessageSquareIcon className="h-6 w-6" />
             </Button>
+          </div>
+        )}
+        
+        {/* Chat component - only shown when user is logged in */}
+        {showChat && user && !isOwnListing && (
+          <div className="mt-6 border rounded-lg shadow-md">
+            <Chat 
+              listingId={listing.id} 
+              receiverId={listing.user_id}
+              onClose={() => setShowChat(false)} 
+            />
           </div>
         )}
       </div>

@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, User, MessageSquareIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface CarDetailsProps {
   listing: {
@@ -65,11 +66,16 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
 
   const featuresList = getFeaturesList();
   
-  // Debug information to verify props
-  console.log("CarDetails: onContactClick prop exists:", !!onContactClick);
-  console.log("CarDetails: isOwnListing:", isOwnListing);
-  console.log("CarDetails: user:", user?.id);
-  console.log("CarDetails: listing user_id:", listing.user_id);
+  // Handle button click for anonymous users
+  const handleInquiryClick = () => {
+    if (!user && onContactClick) {
+      // Redirect to auth page if user is not logged in
+      window.location.href = `/auth?redirect=${encodeURIComponent(window.location.pathname)}`;
+    } else if (onContactClick) {
+      // Execute onContactClick if user is logged in
+      onContactClick();
+    }
+  };
   
   return (
     <div>
@@ -77,20 +83,6 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
       <p className="text-2xl font-bold text-[#007ac8] mb-6">
         {formatCurrency(listing.price)}
       </p>
-      
-      {/* Prominent top contact button for increased visibility */}
-      {!isOwnListing && onContactClick && (
-        <div className="mb-6">
-          <Button 
-            onClick={onContactClick}
-            className="w-full bg-[#007ac8] hover:bg-[#0069b4] text-white py-3"
-            size="lg"
-          >
-            <MessageSquareIcon className="mr-2 h-5 w-5" />
-            Contact Seller Now
-          </Button>
-        </div>
-      )}
       
       {/* Seller information - New section */}
       {listing.seller_name && (
@@ -103,14 +95,13 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
             <p className="font-medium">{listing.seller_name}</p>
           </div>
           
-          {/* Contact button - placed in the seller info section for high visibility */}
-          {!isOwnListing && onContactClick && (
+          {/* "Inquire Now" button - the only button in seller info section */}
+          {!isOwnListing && (
             <Button 
-              onClick={onContactClick}
-              className="bg-[#007ac8] hover:bg-[#0069b4] text-white flex items-center gap-2"
+              onClick={handleInquiryClick}
+              className="bg-[#007ac8] hover:bg-[#0069b4] text-white"
             >
-              <MessageSquareIcon className="h-4 w-4" />
-              Contact
+              Inquire Now
             </Button>
           )}
         </div>
@@ -162,20 +153,6 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
             </div>
           )}
         </div>
-        
-        {/* Prominent contact seller button */}
-        {!isOwnListing && onContactClick && (
-          <div className="mt-6">
-            <Button 
-              onClick={onContactClick}
-              className="w-full bg-[#007ac8] hover:bg-[#0069b4] text-white py-3"
-              size="lg"
-            >
-              <MessageSquareIcon className="mr-2 h-5 w-5" />
-              Contact Seller
-            </Button>
-          </div>
-        )}
       </div>
 
       {/* Features section */}
@@ -217,22 +194,10 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
           </div>
         )}
         {listing.contact_phone && (
-          <div className="mb-4">
+          <div className="mb-3">
             <p className="text-gray-600">Phone</p>
             <p className="font-medium">{listing.contact_phone}</p>
           </div>
-        )}
-        
-        {/* Another contact button at the bottom for visibility */}
-        {!isOwnListing && onContactClick && (
-          <Button 
-            onClick={onContactClick}
-            className="w-full bg-[#007ac8] hover:bg-[#0069b4] text-white py-3 mt-4"
-            size="lg"
-          >
-            <MessageSquareIcon className="mr-2 h-5 w-5" />
-            Message Seller
-          </Button>
         )}
       </div>
     </div>
