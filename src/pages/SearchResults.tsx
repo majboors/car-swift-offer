@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -198,7 +199,7 @@ const SearchResults = () => {
         query = query.ilike("body_type", `%${bodyType}%`);
       }
       
-      // Enhanced text search implementation - improved to search in more fields with better matching
+      // Enhanced text search implementation with better partial matching
       if (searchQuery) {
         // Split the search query into keywords for better partial matching
         const keywords = searchQuery.toLowerCase().split(/\s+/).filter(word => word.length > 0);
@@ -206,27 +207,25 @@ const SearchResults = () => {
         if (keywords.length > 0) {
           console.log("Search using keywords:", keywords);
           
-          // Search across multiple columns without using the problematic ::text casting
-          const filterConditions: string[] = [];
+          // Use OR conditions to match any of the keywords across all searchable fields
+          let orConditions: string[] = [];
           
+          // For each keyword, create search conditions across all important fields
           keywords.forEach(keyword => {
-            // Add conditions for each standard text column
-            filterConditions.push(
-              `title.ilike.%${keyword}%`,
-              `description.ilike.%${keyword}%`,
-              `make.ilike.%${keyword}%`,
-              `model.ilike.%${keyword}%`,
-              `body_type.ilike.%${keyword}%`,
-              `fuel_type.ilike.%${keyword}%`,
-              `transmission.ilike.%${keyword}%`,
-              `car_name.ilike.%${keyword}%`,
-              `color.ilike.%${keyword}%`
-            );
+            // Create a condition for each searchable column
+            const searchableColumns = [
+              "title", "description", "make", "model", "body_type", 
+              "fuel_type", "transmission", "car_name", "color"
+            ];
+            
+            searchableColumns.forEach(column => {
+              orConditions.push(`${column}.ilike.%${keyword}%`);
+            });
           });
           
-          // Combine all keyword filters with OR
-          if (filterConditions.length > 0) {
-            const combinedFilter = filterConditions.join(',');
+          // Join all conditions with commas for the OR query
+          if (orConditions.length > 0) {
+            const combinedFilter = orConditions.join(',');
             console.log("Enhanced combined filter:", combinedFilter);
             query = query.or(combinedFilter);
           }
@@ -291,17 +290,28 @@ const SearchResults = () => {
         const keywords = searchQuery.toLowerCase().split(/\s+/).filter(word => word.length > 0);
         
         if (keywords.length > 0) {
+          // Add this for debugging
+          console.log("Filtering for keywords in features:", keywords);
+          console.log("Initial data count:", filteredData.length);
+          
           // Additional client-side filtering for features
-          filteredData = filteredData.filter(listing => {
-            // If the listing already matched based on standard columns, keep it
-            // If we want to search features too:
+          const additionalMatches = filteredData.filter(listing => {
             if (listing.features) {
               const featuresStr = JSON.stringify(listing.features).toLowerCase();
               // Check if any keyword is in the features JSON
               return keywords.some(keyword => featuresStr.includes(keyword));
             }
-            return true;
+            return false;  // Don't include if no features
           });
+          
+          // Add any matches from features to the results if they're not already included
+          additionalMatches.forEach(match => {
+            if (!filteredData.some(item => item.id === match.id)) {
+              filteredData.push(match);
+            }
+          });
+          
+          console.log("After including feature matches:", filteredData.length);
         }
       }
       
@@ -347,8 +357,16 @@ const SearchResults = () => {
       } else {
         // No feature filtering, just use the data from the query
         setCarListings(filteredData);
-        setTotalResults(count || 0);
+        setTotalResults(count || filteredData.length || 0);  // Use filteredData.length as fallback
       }
+      
+      // Debug log to check the results
+      console.log("Search results:", {
+        totalResults: count || filteredData.length || 0,
+        displayedResults: filteredData.length,
+        carListings: filteredData.length > 0 ? "Has data" : "No data"
+      });
+      
     } catch (error: any) {
       console.error("Error fetching listings:", error);
       toast({
@@ -813,7 +831,7 @@ const SearchResults = () => {
               <div className="flex justify-center items-center h-64">
                 <Loader className="w-8 h-8 animate-spin text-blue-600" />
               </div>
-            ) : totalResults > 0 && carListings.length > 0 ? (
+            ) : (totalResults > 0 && carListings.length > 0) ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {carListings.map((car) => (
                   <Link to={`/listing/${car.id}`} key={car.id}>
