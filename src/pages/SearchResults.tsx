@@ -74,7 +74,7 @@ const SearchResults = () => {
       bodyTypeInput: bodyType,
       searchInput: searchQuery,
     }
-  };
+  });
   
   // Pagination
   const itemsPerPage = 12;
