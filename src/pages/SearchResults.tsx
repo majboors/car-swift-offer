@@ -215,26 +215,18 @@ const SearchResults = () => {
         );
       }
       
-      // Fixed approach for feature filtering using PostgREST's built-in operators
+      // Handle feature filtering - completely client-side approach
+      // We'll fetch all listings that match the basic criteria and then filter in memory
+      let shouldApplyFeatureFilters = false;
+      
       if (Object.keys(selectedFeatures).length > 0) {
-        // Handle each feature category separately
-        Object.entries(selectedFeatures).forEach(([category, selectedFeatureList]) => {
-          if (selectedFeatureList.length > 0) {
-            // For each selected feature, we add a filter condition
-            selectedFeatureList.forEach(feature => {
-              // We need to use a different approach that's compatible with PostgREST's query syntax
-              // Using the contains operator to check if a specific feature exists in the category array
-              const featurePath = category.replace(/\s+/g, ' ');
-              const featureValue = feature.replace(/\s+/g, ' ');
-              
-              console.log(`Adding filter for feature: ${featurePath} - ${featureValue}`);
-              
-              // Check if the feature exists in the JSONB array at the specified path
-              // Using the PostgreSQL JSON containment operator: ?
-              query = query.contains(`features:${featurePath}`, [featureValue]);
-            });
+        // Check if we have any selected features
+        for (const category in selectedFeatures) {
+          if (selectedFeatures[category].length > 0) {
+            shouldApplyFeatureFilters = true;
+            break;
           }
-        });
+        }
       }
       
       // Apply sorting
@@ -256,24 +248,71 @@ const SearchResults = () => {
           query = query.order("created_at", { ascending: false });
       }
       
-      // Apply pagination
-      const from = (currentPage - 1) * itemsPerPage;
-      const to = from + itemsPerPage - 1;
+      // Apply pagination - but only if we're not going to filter by features
+      // Otherwise, we'll do pagination after filtering
+      if (!shouldApplyFeatureFilters) {
+        const from = (currentPage - 1) * itemsPerPage;
+        const to = from + itemsPerPage - 1;
+        query = query.range(from, to);
+      }
       
       // Log the query for debugging
       console.log("Final query to be executed:", query);
       
       // Execute query
-      const { data, count, error } = await query
-        .range(from, to);
+      const { data, count, error } = await query;
       
       if (error) {
         console.error("Error details:", error);
         throw error;
       }
       
-      setCarListings(data || []);
-      setTotalResults(count || 0);
+      // If we need to filter by features, do it in memory and then paginate the results
+      let filteredData = data || [];
+      
+      if (shouldApplyFeatureFilters && filteredData.length > 0) {
+        console.log("Applying client-side feature filters");
+        
+        filteredData = filteredData.filter(listing => {
+          // Check if the listing has features
+          if (!listing.features) return false;
+          
+          // Check each selected feature category
+          for (const [category, selectedFeatures] of Object.entries(selectedFeatures)) {
+            // If this category has no selected features, skip it
+            if (!selectedFeatures.length) continue;
+            
+            // Get the features in this category for the current listing
+            const listingFeatures = listing.features[category];
+            
+            // If the listing doesn't have this category, it doesn't match
+            if (!listingFeatures || !Array.isArray(listingFeatures)) return false;
+            
+            // Check if ANY of the selected features in this category are present
+            const hasAnyFeature = selectedFeatures.some(selectedFeature => 
+              listingFeatures.includes(selectedFeature)
+            );
+            
+            // If none of the features match, this listing doesn't match
+            if (!hasAnyFeature) return false;
+          }
+          
+          // If we got here, all category checks passed
+          return true;
+        });
+        
+        // Now apply pagination to the filtered results
+        const total = filteredData.length;
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = Math.min(start + itemsPerPage, total);
+        
+        setTotalResults(total);
+        setCarListings(filteredData.slice(start, end));
+      } else {
+        // No feature filtering, just use the data from the query
+        setCarListings(filteredData);
+        setTotalResults(count || 0);
+      }
     } catch (error: any) {
       console.error("Error fetching listings:", error);
       toast({
