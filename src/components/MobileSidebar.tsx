@@ -42,41 +42,41 @@ export function MobileSidebar() {
 
   // Navigation items for dropdown menus
   const buyDropdownItems = [
-    { title: "All cars for sale", href: "/cars" },
-    { title: "New cars", href: "/cars/new" },
-    { title: "Used cars", href: "/cars/used" },
-    { title: "Dealer cars", href: "/cars/dealer" },
-    { title: "Private seller cars", href: "/cars/private" },
-    { title: "Electric cars", href: "/cars/electric" },
-    { title: "Finance", href: "/finance" },
-    { title: "Inspections", href: "/inspections" },
+    { title: "All cars for sale", href: "/" },
+    { title: "New cars", href: "/" },
+    { title: "Used cars", href: "/" },
+    { title: "Dealer cars", href: "/" },
+    { title: "Private seller cars", href: "/" },
+    { title: "Electric cars", href: "/" },
+    { title: "Finance", href: "/" },
+    { title: "Inspections", href: "/" },
   ];
 
   const sellDropdownItems = [
-    { title: "Create an ad", href: "/create-ad" },
-    { title: "Get an Instant Offer™", href: "/instant-offer" },
-    { title: "Manage my ad", href: "/manage-ad" },
+    { title: "Create an ad", href: "/" },
+    { title: "Get an Instant Offer™", href: "/" },
+    { title: "Manage my ad", href: "/" },
     { title: "Value my car", href: "/value-my-car" },
   ];
 
   const researchDropdownItems = [
-    { title: "Research all cars", href: "/research" },
-    { title: "All news and reviews", href: "/news-reviews" },
-    { title: "News", href: "/news" },
-    { title: "Reviews", href: "/reviews" },
-    { title: "Advice", href: "/advice" },
-    { title: "Best cars", href: "/best-cars" },
-    { title: "Owner reviews", href: "/owner-reviews" },
-    { title: "Compare cars", href: "/compare" },
-    { title: "Electric cars", href: "/electric" },
-    { title: "Car of the year", href: "/car-of-year" },
+    { title: "Research all cars", href: "/" },
+    { title: "All news and reviews", href: "/" },
+    { title: "News", href: "/" },
+    { title: "Reviews", href: "/" },
+    { title: "Advice", href: "/" },
+    { title: "Best cars", href: "/" },
+    { title: "Owner reviews", href: "/" },
+    { title: "Compare cars", href: "/" },
+    { title: "Electric cars", href: "/" },
+    { title: "Car of the year", href: "/" },
   ];
 
   const showroomDropdownItems = [
-    { title: "Showroom", href: "/showroom" },
-    { title: "Electric cars", href: "/showroom/electric" },
-    { title: "Certified pre-owned", href: "/showroom/certified" },
-    { title: "New car calendar", href: "/showroom/calendar" },
+    { title: "Showroom", href: "/" },
+    { title: "Electric cars", href: "/" },
+    { title: "Certified pre-owned", href: "/" },
+    { title: "New car calendar", href: "/" },
   ];
 
   const popularMakes = [
@@ -87,6 +87,10 @@ export function MobileSidebar() {
   const bodyTypes = [
     "Cab Chassis", "Convertible", "Coupe", "Hatch", "Sedan",
     "SUV", "Ute", "Van", "Wagon"
+  ];
+
+  const locations = [
+    "ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA"
   ];
 
   const handleSignOut = async () => {
@@ -109,11 +113,7 @@ export function MobileSidebar() {
     <div className="h-full bg-white overflow-y-auto">
       <div className="border-b p-4 flex items-center justify-between">
         <Link to="/">
-          <img 
-            src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg" 
-            alt="Car Swift Offer" 
-            className="h-8 w-auto" 
-          />
+          <span className="font-bold inline-block">CarTrade</span>
         </Link>
         {user && (
           <div className="flex items-center gap-2">
@@ -186,6 +186,18 @@ export function MobileSidebar() {
                         className="block py-1.5 text-gray-700 hover:text-[#007ac8]"
                       >
                         {type}
+                      </Link>
+                    ))}
+                  </div>
+                  <div className="pt-2">
+                    <div className="font-medium text-sm py-1">Locations</div>
+                    {locations.slice(0, 5).map((location) => (
+                      <Link 
+                        key={location} 
+                        to="/cars" 
+                        className="block py-1.5 text-gray-700 hover:text-[#007ac8]"
+                      >
+                        {location}
                       </Link>
                     ))}
                   </div>
@@ -378,4 +390,4 @@ export function MobileSidebar() {
       </div>
     </div>
   );
-};
+}
