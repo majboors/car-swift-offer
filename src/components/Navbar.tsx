@@ -1,10 +1,11 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { MobileSidebar } from "./MobileSidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { AdminNavLink } from "./AdminNavLink";
 import { Bell } from "lucide-react";
+import { useState, useEffect } from "react";
+import ScrollNav from "./ScrollNav";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -69,52 +70,171 @@ const locations = [
 
 export function Navbar() {
   const { user, signOut, loading } = useAuth();
+  const [scrolled, setScrolled] = useState(false);
+
+  // Add scroll event listener
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show compact navbar when scrolled past 200px
+      const isScrolled = window.scrollY > 200;
+      if (isScrolled !== scrolled) {
+        setScrolled(isScrolled);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [scrolled]);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 max-w-screen-2xl items-center">
-        <MobileSidebar />
-        <div className="mr-4 hidden md:flex">
-          <Link to="/" className="mr-6 flex items-center space-x-2">
-            <span className="font-bold inline-block">CarTrade</span>
-          </Link>
-          <nav className="hidden md:flex gap-6 items-center">
-            {/* Main Navigation Menu */}
-            <NavigationMenu>
-              <NavigationMenuList>
-                {/* Buy Dropdown */}
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger>Buy</NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="grid grid-cols-3 p-4 w-[800px]">
-                      <div>
-                        <h3 className="font-medium mb-2 text-sm">Primary Links</h3>
-                        <ul className="space-y-2">
-                          {buyDropdownItems.map((item) => (
-                            <li key={item.title}>
-                              <Link to={item.href} className="text-sm hover:text-primary">
-                                {item.title}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <h3 className="font-medium mb-2 text-sm">Popular Makes</h3>
-                        <ul className="grid grid-cols-2 gap-2">
-                          {popularMakes.map((make) => (
-                            <li key={make}>
-                              <Link to="/" className="text-sm hover:text-primary">
-                                {make}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <div className="mb-4">
-                          <h3 className="font-medium mb-2 text-sm">Body Types</h3>
+    <>
+      {/* Compact navbar that appears on scroll */}
+      <ScrollNav visible={scrolled} />
+      
+      {/* Main navbar */}
+      <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-14 max-w-screen-2xl items-center">
+          <MobileSidebar />
+          <div className="mr-4 hidden md:flex">
+            <Link to="/" className="mr-6 flex items-center space-x-2">
+              <img 
+                src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg" 
+                alt="CarTrade"
+                className="h-10 w-auto"
+              />
+            </Link>
+            <nav className="hidden md:flex gap-6 items-center">
+              {/* Main Navigation Menu */}
+              <NavigationMenu>
+                <NavigationMenuList>
+                  {/* Buy Dropdown */}
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger>Buy</NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <div className="grid grid-cols-3 p-4 w-[800px]">
+                        <div>
+                          <h3 className="font-medium mb-2 text-sm">Primary Links</h3>
+                          <ul className="space-y-2">
+                            {buyDropdownItems.map((item) => (
+                              <li key={item.title}>
+                                <Link to={item.href} className="text-sm hover:text-primary">
+                                  {item.title}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h3 className="font-medium mb-2 text-sm">Popular Makes</h3>
                           <ul className="grid grid-cols-2 gap-2">
+                            {popularMakes.map((make) => (
+                              <li key={make}>
+                                <Link to="/" className="text-sm hover:text-primary">
+                                  {make}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <div className="mb-4">
+                            <h3 className="font-medium mb-2 text-sm">Body Types</h3>
+                            <ul className="grid grid-cols-2 gap-2">
+                              {bodyTypes.map((type) => (
+                                <li key={type}>
+                                  <Link to="/" className="text-sm hover:text-primary">
+                                    {type}
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <h3 className="font-medium mb-2 text-sm">Locations</h3>
+                            <ul className="grid grid-cols-2 gap-2">
+                              {locations.map((location) => (
+                                <li key={location}>
+                                  <Link to="/" className="text-sm hover:text-primary">
+                                    {location}
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+
+                  {/* Sell Dropdown */}
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger>Sell</NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <ul className="grid p-4 w-[200px] gap-2">
+                        {sellDropdownItems.map((item) => (
+                          <li key={item.title}>
+                            <Link to={item.href} className="text-sm hover:text-primary">
+                              {item.title}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+
+                  {/* Research Dropdown */}
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger>Research</NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <div className="grid grid-cols-2 p-4 w-[600px]">
+                        <div>
+                          <h3 className="font-medium mb-2 text-sm">Research Links</h3>
+                          <ul className="space-y-2">
+                            {researchDropdownItems.map((item) => (
+                              <li key={item.title}>
+                                <Link to={item.href} className="text-sm hover:text-primary">
+                                  {item.title}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h3 className="font-medium mb-2 text-sm">Popular Makes</h3>
+                          <ul className="grid grid-cols-2 gap-2">
+                            {popularMakes.map((make) => (
+                              <li key={make}>
+                                <Link to="/" className="text-sm hover:text-primary">
+                                  {make}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+
+                  {/* Showroom Dropdown */}
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger>Showroom</NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <div className="grid grid-cols-2 p-4 w-[500px]">
+                        <div>
+                          <h3 className="font-medium mb-2 text-sm">Showroom Links</h3>
+                          <ul className="space-y-2">
+                            {showroomDropdownItems.map((item) => (
+                              <li key={item.title}>
+                                <Link to={item.href} className="text-sm hover:text-primary">
+                                  {item.title}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h3 className="font-medium mb-2 text-sm">Popular Body Types</h3>
+                          <ul className="space-y-2">
                             {bodyTypes.map((type) => (
                               <li key={type}>
                                 <Link to="/" className="text-sm hover:text-primary">
@@ -124,161 +244,67 @@ export function Navbar() {
                             ))}
                           </ul>
                         </div>
-                        <div>
-                          <h3 className="font-medium mb-2 text-sm">Locations</h3>
-                          <ul className="grid grid-cols-2 gap-2">
-                            {locations.map((location) => (
-                              <li key={location}>
-                                <Link to="/" className="text-sm hover:text-primary">
-                                  {location}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
                       </div>
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
 
-                {/* Sell Dropdown */}
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger>Sell</NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <ul className="grid p-4 w-[200px] gap-2">
-                      {sellDropdownItems.map((item) => (
-                        <li key={item.title}>
-                          <Link to={item.href} className="text-sm hover:text-primary">
-                            {item.title}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-
-                {/* Research Dropdown */}
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger>Research</NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="grid grid-cols-2 p-4 w-[600px]">
-                      <div>
-                        <h3 className="font-medium mb-2 text-sm">Research Links</h3>
-                        <ul className="space-y-2">
-                          {researchDropdownItems.map((item) => (
-                            <li key={item.title}>
-                              <Link to={item.href} className="text-sm hover:text-primary">
-                                {item.title}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <h3 className="font-medium mb-2 text-sm">Popular Makes</h3>
-                        <ul className="grid grid-cols-2 gap-2">
-                          {popularMakes.map((make) => (
-                            <li key={make}>
-                              <Link to="/" className="text-sm hover:text-primary">
-                                {make}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-
-                {/* Showroom Dropdown */}
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger>Showroom</NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="grid grid-cols-2 p-4 w-[500px]">
-                      <div>
-                        <h3 className="font-medium mb-2 text-sm">Showroom Links</h3>
-                        <ul className="space-y-2">
-                          {showroomDropdownItems.map((item) => (
-                            <li key={item.title}>
-                              <Link to={item.href} className="text-sm hover:text-primary">
-                                {item.title}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <h3 className="font-medium mb-2 text-sm">Popular Body Types</h3>
-                        <ul className="space-y-2">
-                          {bodyTypes.map((type) => (
-                            <li key={type}>
-                              <Link to="/" className="text-sm hover:text-primary">
-                                {type}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-
-                {/* Value My Car (single link) */}
-                <NavigationMenuItem>
-                  <Link to="/value-my-car" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                    Value my car
-                  </Link>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </NavigationMenu>
-            <AdminNavLink />
-          </nav>
-        </div>
-        
-        {/* Right Side Utility Buttons */}
-        <div className="flex flex-1 items-center justify-end space-x-4">
-          <nav className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="mr-2">
-              <Bell className="h-5 w-5" />
-              <span className="sr-only">Notifications</span>
-            </Button>
-            
-            {loading ? (
-              <Button variant="ghost" size="sm" disabled>
-                Loading...
+                  {/* Value My Car (single link) */}
+                  <NavigationMenuItem>
+                    <Link to="/value-my-car" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                      Value my car
+                    </Link>
+                  </NavigationMenuItem>
+                </NavigationMenuList>
+              </NavigationMenu>
+              <AdminNavLink />
+            </nav>
+          </div>
+          
+          {/* Right Side Utility Buttons */}
+          <div className="flex flex-1 items-center justify-end space-x-4">
+            <nav className="flex items-center gap-2">
+              <Button variant="ghost" size="icon" className="mr-2">
+                <Bell className="h-5 w-5" />
+                <span className="sr-only">Notifications</span>
               </Button>
-            ) : user ? (
-              <div className="flex items-center gap-4">
-                <Link to="/add-listing">
-                  <Button size="sm" className="px-4">
-                    Add Listing
-                  </Button>
-                </Link>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="px-4"
-                  onClick={() => signOut()}
-                >
-                  Log Out
+              
+              {loading ? (
+                <Button variant="ghost" size="sm" disabled>
+                  Loading...
                 </Button>
-              </div>
-            ) : (
-              <>
-                <Link to="/auth">
-                  <Button size="sm" variant="ghost">
-                    Sign In
+              ) : user ? (
+                <div className="flex items-center gap-4">
+                  <Link to="/add-listing">
+                    <Button size="sm" className="px-4">
+                      Add Listing
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="px-4"
+                    onClick={() => signOut()}
+                  >
+                    Log Out
                   </Button>
-                </Link>
-                <Button size="sm" variant="default" className="ml-2">
-                  Sell my car
-                </Button>
-              </>
-            )}
-          </nav>
+                </div>
+              ) : (
+                <>
+                  <Link to="/auth">
+                    <Button size="sm" variant="ghost">
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Button size="sm" variant="default" className="ml-2">
+                    Sell my car
+                  </Button>
+                </>
+              )}
+            </nav>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }
 
