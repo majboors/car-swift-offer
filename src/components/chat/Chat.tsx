@@ -38,11 +38,10 @@ export const Chat: React.FC<ChatProps> = ({
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [pollingInterval, setPollingInterval] = useState<number | null>(null);
-  const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false);
+  const [userScrolled, setUserScrolled] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
-  const [userInitiatedScroll, setUserInitiatedScroll] = useState(false);
   
   const fetchMessages = async () => {
     try {
@@ -59,19 +58,30 @@ export const Chat: React.FC<ChatProps> = ({
       }
       
       if (data) {
-        // Only scroll if:
-        // 1. We're getting new messages after initial load
-        // 2. User is near bottom (handled by scroll handler)
-        // Don't scroll if user has manually scrolled up to read previous messages
-        if (initialLoadComplete && data.length > messages.length && !userInitiatedScroll) {
-          setShouldScrollToBottom(true);
-        }
+        // Check if there are new messages before updating state
+        const hasNewMessages = initialLoadComplete && data.length > messages.length;
         
         setMessages(data);
         
+        // Don't auto-scroll on initial load, only when new messages arrive AND user hasn't scrolled up
         if (!initialLoadComplete) {
           setInitialLoadComplete(true);
-          // Don't auto-scroll on initial load
+        } else if (hasNewMessages && !userScrolled && scrollContainerRef.current) {
+          // Check if user is already near bottom (within 100px)
+          const { scrollHeight, scrollTop, clientHeight } = scrollContainerRef.current;
+          const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+          
+          if (isNearBottom) {
+            // Smoothly scroll to new messages
+            setTimeout(() => {
+              if (messagesEndRef.current) {
+                messagesEndRef.current.scrollIntoView({ 
+                  behavior: 'smooth', 
+                  block: 'end'
+                });
+              }
+            }, 100);
+          }
         }
         
         // Mark messages as read if the user is the receiver
@@ -110,44 +120,33 @@ export const Chat: React.FC<ChatProps> = ({
     };
   }, [listingId, user?.id, receiverId]);
   
-  // Handle scroll position
+  // Initial scroll to bottom after messages load
   useEffect(() => {
-    if (!shouldScrollToBottom || !messagesEndRef.current || userInitiatedScroll) return;
-    
-    // Use scrollIntoView with behavior: 'auto' to prevent page scrolling
-    messagesEndRef.current.scrollIntoView({ 
-      behavior: 'auto', 
-      block: 'end',
-      inline: 'nearest'
-    });
-    
-    setShouldScrollToBottom(false);
-  }, [messages, shouldScrollToBottom, userInitiatedScroll]);
+    if (initialLoadComplete && !userScrolled && messagesEndRef.current && messages.length > 0) {
+      // Use setTimeout to ensure DOM has updated
+      setTimeout(() => {
+        if (messagesEndRef.current) {
+          messagesEndRef.current.scrollIntoView({ behavior: 'auto' });
+        }
+      }, 100);
+    }
+  }, [initialLoadComplete, messages.length]);
   
-  // Set up scroll detection
-  useEffect(() => {
-    const container = messagesContainerRef.current;
-    if (!container) return;
+  // Handle scroll events
+  const handleScroll = () => {
+    if (!scrollContainerRef.current) return;
     
-    const handleScroll = () => {
-      // Check if user is near bottom (within 100px)
-      const isNearBottom = 
-        container.scrollHeight - container.scrollTop - container.clientHeight < 100;
-      
-      // If user scrolls up, set userInitiatedScroll to true
-      if (!isNearBottom) {
-        setUserInitiatedScroll(true);
-      } else {
-        // If user scrolls to bottom, reset userInitiatedScroll
-        setUserInitiatedScroll(false);
-      }
-      
-      setShouldScrollToBottom(isNearBottom);
-    };
+    const { scrollHeight, scrollTop, clientHeight } = scrollContainerRef.current;
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
     
-    container.addEventListener('scroll', handleScroll);
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, []);
+    // If user scrolls up more than 100px from bottom, mark as user scrolled
+    if (distanceFromBottom > 100) {
+      setUserScrolled(true);
+    } else {
+      // If user scrolls back to bottom, reset userScrolled
+      setUserScrolled(false);
+    }
+  };
   
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,23 +176,25 @@ export const Chat: React.FC<ChatProps> = ({
         return;
       }
       
+      // Clear the input field immediately
       setNewMessage('');
-      await fetchMessages(); // Fetch messages immediately after sending
       
-      // Only scroll after sending if the container exists and the user hasn't scrolled up
-      if (messagesContainerRef.current && !userInitiatedScroll) {
-        // Use requestAnimationFrame to ensure the DOM has updated
-        requestAnimationFrame(() => {
-          // Scroll the message container not the whole page
-          if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ 
-              behavior: 'auto',
-              block: 'end',
-              inline: 'nearest'
-            });
-          }
-        });
-      }
+      // Fetch new messages
+      await fetchMessages();
+      
+      // Reset userScrolled to scroll to the bottom after sending
+      setUserScrolled(false);
+      
+      // Scroll to bottom smoothly - but contained within the chat area
+      setTimeout(() => {
+        if (messagesEndRef.current && scrollContainerRef.current) {
+          // Using scrollIntoView with the container's scrolling
+          messagesEndRef.current.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'end'
+          });
+        }
+      }, 100);
       
     } catch (error: any) {
       toast({
@@ -232,11 +233,12 @@ export const Chat: React.FC<ChatProps> = ({
       
       {/* Messages Container */}
       <div 
-        ref={messagesContainerRef}
+        ref={scrollContainerRef}
         className="flex-grow p-4 overflow-y-auto" 
         style={{ maxHeight: isPopup ? '350px' : '400px' }}
         role="log"
         aria-live="polite"
+        onScroll={handleScroll}
       >
         {loading ? (
           <div className="flex justify-center items-center h-full">
