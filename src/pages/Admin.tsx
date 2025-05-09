@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -126,9 +127,14 @@ const Admin = () => {
           const [aMonth, aYear] = a.name.split(' ');
           const [bMonth, bYear] = b.name.split(' ');
           
-          // Compare years first - using parseInt to ensure numeric comparison
-          const yearDiff = parseInt(aYear) - parseInt(bYear);
-          if (yearDiff !== 0) return yearDiff;
+          // Fix: Convert string years to numbers for arithmetic comparison
+          const aYearNum = parseInt(aYear || '0', 10);
+          const bYearNum = parseInt(bYear || '0', 10);
+          
+          // Compare years first - using parsed integers for comparison
+          if (aYearNum !== bYearNum) {
+            return aYearNum - bYearNum;
+          }
           
           // If years are the same, compare months by their index in the months array
           return months.indexOf(aMonth) - months.indexOf(bMonth);
