@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
@@ -18,6 +17,7 @@ import {
   Tooltip
 } from "recharts";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 
 interface AdminStat {
   name: string;
@@ -32,6 +32,7 @@ interface DashboardChartsProps {
   totalUsers: number;
   totalListings: number;
   activeUsers: number;
+  pendingListings?: number; // New prop for pending listings
 }
 
 export const DashboardCharts = ({
@@ -40,7 +41,8 @@ export const DashboardCharts = ({
   listingsByMonth,
   totalUsers,
   totalListings,
-  activeUsers
+  activeUsers,
+  pendingListings = 0
 }: DashboardChartsProps) => {
   const [chartType, setChartType] = useState<'listings' | 'users'>('listings');
   
@@ -48,6 +50,8 @@ export const DashboardCharts = ({
     { name: "Total Users", value: totalUsers, color: "#9b87f5" },
     { name: "Active Users", value: activeUsers, color: "#7E69AB" },
     { name: "Total Listings", value: totalListings, color: "#D946EF" },
+    // Add pending listings stat card
+    { name: "Pending Listings", value: pendingListings, color: "#F97316" },
   ];
 
   const COLORS = ["#9b87f5", "#7E69AB", "#6E59A5", "#F97316", "#0EA5E9", "#F0ABFC", "#42CCC8", "#6366F1", "#5EEAD4"];
@@ -55,12 +59,17 @@ export const DashboardCharts = ({
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         {statCards.map((stat, index) => (
           <Card key={index} className="border-l-4" style={{ borderLeftColor: stat.color }}>
             <CardHeader className="pb-2">
               <CardDescription>{stat.name}</CardDescription>
-              <CardTitle className="text-2xl">{stat.value}</CardTitle>
+              <CardTitle className="text-2xl flex items-center">
+                {stat.value}
+                {stat.name === "Pending Listings" && stat.value > 0 && (
+                  <Badge className="ml-2 bg-amber-500">Needs Review</Badge>
+                )}
+              </CardTitle>
             </CardHeader>
           </Card>
         ))}

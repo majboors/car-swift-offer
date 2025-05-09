@@ -1,3 +1,4 @@
+
 // src/pages/Admin.tsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +25,7 @@ interface DashboardData {
   totalUsers: number;
   totalListings: number;
   activeUsers: number;
+  pendingListings: number; // Added pending listings count
 }
 
 const Admin = () => {
@@ -37,6 +39,7 @@ const Admin = () => {
     totalUsers: 0,
     totalListings: 0,
     activeUsers: 0,
+    pendingListings: 0, // Initialize pending listings count
   });
 
   useEffect(() => {
@@ -95,6 +98,9 @@ const Admin = () => {
       const { data: users, error: usersError } = await supabase.rpc("get_all_users");
       if (usersError) throw usersError;
 
+      // Count pending listings
+      const pendingListings = listings?.filter(listing => listing.status === 'pending').length || 0;
+
       // Process listings by make
       const makeCount: Record<string, number> = {};
       listings?.forEach((listing) => {
@@ -131,6 +137,7 @@ const Admin = () => {
         monthCount[monthYear] = (monthCount[monthYear] || 0) + 1;
       });
 
+      // Fix for TypeScript error with month sorting
       const getMonthIndex = (monthName: string): number => {
         const idx = months.indexOf(monthName);
         return idx !== -1 ? idx : -1;
@@ -141,10 +148,18 @@ const Admin = () => {
         .sort((a, b) => {
           const [aMonth, aYear] = a.name.split(" ");
           const [bMonth, bYear] = b.name.split(" ");
+          
           const aYearNum = parseInt(aYear, 10);
           const bYearNum = parseInt(bYear, 10);
-          if (aYearNum !== bYearNum) return aYearNum - bYearNum;
-          return getMonthIndex(aMonth) - getMonthIndex(bMonth);
+          
+          if (aYearNum !== bYearNum) {
+            return aYearNum - bYearNum;
+          }
+          
+          const aMonthIndex = getMonthIndex(aMonth);
+          const bMonthIndex = getMonthIndex(bMonth);
+          
+          return aMonthIndex - bMonthIndex;
         });
 
       const activeUsers = users?.filter((u) => u.last_sign_in_at !== null).length || 0;
@@ -156,6 +171,7 @@ const Admin = () => {
         totalUsers: users?.length || 0,
         totalListings: listings?.length || 0,
         activeUsers,
+        pendingListings,
       });
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
@@ -213,7 +229,7 @@ const Admin = () => {
           </TabsList>
 
           <TabsContent value="listings">
-            <AdminListings />
+            <AdminListings onListingStatusChange={fetchDashboardData} />
           </TabsContent>
 
           <TabsContent value="users">

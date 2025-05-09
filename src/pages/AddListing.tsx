@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -77,6 +76,9 @@ const AddListing = () => {
     contact_email: '',
     contact_phone: '',
   });
+  
+  const [submissionSuccess, setSubmissionSuccess] = useState<boolean>(false);
+  const [submittedListingId, setSubmittedListingId] = useState<string | null>(null);
   
   useEffect(() => {
     // Wait for auth to finish loading before checking
@@ -295,6 +297,7 @@ const AddListing = () => {
         contact_phone: formData.contact_phone || null,
         features: Object.keys(featuresData).length > 0 ? featuresData : null,
         images: imageUrls,
+        status: 'pending', // Set status as pending for new listings
       };
 
       console.log("Final listing data to be inserted:", listingData);
@@ -310,12 +313,15 @@ const AddListing = () => {
 
       console.log("Listing created successfully:", data);
       
+      // Set submission success state
+      setSubmissionSuccess(true);
+      setSubmittedListingId(data.id);
+      
       toast({
         title: "Success!",
-        description: "Your listing has been added successfully.",
+        description: "Your listing has been submitted for review.",
       });
       
-      navigate(`/listing/${data.id}`);
     } catch (error: any) {
       console.error("Error adding listing:", error);
       toast({
@@ -476,6 +482,7 @@ const AddListing = () => {
         contact_phone: '0412345678',
         features: featuresData,
         images: imageUrls,
+        status: 'pending', // Set status as pending for test listings
       };
       
       console.log("Final test listing data:", listingData);
@@ -494,12 +501,15 @@ const AddListing = () => {
       
       console.log("Test listing created successfully:", data);
       
+      // Set submission success state
+      setSubmissionSuccess(true);
+      setSubmittedListingId(data.id);
+      
       toast({
         title: "Test Listing Created!",
-        description: "Your test listing has been added successfully.",
+        description: "Your test listing has been submitted for review.",
       });
       
-      navigate(`/listing/${data.id}`);
     } catch (error: any) {
       console.error("Error adding test listing:", error);
       toast({
@@ -532,7 +542,85 @@ const AddListing = () => {
     );
   }
 
-  // If not loading and no user, this will be caught by the useEffect and redirected
+  // Add a success submission screen
+  if (submissionSuccess) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <TrustedBanner />
+        <Navbar />
+        
+        <div className="flex-grow container mx-auto px-4 py-12">
+          <div className="max-w-2xl mx-auto text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-6">
+              <Check className="h-8 w-8 text-green-600" />
+            </div>
+            
+            <h1 className="text-3xl font-bold mb-4">Listing Submitted Successfully!</h1>
+            
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+              <p className="text-amber-700 mb-2">
+                <strong>Your listing is now pending review.</strong>
+              </p>
+              <p className="text-amber-600">
+                Our team will review your listing shortly. You'll be notified when your listing is approved and becomes visible to other users.
+              </p>
+            </div>
+            
+            <div className="flex flex-col gap-4 sm:flex-row sm:justify-center mt-8">
+              {submittedListingId && (
+                <Button
+                  onClick={() => navigate(`/listing/${submittedListingId}`)}
+                  className="bg-[#007ac8] hover:bg-[#0069b4]"
+                >
+                  View My Listing
+                </Button>
+              )}
+              
+              <Button
+                onClick={() => {
+                  // Reset form and states
+                  setSubmissionSuccess(false);
+                  setSubmittedListingId(null);
+                  setFormData({
+                    car_name: '',
+                    title: '',
+                    make: '',
+                    model: '',
+                    year: new Date().getFullYear(),
+                    price: '',
+                    mileage: '',
+                    color: '',
+                    transmission: '',
+                    fuel_type: '',
+                    body_type: '',
+                    description: '',
+                    location: '',
+                    contact_email: user?.email || '',
+                    contact_phone: '',
+                  });
+                  setSelectedImages([]);
+                  setPreviewUrls([]);
+                  setSelectedFeatures({});
+                }}
+                variant="outline"
+              >
+                Add Another Listing
+              </Button>
+              
+              <Button
+                onClick={() => navigate('/')}
+                variant="outline"
+              >
+                Go to Homepage
+              </Button>
+            </div>
+          </div>
+        </div>
+        
+        <Footer />
+      </div>
+    );
+  }
   
   return (
     <div className="flex flex-col min-h-screen">
@@ -846,79 +934,4 @@ const AddListing = () => {
               <TabsContent value="images" className="space-y-4 mt-4">
                 <Card>
                   <CardContent className="pt-6">
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="images" className="block mb-2">Upload Images (up to 10)</Label>
-                        <Input
-                          id="images"
-                          type="file"
-                          accept="image/*"
-                          multiple
-                          onChange={handleImageChange}
-                          disabled={previewUrls.length >= 10}
-                          className="mt-1"
-                        />
-                        <p className="text-sm text-gray-500 mt-1">
-                          You can upload up to 10 images. First image will be the main image.
-                        </p>
-                      </div>
-                      
-                      {previewUrls.length > 0 && (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
-                          {previewUrls.map((url, index) => (
-                            <div key={index} className="relative">
-                              <img
-                                src={url}
-                                alt={`Preview ${index}`}
-                                className="w-full h-32 object-cover rounded-md"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => removeImage(index)}
-                                className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 transform translate-x-1/3 -translate-y-1/3"
-                              >
-                                &times;
-                              </button>
-                              {index === 0 && (
-                                <span className="absolute top-0 left-0 bg-blue-500 text-white text-xs py-1 px-2 rounded-br-md">
-                                  Main
-                                </span>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <div className="flex justify-between">
-                  <Button 
-                    type="button"
-                    onClick={handlePreviousStep}
-                    variant="outline"
-                    className="px-8"
-                  >
-                    <ArrowLeft className="mr-2" /> Back
-                  </Button>
-                  
-                  <Button
-                    type="submit"
-                    className="bg-[#007ac8] hover:bg-[#0069b4] px-8"
-                    disabled={loading || uploadingImages}
-                  >
-                    {(loading || uploadingImages) ? 'Processing...' : 'Submit Listing'}
-                  </Button>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </form>
-        </div>
-      </div>
-      
-      <Footer />
-    </div>
-  );
-};
-
-export default AddListing;
+                    <div className="space-

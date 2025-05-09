@@ -17,6 +17,8 @@ interface ListingTableProps {
   fetchError: string | null;
   onEdit: (listing: Listing) => void;
   onDelete: (id: string) => void;
+  onApprove?: (id: string) => void;
+  onReject?: (id: string) => void;
 }
 
 export const ListingTable = ({
@@ -24,7 +26,9 @@ export const ListingTable = ({
   loading,
   fetchError,
   onEdit,
-  onDelete
+  onDelete,
+  onApprove,
+  onReject
 }: ListingTableProps) => {
   return (
     <div className="rounded-md border">
@@ -35,6 +39,7 @@ export const ListingTable = ({
             <TableHead>Make/Model</TableHead>
             <TableHead>Year</TableHead>
             <TableHead>Price</TableHead>
+            <TableHead>Status</TableHead>
             <TableHead>Created At</TableHead>
             <TableHead>Owner</TableHead>
             <TableHead>Actions</TableHead>
@@ -43,7 +48,7 @@ export const ListingTable = ({
         <TableBody>
           {loading ? (
             <TableRow>
-              <TableCell colSpan={7} className="text-center py-8">
+              <TableCell colSpan={8} className="text-center py-8">
                 <div className="flex flex-col items-center justify-center">
                   <Loader className="h-8 w-8 animate-spin text-primary mb-2" />
                   <span>Loading listings...</span>
@@ -56,12 +61,14 @@ export const ListingTable = ({
                 key={listing.id} 
                 listing={listing} 
                 onEdit={onEdit} 
-                onDelete={onDelete} 
+                onDelete={onDelete}
+                onApprove={onApprove}
+                onReject={onReject}
               />
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={7} className="text-center py-4">
+              <TableCell colSpan={8} className="text-center py-4">
                 {fetchError ? 'Error loading listings' : 'No listings found'}
               </TableCell>
             </TableRow>

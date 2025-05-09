@@ -8,14 +8,22 @@ import { ListingTable } from "./listings/ListingTable";
 import { ListingTableHeader } from "./listings/ListingTableHeader";
 import { Listing } from "@/types/admin";
 import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export const AdminListings: React.FC = () => {
+interface AdminListingsProps {
+  onListingStatusChange?: () => void;
+}
+
+export const AdminListings: React.FC<AdminListingsProps> = ({ 
+  onListingStatusChange 
+}) => {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [editListing, setEditListing] = useState<Listing | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'approved'>('all');
 
   const fetchListings = async () => {
     setLoading(true);
@@ -57,6 +65,7 @@ export const AdminListings: React.FC = () => {
         year: item.year || 0,
         user_id: item.user_id || '',
         user_email: 'User ID: ' + item.user_id.substring(0, 8) + '...',
+        status: item.status || 'pending', // Add status field
         // Additional fields needed for the expanded edit dialog
         mileage: item.mileage || 0,
         color: item.color || '',
@@ -72,6 +81,11 @@ export const AdminListings: React.FC = () => {
       }));
 
       setListings(result);
+      
+      // Notify parent component if a callback was provided
+      if (onListingStatusChange) {
+        onListingStatusChange();
+      }
     } catch (err) {
       console.error("Unexpected error fetching listings:", err);
       setFetchError("An unexpected error occurred");
@@ -102,6 +116,12 @@ export const AdminListings: React.FC = () => {
       if (error) throw error;
 
       setListings(prev => prev.filter(l => l.id !== id));
+      
+      // Update dashboard stats
+      if (onListingStatusChange) {
+        onListingStatusChange();
+      }
+      
       toast({
         title: "Success",
         description: "Listing deleted successfully"
@@ -110,6 +130,72 @@ export const AdminListings: React.FC = () => {
       toast({
         title: "Error",
         description: err.message || "Failed to delete listing",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleApprove = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("car_listings")
+        .update({ status: 'approved' })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      // Update local state
+      setListings(prev =>
+        prev.map(l => (l.id === id ? { ...l, status: 'approved' } : l))
+      );
+      
+      // Update dashboard stats
+      if (onListingStatusChange) {
+        onListingStatusChange();
+      }
+
+      toast({
+        title: "Success",
+        description: "Listing approved successfully"
+      });
+    } catch (err: any) {
+      console.error("Error approving listing:", err);
+      toast({
+        title: "Error",
+        description: err.message || "Failed to approve listing",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  const handleReject = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("car_listings")
+        .update({ status: 'rejected' })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      // Update local state
+      setListings(prev =>
+        prev.map(l => (l.id === id ? { ...l, status: 'rejected' } : l))
+      );
+      
+      // Update dashboard stats
+      if (onListingStatusChange) {
+        onListingStatusChange();
+      }
+
+      toast({
+        title: "Success",
+        description: "Listing rejected successfully"
+      });
+    } catch (err: any) {
+      console.error("Error rejecting listing:", err);
+      toast({
+        title: "Error",
+        description: err.message || "Failed to reject listing",
         variant: "destructive"
       });
     }
@@ -137,7 +223,8 @@ export const AdminListings: React.FC = () => {
           contact_email: data.contact_email,
           contact_phone: data.contact_phone,
           features: data.features,
-          images: data.images
+          images: data.images,
+          status: data.status // Include status in update
         })
         .eq("id", id);
 
@@ -147,6 +234,12 @@ export const AdminListings: React.FC = () => {
         prev.map(l => (l.id === id ? { ...l, ...data } : l))
       );
       setIsDialogOpen(false);
+      
+      // Update dashboard stats
+      if (onListingStatusChange) {
+        onListingStatusChange();
+      }
+      
       toast({
         title: "Success",
         description: "Listing updated successfully"
@@ -161,28 +254,99 @@ export const AdminListings: React.FC = () => {
     }
   };
 
-  const filteredListings = listings.filter(l =>
-    l.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    l.make?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    l.model?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter listings based on tab and search term
+  const getFilteredListings = () => {
+    let filtered = listings;
+    
+    // First filter by tab
+    if (activeTab === 'pending') {
+      filtered = filtered.filter(l => l.status === 'pending');
+    } else if (activeTab === 'approved') {
+      filtered = filtered.filter(l => l.status === 'approved');
+    }
+    
+    // Then filter by search term
+    return filtered.filter(l =>
+      l.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      l.make?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      l.model?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  };
 
   return (
     <Card className="p-4">
-      <ListingTableHeader
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        onRefresh={fetchListings}
-        loading={loading}
-      />
-      {fetchError && <ErrorAlert message={fetchError} />}
-      <ListingTable
-        listings={filteredListings}
-        loading={loading}
-        fetchError={fetchError}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'all' | 'pending' | 'approved')}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="all">All Listings</TabsTrigger>
+          <TabsTrigger value="pending">
+            Pending
+            {listings.filter(l => l.status === 'pending').length > 0 && (
+              <span className="ml-1.5 bg-amber-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                {listings.filter(l => l.status === 'pending').length}
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="approved">Approved</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="all">
+          <ListingTableHeader
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            onRefresh={fetchListings}
+            loading={loading}
+          />
+          {fetchError && <ErrorAlert message={fetchError} />}
+          <ListingTable
+            listings={getFilteredListings()}
+            loading={loading}
+            fetchError={fetchError}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onApprove={handleApprove}
+            onReject={handleReject}
+          />
+        </TabsContent>
+        
+        <TabsContent value="pending">
+          <ListingTableHeader
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            onRefresh={fetchListings}
+            loading={loading}
+          />
+          {fetchError && <ErrorAlert message={fetchError} />}
+          <ListingTable
+            listings={getFilteredListings()}
+            loading={loading}
+            fetchError={fetchError}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onApprove={handleApprove}
+            onReject={handleReject}
+          />
+        </TabsContent>
+        
+        <TabsContent value="approved">
+          <ListingTableHeader
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            onRefresh={fetchListings}
+            loading={loading}
+          />
+          {fetchError && <ErrorAlert message={fetchError} />}
+          <ListingTable
+            listings={getFilteredListings()}
+            loading={loading}
+            fetchError={fetchError}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onApprove={handleApprove}
+            onReject={handleReject}
+          />
+        </TabsContent>
+      </Tabs>
+      
       <EditListingDialog
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}

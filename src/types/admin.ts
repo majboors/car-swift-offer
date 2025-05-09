@@ -10,6 +10,7 @@ export interface Listing {
   user_id: string;
   user_email?: string;
   description?: string;
+  status: string; // Add status field
   // Additional fields for expanded edit functionality
   mileage?: number | null;
   color?: string | null;
