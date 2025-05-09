@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +8,7 @@ import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -37,7 +37,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
-import { ChevronDown, Filter, Loader, Search, X } from "lucide-react";
+import { ChevronDown, Filter, Loader, Search, Star, Trophy, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
@@ -246,25 +246,8 @@ const SearchResults = () => {
           }
         }
       }
-      
-      // Apply sorting
-      switch (currentSort) {
-        case "price_low":
-          query = query.order("price", { ascending: true });
-          break;
-        case "price_high":
-          query = query.order("price", { ascending: false });
-          break;
-        case "year_new":
-          query = query.order("year", { ascending: false });
-          break;
-        case "year_old":
-          query = query.order("year", { ascending: true });
-          break;
-        case "newest":
-        default:
-          query = query.order("created_at", { ascending: false });
-      }
+
+      // Don't apply sorting yet, we'll do it client-side to ensure package level is prioritized
       
       // Apply pagination - but only if we're not going to filter by features
       // Otherwise, we'll do pagination after filtering
@@ -346,24 +329,42 @@ const SearchResults = () => {
           // If we got here, all category checks passed
           return true;
         });
-        
-        // Now apply pagination to the filtered results
-        const total = filteredData.length;
-        const start = (currentPage - 1) * itemsPerPage;
-        const end = Math.min(start + itemsPerPage, total);
-        
-        setTotalResults(total);
-        setCarListings(filteredData.slice(start, end));
-      } else {
-        // No feature filtering, just use the data from the query
-        setCarListings(filteredData);
-        setTotalResults(count || filteredData.length || 0);  // Use filteredData.length as fallback
       }
+
+      // Custom sort that prioritizes package_level first, followed by the selected sort option
+      filteredData.sort((a, b) => {
+        // First prioritize by package level (higher levels first)
+        const packageDiff = (b.package_level || 0) - (a.package_level || 0);
+        if (packageDiff !== 0) return packageDiff;
+        
+        // If same package level, apply the selected sort
+        switch (currentSort) {
+          case "price_low":
+            return a.price - b.price;
+          case "price_high":
+            return b.price - a.price;
+          case "year_new":
+            return b.year - a.year;
+          case "year_old":
+            return a.year - b.year;
+          case "newest":
+          default:
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        }
+      });
+      
+      // Now paginate the sorted results
+      const total = filteredData.length;
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = Math.min(start + itemsPerPage, total);
+      
+      setTotalResults(total);
+      setCarListings(filteredData.slice(start, end));
       
       // Debug log to check the results
       console.log("Search results:", {
-        totalResults: count || filteredData.length || 0,
-        displayedResults: filteredData.length,
+        totalResults: total,
+        displayedResults: filteredData.slice(start, end).length,
         carListings: filteredData.length > 0 ? "Has data" : "No data"
       });
       
@@ -502,6 +503,16 @@ const SearchResults = () => {
     currentPage,
     totalPages
   });
+  
+  // Get package level name
+  const getPackageName = (level: number): string => {
+    switch(level) {
+      case 3: return "Premium";
+      case 2: return "Enhanced";
+      case 1: return "Standard";
+      default: return "";
+    }
+  };
   
   return (
     <div className="flex flex-col min-h-screen">
@@ -835,7 +846,10 @@ const SearchResults = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {carListings.map((car) => (
                   <Link to={`/listing/${car.id}`} key={car.id}>
-                    <Card className="h-full hover:shadow-lg transition-shadow border border-transparent hover:border-[#007ac8]">
+                    <Card className={cn(
+                      "h-full hover:shadow-lg transition-shadow",
+                      car.package_level === 3 ? "border-2 border-[#8B5CF6] shadow-md" : "border border-transparent hover:border-[#007ac8]"
+                    )}>
                       <div className="aspect-[4/3] relative">
                         <img 
                           src={car.images?.[0] || "/placeholder.svg"} 
@@ -845,6 +859,17 @@ const SearchResults = () => {
                         <div className="absolute top-0 right-0 bg-[#007ac8] text-white px-3 py-1 m-2 rounded-md font-semibold">
                           {car.year}
                         </div>
+                        {car.package_level === 3 && (
+                          <div className="absolute top-0 left-0 m-2">
+                            <Badge 
+                              variant="premium" 
+                              className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold"
+                            >
+                              <Trophy className="h-3 w-3" />
+                              PREMIUM
+                            </Badge>
+                          </div>
+                        )}
                       </div>
                       <CardContent className="p-4">
                         <h3 className="font-semibold mb-1 text-lg">
