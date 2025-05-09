@@ -127,18 +127,19 @@ const Admin = () => {
           const [aMonth, aYear] = a.name.split(' ');
           const [bMonth, bYear] = b.name.split(' ');
           
-          // Fix: Convert string years to numbers for arithmetic comparison
+          // Convert string years to numbers for arithmetic comparison
           const aYearNum = parseInt(aYear || '0', 10);
           const bYearNum = parseInt(bYear || '0', 10);
           
-          // Compare years first - using parsed integers for comparison
+          // Compare years first
           if (aYearNum !== bYearNum) {
             return aYearNum - bYearNum;
           }
           
-          // Fix: Ensure the month indices are treated as numbers in the comparison
-          const aMonthIndex = months.indexOf(aMonth);
-          const bMonthIndex = months.indexOf(bMonth);
+          // Ensure month indices are converted to numbers for comparison
+          // This fixes the TypeScript error by ensuring we're using numbers in the arithmetic operation
+          const aMonthIndex = months.indexOf(aMonth || '');
+          const bMonthIndex = months.indexOf(bMonth || '');
           
           return aMonthIndex - bMonthIndex;
         });
