@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { formatRelative } from 'date-fns';
-import { SendIcon, XIcon } from 'lucide-react';
+import { SendIcon, XIcon, ArrowDownIcon } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Message {
@@ -40,7 +40,7 @@ export const Chat: React.FC<ChatProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [pollingInterval, setPollingInterval] = useState<number | null>(null);
-  const [userScrolled, setUserScrolled] = useState(false);
+  const [showScrollButton, setShowScrollButton] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   
   const fetchMessages = async () => {
@@ -58,30 +58,12 @@ export const Chat: React.FC<ChatProps> = ({
       }
       
       if (data) {
-        // Check if there are new messages before updating state
-        const hasNewMessages = initialLoadComplete && data.length > messages.length;
-        
+        // Update messages state without automatic scrolling
         setMessages(data);
         
-        // Don't auto-scroll on initial load, only when new messages arrive AND user hasn't scrolled up
+        // On initial load, set flag but don't scroll
         if (!initialLoadComplete) {
           setInitialLoadComplete(true);
-        } else if (hasNewMessages && !userScrolled && scrollContainerRef.current) {
-          // Check if user is already near bottom (within 100px)
-          const { scrollHeight, scrollTop, clientHeight } = scrollContainerRef.current;
-          const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
-          
-          if (isNearBottom) {
-            // Smoothly scroll to new messages
-            setTimeout(() => {
-              if (messagesEndRef.current) {
-                messagesEndRef.current.scrollIntoView({ 
-                  behavior: 'smooth', 
-                  block: 'end'
-                });
-              }
-            }, 100);
-          }
         }
         
         // Mark messages as read if the user is the receiver
@@ -120,31 +102,24 @@ export const Chat: React.FC<ChatProps> = ({
     };
   }, [listingId, user?.id, receiverId]);
   
-  // Initial scroll to bottom after messages load
-  useEffect(() => {
-    if (initialLoadComplete && !userScrolled && messagesEndRef.current && messages.length > 0) {
-      // Use setTimeout to ensure DOM has updated
-      setTimeout(() => {
-        if (messagesEndRef.current) {
-          messagesEndRef.current.scrollIntoView({ behavior: 'auto' });
-        }
-      }, 100);
-    }
-  }, [initialLoadComplete, messages.length]);
-  
-  // Handle scroll events
+  // Check scroll position to show/hide scroll button
   const handleScroll = () => {
     if (!scrollContainerRef.current) return;
     
     const { scrollHeight, scrollTop, clientHeight } = scrollContainerRef.current;
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
     
-    // If user scrolls up more than 100px from bottom, mark as user scrolled
-    if (distanceFromBottom > 100) {
-      setUserScrolled(true);
-    } else {
-      // If user scrolls back to bottom, reset userScrolled
-      setUserScrolled(false);
+    // Show button if user is more than 100px from bottom
+    setShowScrollButton(distanceFromBottom > 100);
+  };
+  
+  // Manual scroll to bottom function
+  const scrollToBottom = () => {
+    if (messagesEndRef.current && scrollContainerRef.current) {
+      messagesEndRef.current.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'end'
+      });
     }
   };
   
@@ -179,22 +154,8 @@ export const Chat: React.FC<ChatProps> = ({
       // Clear the input field immediately
       setNewMessage('');
       
-      // Fetch new messages
+      // Fetch new messages without automatic scrolling
       await fetchMessages();
-      
-      // Reset userScrolled to scroll to the bottom after sending
-      setUserScrolled(false);
-      
-      // Scroll to bottom smoothly - but contained within the chat area
-      setTimeout(() => {
-        if (messagesEndRef.current && scrollContainerRef.current) {
-          // Using scrollIntoView with the container's scrolling
-          messagesEndRef.current.scrollIntoView({ 
-            behavior: 'smooth',
-            block: 'end'
-          });
-        }
-      }, 100);
       
     } catch (error: any) {
       toast({
@@ -281,6 +242,17 @@ export const Chat: React.FC<ChatProps> = ({
             ))}
             <div ref={messagesEndRef} />
           </div>
+        )}
+        
+        {/* Scroll to bottom button */}
+        {showScrollButton && (
+          <Button 
+            className="absolute bottom-20 right-4 rounded-full w-10 h-10 flex items-center justify-center bg-primary shadow-lg"
+            onClick={scrollToBottom}
+            aria-label="Scroll to bottom"
+          >
+            <ArrowDownIcon className="h-5 w-5" />
+          </Button>
         )}
       </div>
       
