@@ -110,7 +110,7 @@ export function MobileSidebar() {
   };
 
   return (
-    <div className="h-full bg-white overflow-y-auto">
+    <div className="md:hidden h-full bg-white overflow-y-auto">
       <div className="border-b p-4 flex items-center justify-between">
         <Link to="/">
           <span className="font-bold inline-block">CarTrade</span>

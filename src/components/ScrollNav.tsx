@@ -34,6 +34,8 @@ const sellDropdownItems = [
 const ScrollNav: React.FC<{ visible: boolean }> = ({ visible }) => {
   const { user, signOut, loading } = useAuth();
   
+  if (!visible) return null; // Only render when visible is true
+  
   return (
     <div 
       className={`fixed top-0 left-0 right-0 z-50 bg-white shadow-md transform transition-transform duration-300 ${

@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { MobileSidebar } from "./MobileSidebar";
@@ -89,12 +90,14 @@ export function Navbar() {
   return (
     <>
       {/* Compact navbar that appears on scroll */}
-      <ScrollNav visible={scrolled} />
+      {scrolled && <ScrollNav visible={scrolled} />}
       
       {/* Main navbar */}
       <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 max-w-screen-2xl items-center">
-          <MobileSidebar />
+          <div className="md:hidden">
+            <MobileSidebar />
+          </div>
           <div className="mr-4 hidden md:flex">
             <Link to="/" className="mr-6 flex items-center space-x-2">
               <img 
