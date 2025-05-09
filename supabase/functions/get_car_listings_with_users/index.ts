@@ -81,9 +81,10 @@ serve(async (req) => {
     console.log("Admin check passed, retrieving all car listings");
 
     // Get all car listings using the admin client
+    // Explicitly include package_level field to ensure it's returned
     const { data: listings, error: listingsError } = await adminClient
       .from('car_listings')
-      .select('*');
+      .select('*, package_level');
 
     if (listingsError) {
       console.error("Error fetching listings:", listingsError);
@@ -94,6 +95,8 @@ serve(async (req) => {
     }
 
     console.log("Successfully fetched listings, count:", listings?.length || 0);
+    // Log the package levels to verify they're being returned correctly
+    console.log("Package levels:", listings?.map(l => ({ id: l.id, title: l.title, package_level: l.package_level })));
 
     // Get all users for adding email using admin.listUsers()
     const { data, error: usersError } = await adminClient.auth.admin.listUsers();
