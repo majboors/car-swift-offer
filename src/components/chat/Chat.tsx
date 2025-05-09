@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { formatRelative } from 'date-fns';
 import { SendIcon, XIcon } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Message {
   id: string;
@@ -39,7 +40,8 @@ export const Chat: React.FC<ChatProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [pollingInterval, setPollingInterval] = useState<number | null>(null);
-  const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true);
+  const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false); // Changed to false initially
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   
   const fetchMessages = async () => {
     try {
@@ -56,12 +58,18 @@ export const Chat: React.FC<ChatProps> = ({
       }
       
       if (data) {
-        // Only set shouldScrollToBottom if we're getting new messages
-        if (data.length > messages.length) {
+        // Only scroll if:
+        // 1. We're getting new messages after initial load
+        // 2. User is sending a message
+        if (initialLoadComplete && data.length > messages.length) {
           setShouldScrollToBottom(true);
         }
         
         setMessages(data);
+        
+        if (!initialLoadComplete) {
+          setInitialLoadComplete(true);
+        }
         
         // Mark messages as read if the user is the receiver
         if (user && receiverId) {
@@ -129,7 +137,7 @@ export const Chat: React.FC<ChatProps> = ({
     if (!newMessage.trim()) return;
     
     setSending(true);
-    setShouldScrollToBottom(true);
+    setShouldScrollToBottom(true); // Always scroll when sending a new message
     
     try {
       const messageData = {
