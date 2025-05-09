@@ -39,27 +39,44 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
   console.log("CarDetails: isOwnListing:", isOwnListing);
   if (user) console.log("CarDetails: user:", user.id);
   console.log("CarDetails: listing user_id:", listing.user_id);
+  console.log("CarDetails: features data:", listing.features);
   
-  // Function to flatten features object into an array if needed
+  // Improved function to flatten features object into an array
   const getFeaturesList = () => {
-    if (!listing.features) return null;
+    if (!listing.features) {
+      return null;
+    }
 
-    // Check if features is already an array
+    // If features is already a flat array
     if (Array.isArray(listing.features)) {
       return listing.features;
     }
 
-    // If features is an object of categories, flatten it
+    // If features is an object of categories
     if (typeof listing.features === 'object') {
       try {
-        // Try to convert from potential JSON format or object of categories
+        // Convert from potential JSON format if it's a string
         const featuresObj = typeof listing.features === 'string' 
           ? JSON.parse(listing.features) 
           : listing.features;
         
-        // If it's an object with categories as keys and arrays as values
+        // Flatten the object structure into a single array of features
         if (Object.keys(featuresObj).length > 0) {
-          return Object.values(featuresObj).flat();
+          // Handle both nested arrays and direct value structures
+          const allFeatures = [];
+          
+          for (const category in featuresObj) {
+            const categoryFeatures = featuresObj[category];
+            if (Array.isArray(categoryFeatures)) {
+              // If the category contains an array of features
+              allFeatures.push(...categoryFeatures);
+            } else if (typeof categoryFeatures === 'string') {
+              // If the category contains a single feature as string
+              allFeatures.push(categoryFeatures);
+            }
+          }
+          
+          return allFeatures;
         }
       } catch (e) {
         console.error("Error parsing features:", e);
@@ -70,6 +87,7 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
   };
 
   const featuresList = getFeaturesList();
+  console.log("Processed features list:", featuresList);
   
   return (
     <div>
@@ -149,7 +167,7 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
         </div>
       </div>
 
-      {/* Features section */}
+      {/* Features section - improved to handle different data structures */}
       {featuresList && featuresList.length > 0 && (
         <Card className="mb-6">
           <CardContent className="pt-6">
