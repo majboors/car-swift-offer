@@ -546,10 +546,12 @@ const SearchResults = () => {
     }
   };
   
-  // Debug function to check if a car is premium
+  // FIXED: Debug function to check if a car is premium
   const isPremium = (car: any): boolean => {
-    console.log(`Checking if premium: ${car.title}, package_level=${car.package_level}`);
-    return car.package_level === 3;
+    // Use strict === 3 comparison to check premium status
+    const isPremiumStatus = car.package_level === 3;
+    console.log(`Checking if premium: ${car.title}, package_level=${car.package_level}, result=${isPremiumStatus}`);
+    return isPremiumStatus;
   };
   
   return (
