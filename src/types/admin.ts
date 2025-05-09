@@ -10,7 +10,7 @@ export interface Listing {
   user_id: string;
   user_email?: string;
   description?: string;
-  status: string; // Add status field
+  status: string; 
   // Additional fields for expanded edit functionality
   mileage?: number | null;
   color?: string | null;
@@ -25,6 +25,7 @@ export interface Listing {
   package_level?: number | null;
   featured?: boolean;
   top_search?: boolean;
+  showcase?: boolean; // New property for showcase section
 }
 
 // Add User interface for AdminUsers component

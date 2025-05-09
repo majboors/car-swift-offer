@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -65,7 +64,7 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
         year: item.year || 0,
         user_id: item.user_id || '',
         user_email: 'User ID: ' + item.user_id.substring(0, 8) + '...',
-        status: item.status || 'pending', // Add status field
+        status: item.status || 'pending',
         // Additional fields needed for the expanded edit dialog
         mileage: item.mileage || 0,
         color: item.color || '',
@@ -77,7 +76,9 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
         contact_phone: item.contact_phone || '',
         // Convert features and images to string arrays or empty arrays if null
         features: Array.isArray(item.features) ? item.features.map(f => String(f)) : [],
-        images: Array.isArray(item.images) ? item.images.map(img => String(img)) : []
+        images: Array.isArray(item.images) ? item.images.map(img => String(img)) : [],
+        // Add showcase flag
+        showcase: item.showcase || false,
       }));
 
       setListings(result);
@@ -224,7 +225,8 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
           contact_phone: data.contact_phone,
           features: data.features,
           images: data.images,
-          status: data.status // Include status in update
+          status: data.status,
+          showcase: data.showcase
         })
         .eq("id", id);
 
@@ -249,6 +251,41 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
       toast({
         title: "Error",
         description: err.message || "Failed to update listing",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleShowcaseToggle = async (id: string, value: boolean) => {
+    try {
+      console.log(`Setting listing ${id} showcase to ${value}`);
+      
+      const { error } = await supabase
+        .from("car_listings")
+        .update({ showcase: value })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      // Update local state
+      setListings(prev =>
+        prev.map(l => (l.id === id ? { ...l, showcase: value } : l))
+      );
+      
+      // Update dashboard stats
+      if (onListingStatusChange) {
+        onListingStatusChange();
+      }
+
+      toast({
+        title: "Success",
+        description: `Listing ${value ? 'added to' : 'removed from'} showcase successfully`
+      });
+    } catch (err: any) {
+      console.error("Error updating showcase status:", err);
+      toast({
+        title: "Error",
+        description: err.message || "Failed to update showcase status",
         variant: "destructive"
       });
     }
@@ -305,6 +342,7 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
             onDelete={handleDelete}
             onApprove={handleApprove}
             onReject={handleReject}
+            onShowcaseToggle={handleShowcaseToggle}
           />
         </TabsContent>
         

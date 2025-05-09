@@ -4,6 +4,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Listing } from "@/types/admin";
 import { Check, X, Star } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 interface ListingTableRowProps {
   listing: Listing;
@@ -11,6 +12,7 @@ interface ListingTableRowProps {
   onDelete: (id: string) => void;
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;
+  onShowcaseToggle?: (id: string, value: boolean) => void;
 }
 
 export const ListingTableRow = ({ 
@@ -18,7 +20,8 @@ export const ListingTableRow = ({
   onEdit, 
   onDelete,
   onApprove,
-  onReject 
+  onReject,
+  onShowcaseToggle
 }: ListingTableRowProps) => {
   const getStatusBadge = () => {
     switch(listing.status) {
@@ -34,13 +37,17 @@ export const ListingTableRow = ({
   };
 
   const isPremium = listing.package_level === 3;
+  const isShowcase = listing.showcase === true;
 
   return (
     <TableRow key={listing.id}>
       <TableCell>
         <div className="flex items-center gap-2">
           {listing.title}
-          {isPremium && <Badge variant="premium">Premium</Badge>}
+          <div className="flex gap-1">
+            {isPremium && <Badge variant="premium">Premium</Badge>}
+            {isShowcase && <Badge variant="showcase">Showcase</Badge>}
+          </div>
         </div>
       </TableCell>
       <TableCell>{`${listing.make} ${listing.model}`}</TableCell>
@@ -73,6 +80,24 @@ export const ListingTableRow = ({
             >
               <X className="h-4 w-4 mr-1" /> Reject
             </Button>
+          )}
+          
+          {/* Showcase toggle - only for approved listings */}
+          {listing.status === 'approved' && onShowcaseToggle && (
+            <div className="flex items-center gap-1 ml-1">
+              <Switch 
+                id={`showcase-${listing.id}`}
+                checked={isShowcase} 
+                onCheckedChange={(checked) => onShowcaseToggle(listing.id, checked)}
+                className="data-[state=checked]:bg-[#007ac8]"
+              />
+              <label 
+                htmlFor={`showcase-${listing.id}`} 
+                className="text-xs whitespace-nowrap cursor-pointer"
+              >
+                Showcase
+              </label>
+            </div>
           )}
           
           <Button 

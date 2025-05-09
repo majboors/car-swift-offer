@@ -19,6 +19,7 @@ interface ListingTableProps {
   onDelete: (id: string) => void;
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;
+  onShowcaseToggle?: (id: string, value: boolean) => void;
 }
 
 export const ListingTable = ({
@@ -28,7 +29,8 @@ export const ListingTable = ({
   onEdit,
   onDelete,
   onApprove,
-  onReject
+  onReject,
+  onShowcaseToggle
 }: ListingTableProps) => {
   return (
     <div className="rounded-md border">
@@ -64,6 +66,7 @@ export const ListingTable = ({
                 onDelete={onDelete}
                 onApprove={onApprove}
                 onReject={onReject}
+                onShowcaseToggle={onShowcaseToggle}
               />
             ))
           ) : (
