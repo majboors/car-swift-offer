@@ -899,4 +899,20 @@ const SearchResults = () => {
                   
                   <PaginationItem>
                     <PaginationNext
-                      onClick={() => updateSearchParam("page", (currentPage + 1
+                      onClick={() => updateSearchParam("page", (currentPage + 1).toString())}
+                      className={cn(currentPage >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer")}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
+          </div>
+        </div>
+      </main>
+      
+      <Footer />
+    </div>
+  );
+};
+
+export default SearchResults;
