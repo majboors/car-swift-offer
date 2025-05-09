@@ -24,6 +24,21 @@ const SearchForm = () => {
     if (queryParam) {
       setSearchQuery(queryParam);
     }
+    
+    const makeParam = searchParams.get('make');
+    if (makeParam) {
+      setSelectedMake(makeParam);
+    }
+    
+    const modelParam = searchParams.get('model');
+    if (modelParam) {
+      setSelectedModel(modelParam);
+    }
+    
+    const bodyTypeParam = searchParams.get('bodyType');
+    if (bodyTypeParam) {
+      setSelectedBodyType(bodyTypeParam);
+    }
   }, [searchParams]);
   
   // Fetch car data from public.json

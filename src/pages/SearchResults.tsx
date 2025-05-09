@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -75,7 +74,7 @@ const SearchResults = () => {
       bodyTypeInput: bodyType,
       searchInput: searchQuery,
     }
-  });
+  };
   
   // Pagination
   const itemsPerPage = 12;
@@ -147,7 +146,8 @@ const SearchResults = () => {
       const allFeatures: Record<string, Set<string>> = {};
       
       data.forEach(listing => {
-        if (listing.features) {
+        if (listing.features && typeof listing.features === 'object') {
+          // Handle features as a JSON object
           Object.entries(listing.features).forEach(([category, featureList]) => {
             if (!allFeatures[category]) {
               allFeatures[category] = new Set();
@@ -155,7 +155,9 @@ const SearchResults = () => {
             
             if (Array.isArray(featureList)) {
               featureList.forEach(feature => {
-                allFeatures[category].add(feature);
+                if (typeof feature === 'string') {
+                  allFeatures[category].add(feature);
+                }
               });
             }
           });
@@ -201,12 +203,17 @@ const SearchResults = () => {
         query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,make.ilike.%${searchQuery}%,model.ilike.%${searchQuery}%`);
       }
       
-      // Apply feature filters
+      // Apply feature filters - handle complex feature paths properly
       Object.entries(selectedFeatures).forEach(([category, selectedFeatureList]) => {
         if (selectedFeatureList.length > 0) {
-          // For each selected feature, we check if it exists in the features JSON
+          // Convert category names with spaces to proper JSON path format
+          // We need to escape the quotation marks and properly format the JSON path
+          const categoryPath = category.includes(' ') ? `"${category}"` : category;
+          
           selectedFeatureList.forEach(feature => {
-            query = query.or(`features->${category}->contains("${feature}")`);
+            // Create a proper JSON containment query for each feature
+            // Using ->> operator for text comparison
+            query = query.or(`features->${categoryPath}::jsonb @> '["${feature}"]'`);
           });
         }
       });

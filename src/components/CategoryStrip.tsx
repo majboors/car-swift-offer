@@ -53,6 +53,21 @@ const CategoryStrip = () => {
       case "Green":
         searchParams.append("query", "electric hybrid");
         break;
+      case "Offroad":
+        searchParams.append("query", "offroad 4x4 adventure");
+        break;
+      case "Performance":
+        searchParams.append("query", "performance sport turbo");
+        break;
+      case "Prestige":
+        searchParams.append("query", "luxury premium prestige");
+        break;
+      case "Tradie":
+        searchParams.append("query", "utility work commercial");
+        break;
+      case "Unique":
+        searchParams.append("query", "unique rare classic");
+        break;
       default:
         searchParams.append("query", category);
         break;
