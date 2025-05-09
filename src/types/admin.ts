@@ -22,6 +22,9 @@ export interface Listing {
   contact_phone?: string | null;
   features?: string[] | any[];
   images?: string[] | any[];
+  package_level?: number | null;
+  featured?: boolean;
+  top_search?: boolean;
 }
 
 // Add User interface for AdminUsers component

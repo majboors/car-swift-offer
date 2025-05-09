@@ -81,7 +81,7 @@ serve(async (req) => {
     console.log("Admin check passed, retrieving all car listings");
 
     // Get all car listings using the admin client
-    // Explicitly include package_level field to ensure it's returned
+    // Explicitly select package_level field to ensure it's returned
     const { data: listings, error: listingsError } = await adminClient
       .from('car_listings')
       .select('*, package_level');

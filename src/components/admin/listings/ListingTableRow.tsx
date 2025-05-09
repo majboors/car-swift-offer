@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Listing } from "@/types/admin";
-import { Check, X } from "lucide-react";
+import { Check, X, Star } from "lucide-react";
 
 interface ListingTableRowProps {
   listing: Listing;
@@ -33,9 +33,16 @@ export const ListingTableRow = ({
     }
   };
 
+  const isPremium = listing.package_level === 3;
+
   return (
     <TableRow key={listing.id}>
-      <TableCell>{listing.title}</TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2">
+          {listing.title}
+          {isPremium && <Badge variant="premium">Premium</Badge>}
+        </div>
+      </TableCell>
       <TableCell>{`${listing.make} ${listing.model}`}</TableCell>
       <TableCell>{listing.year}</TableCell>
       <TableCell>${listing.price.toLocaleString()}</TableCell>
