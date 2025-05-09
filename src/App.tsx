@@ -12,6 +12,8 @@ import Auth from "./pages/Auth";
 import CarListing from "./pages/CarListing";
 import AddListing from "./pages/AddListing";
 import Admin from "./pages/Admin";
+import Dashboard from "./pages/Dashboard";
+import ThreadsPage from "./pages/ThreadsPage";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +31,8 @@ const App = () => (
             <Route path="/listing/:id" element={<CarListing />} />
             <Route path="/add-listing" element={<AddListing />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard/threads/:id" element={<ThreadsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

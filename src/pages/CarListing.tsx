@@ -8,6 +8,9 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import CarDetails from '@/components/CarDetails';
+import { Chat } from '@/components/chat/Chat';
+import { MessageSquareIcon, X } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface CarListing {
   id: string;
@@ -27,15 +30,21 @@ interface CarListing {
   contact_phone: string | null;
   images: string[];
   created_at: string;
-  features: any; // Could be string[], object, or null
+  features: any;
+  user_id: string;
 }
 
 const CarListingPage = () => {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
   const [listing, setListing] = useState<CarListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [imageLoadErrors, setImageLoadErrors] = useState<boolean[]>([]);
+  const [showChat, setShowChat] = useState(false);
+  
+  // Skip chat for own listings
+  const isOwnListing = user && listing && user.id === listing.user_id;
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -127,6 +136,10 @@ const CarListingPage = () => {
       newErrors[index] = true;
       return newErrors;
     });
+  };
+
+  const toggleChat = () => {
+    setShowChat(!showChat);
   };
 
   if (loading) {
@@ -231,9 +244,35 @@ const CarListingPage = () => {
           <div>
             <CarDetails listing={listing} />
             
-            <Button className="w-full bg-[#007ac8] hover:bg-[#0069b4] mt-6">
-              Contact Seller
-            </Button>
+            {!isOwnListing && (
+              <Button 
+                className="w-full bg-[#007ac8] hover:bg-[#0069b4] mt-6 flex items-center gap-2"
+                onClick={toggleChat}
+              >
+                {showChat ? (
+                  <>
+                    <X className="h-4 w-4" />
+                    Close Chat
+                  </>
+                ) : (
+                  <>
+                    <MessageSquareIcon className="h-4 w-4" />
+                    Contact Seller
+                  </>
+                )}
+              </Button>
+            )}
+            
+            {/* Chat component */}
+            {showChat && !isOwnListing && (
+              <div className="mt-6">
+                <Chat 
+                  listingId={listing.id} 
+                  receiverId={listing.user_id}
+                  onClose={() => setShowChat(false)} 
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

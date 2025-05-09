@@ -102,6 +102,44 @@ export type Database = {
         }
         Relationships: []
       }
+      messages: {
+        Row: {
+          content: string
+          id: string
+          inserted_at: string
+          listing_id: string
+          read: boolean
+          receiver_id: string | null
+          sender_id: string | null
+        }
+        Insert: {
+          content: string
+          id?: string
+          inserted_at?: string
+          listing_id: string
+          read?: boolean
+          receiver_id?: string | null
+          sender_id?: string | null
+        }
+        Update: {
+          content?: string
+          id?: string
+          inserted_at?: string
+          listing_id?: string
+          read?: boolean
+          receiver_id?: string | null
+          sender_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "car_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -148,9 +186,24 @@ export type Database = {
           user_email: string
         }[]
       }
+      get_unread_message_count: {
+        Args: { user_id: string }
+        Returns: {
+          listing_id: string
+          unread_count: number
+        }[]
+      }
       is_admin: {
         Args: { user_id: string }
         Returns: boolean
+      }
+      mark_messages_as_read: {
+        Args: {
+          p_listing_id: string
+          p_sender_id: string
+          p_receiver_id: string
+        }
+        Returns: undefined
       }
       remove_admin: {
         Args: { user_id_input: string }
