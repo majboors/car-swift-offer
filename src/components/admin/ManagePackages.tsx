@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -35,7 +36,13 @@ import {
   Plus,
   Loader,
   PackageOpen,
+  Info
 } from "lucide-react";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 interface Package {
   id: string;
@@ -46,6 +53,68 @@ interface Package {
   features: string[];
   active: boolean;
 }
+
+// Define standard features for each package level
+const standardFeatures = {
+  level1: [
+    "AI-powered one-click listing",
+    "Listing stays until sold",
+    "Standard search visibility",
+    "Secure messaging",
+    "ID-verified posting",
+    "Top position in search results",
+    "Higher visibility",
+    "24/7 customer support"
+  ],
+  level2: [
+    "AI-powered one-click listing",
+    "Listing stays until sold",
+    "Standard search visibility",
+    "Secure messaging",
+    "ID-verified posting",
+    "Top position in search results",
+    "Higher visibility",
+    "24/7 customer support",
+    "Featured on homepage carousel",
+    "Hero exposure (1 week)"
+  ],
+  level3: [
+    "AI-powered one-click listing",
+    "Listing stays until sold",
+    "Standard search visibility",
+    "Secure messaging",
+    "ID-verified posting",
+    "Top position in search results",
+    "Higher visibility",
+    "24/7 customer support",
+    "Featured on homepage carousel",
+    "Email alerts to nearby buyers",
+    "SMS notifications to local buyers",
+    "Priority customer support",
+    "Hero exposure (1 month)"
+  ]
+};
+
+// Define feature tooltips
+const featureTooltips: Record<string, string> = {
+  "Hero exposure (1 week)": "Your car is placed at the very top of key pages, giving it maximum attention. More views = faster sale. Spotlight position on homepage or search. Shown to the most active buyers first.",
+  "Hero exposure (1 month)": "Your car is placed at the very top of key pages, giving it maximum attention. More views = faster sale. Spotlight position on homepage or search. Shown to the most active buyers first.",
+  "Featured on homepage carousel": "Your car appears in a rotating banner on the homepage. Eye-catching display. Perfect for grabbing quick attention. High engagement from serious buyers.",
+};
+
+// Package name suggestions based on level
+const packageNameSuggestions: Record<number, string> = {
+  1: "Top Search Results",
+  2: "Premium Visibility",
+  3: "Maximum Exposure"
+};
+
+// Package price suggestions based on level
+const packagePriceSuggestions: Record<number, number> = {
+  1: 29.99,
+  2: 49.99,
+  3: 79.99
+};
 
 const ManagePackages = () => {
   const [packages, setPackages] = useState<Package[]>([]);
@@ -116,10 +185,28 @@ const ManagePackages = () => {
     if (!currentPackage) return;
 
     let processedValue: any = value;
-    if (name === "level" || name === "duration_days") {
-      processedValue = parseInt(value) || 0;
+    if (name === "level") {
+      const level = parseInt(value) || 0;
+      processedValue = level;
+      
+      // Auto-suggest package name and price based on level
+      if (level >= 1 && level <= 3) {
+        setCurrentPackage(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            level,
+            name: packageNameSuggestions[level] || prev.name,
+            price: packagePriceSuggestions[level] || prev.price,
+            features: getStandardFeatures(level) || prev.features,
+          };
+        });
+        return;
+      }
     } else if (name === "price") {
       processedValue = parseFloat(value) || 0;
+    } else if (name === "duration_days") {
+      processedValue = parseInt(value) || 30;
     }
 
     setCurrentPackage({
@@ -158,14 +245,86 @@ const ManagePackages = () => {
     });
   };
 
+  const getStandardFeatures = (level: number): string[] => {
+    switch (level) {
+      case 1:
+        return [...standardFeatures.level1];
+      case 2:
+        return [...standardFeatures.level2];
+      case 3:
+        return [...standardFeatures.level3];
+      default:
+        return [];
+    }
+  };
+
+  const handleApplyStandardFeatures = () => {
+    if (!currentPackage) return;
+    
+    const level = currentPackage.level;
+    const standardFeaturesList = getStandardFeatures(level);
+    
+    if (standardFeaturesList.length === 0) {
+      toast({
+        title: "No standard features",
+        description: "This level doesn't have standard features defined.",
+      });
+      return;
+    }
+    
+    setCurrentPackage({
+      ...currentPackage,
+      features: [...standardFeaturesList],
+    });
+    
+    toast({
+      title: "Applied standard features",
+      description: `Applied ${standardFeaturesList.length} standard features for level ${level}`,
+    });
+  };
+
+  const hasTooltip = (feature: string): boolean => {
+    return feature in featureTooltips;
+  };
+
+  const renderFeature = (feature: string, index: number) => {
+    return (
+      <li
+        key={index}
+        className="flex items-center justify-between text-sm p-1 hover:bg-gray-50 rounded"
+      >
+        <div className="flex items-center gap-1">
+          <span>{feature}</span>
+          {hasTooltip(feature) && (
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <Info className="h-4 w-4 text-gray-400 cursor-help" />
+              </HoverCardTrigger>
+              <HoverCardContent className="w-80">
+                <p className="text-sm">{featureTooltips[feature]}</p>
+              </HoverCardContent>
+            </HoverCard>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() => handleRemoveFeature(index)}
+          className="text-red-500 hover:text-red-700"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      </li>
+    );
+  };
+
   const handleSave = async () => {
     if (!currentPackage) return;
     
     try {
       if (
         !currentPackage.name.trim() ||
-        currentPackage.price <= 0 ||
-        currentPackage.level <= 0 ||
+        currentPackage.price < 0 ||
+        currentPackage.level < 0 ||
         currentPackage.duration_days <= 0
       ) {
         toast({
@@ -249,6 +408,25 @@ const ManagePackages = () => {
     }
   };
 
+  // Show feature tooltip in table
+  const renderFeatureWithTooltip = (feature: string) => {
+    if (!hasTooltip(feature)) return feature;
+    
+    return (
+      <div className="flex items-center gap-1">
+        {feature}
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <Info className="h-4 w-4 text-gray-400 cursor-help" />
+          </HoverCardTrigger>
+          <HoverCardContent className="w-80">
+            <p className="text-sm">{featureTooltips[feature]}</p>
+          </HoverCardContent>
+        </HoverCard>
+      </div>
+    );
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -298,9 +476,25 @@ const ManagePackages = () => {
                       </span>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm text-gray-500">
-                        {pkg.features?.length || 0} features
-                      </span>
+                      <HoverCard>
+                        <HoverCardTrigger asChild>
+                          <span className="text-sm text-gray-500 cursor-pointer underline">
+                            {pkg.features?.length || 0} features
+                          </span>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-80">
+                          <div className="max-h-[200px] overflow-y-auto">
+                            <p className="font-medium mb-2">Features:</p>
+                            <ul className="space-y-1">
+                              {pkg.features?.map((feature, idx) => (
+                                <li key={idx} className="text-sm flex items-center gap-1">
+                                  • {renderFeatureWithTooltip(feature)}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </HoverCardContent>
+                      </HoverCard>
                     </TableCell>
                     <TableCell className="text-right space-x-2">
                       <Button
@@ -370,16 +564,32 @@ const ManagePackages = () => {
                   <Label htmlFor="level" className="text-right">
                     Level *
                   </Label>
-                  <Input
-                    id="level"
-                    name="level"
-                    type="number"
-                    min="1"
-                    value={currentPackage.level}
-                    onChange={handleInputChange}
-                    className="col-span-3"
-                    required
-                  />
+                  <div className="col-span-3 flex items-center gap-2">
+                    <Input
+                      id="level"
+                      name="level"
+                      type="number"
+                      min="1"
+                      max="3"
+                      value={currentPackage.level}
+                      onChange={handleInputChange}
+                      className="flex-1"
+                      required
+                    />
+                    <HoverCard>
+                      <HoverCardTrigger asChild>
+                        <Info className="h-5 w-5 text-gray-400 cursor-help" />
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-80">
+                        <p className="text-sm mb-2">Recommended levels:</p>
+                        <ul className="text-sm space-y-1">
+                          <li>Level 1: Top Search Results ($29.99)</li>
+                          <li>Level 2: Premium Visibility ($49.99)</li>
+                          <li>Level 3: Maximum Exposure ($79.99)</li>
+                        </ul>
+                      </HoverCardContent>
+                    </HoverCard>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-4 items-center gap-4">
@@ -434,6 +644,18 @@ const ManagePackages = () => {
                 <div className="grid grid-cols-4 items-start gap-4">
                   <Label className="text-right mt-2">Features</Label>
                   <div className="col-span-3 space-y-2">
+                    <div className="flex justify-between">
+                      <Button
+                        type="button"
+                        onClick={handleApplyStandardFeatures}
+                        variant="secondary"
+                        size="sm"
+                        className="text-xs"
+                        disabled={currentPackage.level < 1}
+                      >
+                        Apply Standard Features
+                      </Button>
+                    </div>
                     <div className="flex gap-2">
                       <Input
                         value={featureInput}
@@ -450,24 +672,10 @@ const ManagePackages = () => {
                       </Button>
                     </div>
 
-                    <div className="border rounded-lg p-2 max-h-[150px] overflow-y-auto">
+                    <div className="border rounded-lg p-2 max-h-[200px] overflow-y-auto">
                       {currentPackage.features.length > 0 ? (
                         <ul className="space-y-1">
-                          {currentPackage.features.map((feature, index) => (
-                            <li
-                              key={index}
-                              className="flex items-center justify-between text-sm p-1 hover:bg-gray-50 rounded"
-                            >
-                              <span>{feature}</span>
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveFeature(index)}
-                                className="text-red-500 hover:text-red-700"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            </li>
-                          ))}
+                          {currentPackage.features.map((feature, index) => renderFeature(feature, index))}
                         </ul>
                       ) : (
                         <div className="text-center py-2 text-gray-500 text-sm">
