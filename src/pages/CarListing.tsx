@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -89,17 +88,15 @@ const CarListingPage = () => {
           
           if (data.user_id) {
             try {
-              // Use a direct query to fetch email since get_user_email RPC isn't available in TypeScript yet
+              // Use a direct fetch with RPC for the email instead of querying the view
               const { data: userData, error: userError } = await supabase
-                .from('auth_users_view')
-                .select('email')
-                .eq('id', data.user_id)
-                .maybeSingle();
+                .rpc('get_user_email', { user_id_input: data.user_id });
                 
               if (userError) {
                 console.error("Error fetching seller email:", userError);
-              } else if (userData && userData.email) {
-                sellerName = userData.email;
+              } else {
+                // The function returns the email directly as a string
+                sellerName = userData || "Anonymous";
               }
             } catch (error) {
               console.error("Error fetching seller details:", error);
