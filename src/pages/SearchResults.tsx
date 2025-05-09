@@ -199,23 +199,33 @@ const SearchResults = () => {
         query = query.ilike("body_type", `%${bodyType}%`);
       }
       
-      // Apply text search if provided
+      // Apply text search if provided - enhanced to search in more fields and with better matching
       if (searchQuery) {
-        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,make.ilike.%${searchQuery}%,model.ilike.%${searchQuery}%`);
+        // Build a comprehensive search filter with multiple fields
+        // This makes the search more effective by checking various relevant fields
+        query = query.or(
+          `title.ilike.%${searchQuery}%,` +
+          `description.ilike.%${searchQuery}%,` +
+          `make.ilike.%${searchQuery}%,` +
+          `model.ilike.%${searchQuery}%,` +
+          `body_type.ilike.%${searchQuery}%,` +
+          `fuel_type.ilike.%${searchQuery}%,` +
+          `transmission.ilike.%${searchQuery}%,` +
+          `car_name.ilike.%${searchQuery}%,` +
+          `color.ilike.%${searchQuery}%`
+        );
       }
       
       // Apply feature filters
       if (Object.keys(selectedFeatures).length > 0) {
         // We need to build separate filters for each feature and apply them
-        // This approach uses PostgreSQL's native JSONB functions instead of building complex filter strings
-        
         Object.entries(selectedFeatures).forEach(([category, selectedFeatureList]) => {
           if (selectedFeatureList.length > 0) {
             // Create a filter for each selected feature
             selectedFeatureList.forEach(feature => {
-              // Use the PostgreSQL containment operator with proper path traversal
-              // This expression checks if the features JSON contains the feature in the specified category
-              query = query.filter(`features->'${category}'`, 'cs', `["${feature}"]`);
+              // Use the proper filter format for JSONB containment
+              const jsonPath = `features:${category}`;
+              query = query.contains(jsonPath, [feature]);
             });
           }
         });
@@ -567,7 +577,7 @@ const SearchResults = () => {
                     <FormControl>
                       <div className="relative">
                         <Input
-                          placeholder="Search by make, model, or keywords..."
+                          placeholder="Search by make, model, features (electric, leather seats, etc)..."
                           className="pl-10"
                           {...field}
                         />

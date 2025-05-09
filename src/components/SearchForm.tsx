@@ -104,7 +104,11 @@ const SearchForm = () => {
     if (selectedMake) searchParams.append("make", selectedMake);
     if (selectedModel) searchParams.append("model", selectedModel);
     if (selectedBodyType) searchParams.append("bodyType", selectedBodyType);
-    if (searchQuery) searchParams.append("query", searchQuery);
+    if (searchQuery) {
+      // Normalize the search query to improve matching
+      const normalizedQuery = searchQuery.trim().toLowerCase();
+      searchParams.append("query", normalizedQuery);
+    }
     
     // Redirect to search results page with query parameters
     navigate({
@@ -166,7 +170,7 @@ const SearchForm = () => {
         {/* Text search field */}
         <div className="mb-4 relative">
           <Input
-            placeholder="Search by make, model, or keywords..."
+            placeholder="Search by make, model, keywords (electric, leather seats, etc)..."
             className="pl-10"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
