@@ -40,8 +40,9 @@ export const Chat: React.FC<ChatProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [pollingInterval, setPollingInterval] = useState<number | null>(null);
-  const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false); // Changed to false initially
+  const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [userInitiatedScroll, setUserInitiatedScroll] = useState(false);
   
   const fetchMessages = async () => {
     try {
@@ -60,8 +61,9 @@ export const Chat: React.FC<ChatProps> = ({
       if (data) {
         // Only scroll if:
         // 1. We're getting new messages after initial load
-        // 2. User is sending a message
-        if (initialLoadComplete && data.length > messages.length) {
+        // 2. User is near bottom (handled by scroll handler)
+        // Don't scroll if user has manually scrolled up to read previous messages
+        if (initialLoadComplete && data.length > messages.length && !userInitiatedScroll) {
           setShouldScrollToBottom(true);
         }
         
@@ -109,11 +111,11 @@ export const Chat: React.FC<ChatProps> = ({
   
   // Handle scroll position
   useEffect(() => {
-    if (shouldScrollToBottom && messagesEndRef.current) {
+    if (shouldScrollToBottom && messagesEndRef.current && !userInitiatedScroll) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
       setShouldScrollToBottom(false);
     }
-  }, [messages, shouldScrollToBottom]);
+  }, [messages, shouldScrollToBottom, userInitiatedScroll]);
   
   // Set up scroll detection
   useEffect(() => {
@@ -124,6 +126,15 @@ export const Chat: React.FC<ChatProps> = ({
       // Check if user is near bottom (within 100px)
       const isNearBottom = 
         container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+      
+      // If user scrolls up, set userInitiatedScroll to true
+      if (!isNearBottom) {
+        setUserInitiatedScroll(true);
+      } else {
+        // If user scrolls to bottom, reset userInitiatedScroll
+        setUserInitiatedScroll(false);
+      }
+      
       setShouldScrollToBottom(isNearBottom);
     };
     
@@ -137,7 +148,10 @@ export const Chat: React.FC<ChatProps> = ({
     if (!newMessage.trim()) return;
     
     setSending(true);
-    setShouldScrollToBottom(true); // Always scroll when sending a new message
+    // Don't force scroll on send if user has scrolled up to read previous messages
+    if (!userInitiatedScroll) {
+      setShouldScrollToBottom(true);
+    }
     
     try {
       const messageData = {
