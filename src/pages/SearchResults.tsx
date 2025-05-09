@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -74,7 +75,7 @@ const SearchResults = () => {
       bodyTypeInput: bodyType,
       searchInput: searchQuery,
     }
-  };
+  });
   
   // Pagination
   const itemsPerPage = 12;
