@@ -61,7 +61,7 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
           : listing.features;
         
         // Flatten the object structure into a single array of features
-        if (Object.keys(featuresObj).length > 0) {
+        if (featuresObj && Object.keys(featuresObj).length > 0) {
           // Handle both nested arrays and direct value structures
           const allFeatures = [];
           
@@ -76,7 +76,7 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
             }
           }
           
-          return allFeatures;
+          return allFeatures.length > 0 ? allFeatures : null;
         }
       } catch (e) {
         console.error("Error parsing features:", e);
