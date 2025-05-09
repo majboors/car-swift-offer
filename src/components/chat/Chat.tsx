@@ -38,13 +38,14 @@ export const Chat: React.FC<ChatProps> = ({
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const [pollingInterval, setPollingInterval] = useState<number | null>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   
   const fetchMessages = async () => {
     try {
+      if (!user || !listingId) return;
+      
       const { data, error } = await supabase
         .from('messages')
         .select('*')
@@ -58,13 +59,7 @@ export const Chat: React.FC<ChatProps> = ({
       }
       
       if (data) {
-        // Update messages state without automatic scrolling
         setMessages(data);
-        
-        // On initial load, set flag but don't scroll
-        if (!initialLoadComplete) {
-          setInitialLoadComplete(true);
-        }
         
         // Mark messages as read if the user is the receiver
         if (user && receiverId) {
@@ -104,22 +99,19 @@ export const Chat: React.FC<ChatProps> = ({
   
   // Check scroll position to show/hide scroll button
   const handleScroll = () => {
-    if (!scrollContainerRef.current) return;
+    if (!chatContainerRef.current) return;
     
-    const { scrollHeight, scrollTop, clientHeight } = scrollContainerRef.current;
+    const { scrollHeight, scrollTop, clientHeight } = chatContainerRef.current;
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
     
     // Show button if user is more than 100px from bottom
     setShowScrollButton(distanceFromBottom > 100);
   };
   
-  // Manual scroll to bottom function
+  // Manual scroll to bottom function - ONLY affects the chat container
   const scrollToBottom = () => {
-    if (messagesEndRef.current && scrollContainerRef.current) {
-      messagesEndRef.current.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'end'
-      });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   };
   
@@ -157,6 +149,10 @@ export const Chat: React.FC<ChatProps> = ({
       // Fetch new messages without automatic scrolling
       await fetchMessages();
       
+      // Optional: scroll to bottom after sending a message
+      // Uncomment if you want auto-scroll only after sending a message
+      // scrollToBottom();
+      
     } catch (error: any) {
       toast({
         title: "Error sending message",
@@ -192,9 +188,9 @@ export const Chat: React.FC<ChatProps> = ({
         )}
       </div>
       
-      {/* Messages Container */}
+      {/* Messages Container - This div handles its own scrolling */}
       <div 
-        ref={scrollContainerRef}
+        ref={chatContainerRef}
         className="flex-grow p-4 overflow-y-auto" 
         style={{ maxHeight: isPopup ? '350px' : '400px' }}
         role="log"
@@ -244,10 +240,10 @@ export const Chat: React.FC<ChatProps> = ({
           </div>
         )}
         
-        {/* Scroll to bottom button */}
+        {/* Scroll to bottom button - Positioned within the chat container */}
         {showScrollButton && (
           <Button 
-            className="absolute bottom-20 right-4 rounded-full w-10 h-10 flex items-center justify-center bg-primary shadow-lg"
+            className="fixed bottom-20 right-4 rounded-full w-10 h-10 flex items-center justify-center bg-primary shadow-lg z-10"
             onClick={scrollToBottom}
             aria-label="Scroll to bottom"
           >
