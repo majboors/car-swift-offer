@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from "react-router-dom";
 
 // Define the types more precisely
 interface CarListing {
@@ -32,6 +33,7 @@ interface FallbackCar {
 const ShowroomSection = () => {
   const [showcaseListings, setShowcaseListings] = useState<CarListing[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchShowcaseListings = async () => {
@@ -134,6 +136,20 @@ const ShowroomSection = () => {
     }).format(price);
   };
 
+  // Handle click on a car listing
+  const handleCarClick = (car: CarListing | FallbackCar, index: number) => {
+    // Real car listings have an id property that we can use to navigate
+    if ('id' in car) {
+      navigate(`/listing/${car.id}`);
+    } else {
+      // For fallback cars, show a toast notification
+      toast({
+        title: "Demo car",
+        description: "This is a demo car. No detailed listing available.",
+      });
+    }
+  };
+
   // Use showcase listings or fallback if none are available
   const displayListings = showcaseListings.length > 0 ? showcaseListings : fallbackCars;
 
@@ -165,7 +181,11 @@ const ShowroomSection = () => {
           ))
         ) : (
           displayListings.map((car, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div 
+              key={index} 
+              className="bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => handleCarClick(car, index)}
+            >
               <div className="aspect-[4/3] relative">
                 {'images' in car && car.images.length > 0 ? (
                   <img 
