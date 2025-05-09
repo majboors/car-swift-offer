@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const SearchForm = () => {
   const [carData, setCarData] = useState([]);
@@ -10,6 +11,8 @@ const SearchForm = () => {
   
   const [availableModels, setAvailableModels] = useState([]);
   const [availableBodyTypes, setAvailableBodyTypes] = useState([]);
+  
+  const navigate = useNavigate();
   
   // Fetch car data from public.json
   useEffect(() => {
@@ -67,11 +70,18 @@ const SearchForm = () => {
   
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle form submission - can be expanded later
-    console.log({
-      make: selectedMake,
-      model: selectedModel,
-      bodyType: selectedBodyType
+    
+    // Build search parameters
+    const searchParams = new URLSearchParams();
+    
+    if (selectedMake) searchParams.append("make", selectedMake);
+    if (selectedModel) searchParams.append("model", selectedModel);
+    if (selectedBodyType) searchParams.append("bodyType", selectedBodyType);
+    
+    // Redirect to search results page with query parameters
+    navigate({
+      pathname: "/search",
+      search: searchParams.toString()
     });
   };
   
