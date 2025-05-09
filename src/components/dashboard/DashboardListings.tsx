@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, MessageSquareIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface Listing {
   id: string;
@@ -136,71 +137,88 @@ const DashboardListings = () => {
       <h1 id="my-listings-heading" className="text-2xl font-bold mb-6">My Listings</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {listings.map(listing => (
-          <Card key={listing.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-            <div className="aspect-w-16 aspect-h-9 bg-gray-100">
-              {listing.images && listing.images.length > 0 ? (
-                <img 
-                  src={Array.isArray(listing.images) ? listing.images[0] : ''} 
-                  alt={listing.title}
-                  className="w-full h-[160px] object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-              ) : (
-                <div className="w-full h-[160px] flex items-center justify-center bg-gray-200">
-                  <span className="text-gray-500">No image available</span>
-                </div>
+        {listings.map(listing => {
+          // Check if this listing has unread messages
+          const hasUnread = unreadCounts[listing.id] && unreadCounts[listing.id] > 0;
+          
+          return (
+            <Card 
+              key={listing.id} 
+              className={cn(
+                "overflow-hidden hover:shadow-lg transition-shadow border",
+                hasUnread ? "border-primary border-2" : "border-border"
               )}
-            </div>
-            
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex justify-between items-center">
-                <Link to={`/listing/${listing.id}`} className="hover:text-primary">
-                  {listing.title || `${listing.year} ${listing.make} ${listing.model}`}
-                </Link>
-                
-                {unreadCounts[listing.id] && unreadCounts[listing.id] > 0 && (
-                  <span 
-                    className="bg-red-500 text-white flex items-center gap-1 px-2 py-1 rounded-full text-xs"
-                    aria-label={`${unreadCounts[listing.id]} unread messages`}
-                  >
-                    <MessageSquareIcon className="h-3 w-3" />
-                    {unreadCounts[listing.id]}
-                  </span>
+            >
+              <div className="aspect-w-16 aspect-h-9 bg-gray-100">
+                {listing.images && listing.images.length > 0 ? (
+                  <img 
+                    src={Array.isArray(listing.images) ? listing.images[0] : ''} 
+                    alt={listing.title}
+                    className="w-full h-[160px] object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-[160px] flex items-center justify-center bg-gray-200">
+                    <span className="text-gray-500">No image available</span>
+                  </div>
                 )}
-              </CardTitle>
-            </CardHeader>
-            
-            <CardContent className="pt-0">
-              <p className="font-semibold text-lg text-primary">
-                {formatCurrency(listing.price)}
-              </p>
+              </div>
               
-              <div className="mt-4 flex justify-between">
-                <Link 
-                  to={`/listing/${listing.id}`} 
-                  className="text-sm text-gray-500 hover:text-gray-900"
-                >
-                  View Listing
-                </Link>
-                <Link 
-                  to={`/dashboard/threads/${listing.id}`}
-                  className="text-sm text-primary flex items-center gap-1"
-                >
-                  <MessageSquareIcon className="h-4 w-4" />
-                  Messages 
-                  {unreadCounts[listing.id] && unreadCounts[listing.id] > 0 && (
-                    <span className="bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs">
+              <CardHeader className={cn(
+                "pb-2",
+                hasUnread ? "bg-primary/5" : ""
+              )}>
+                <CardTitle className="text-lg flex justify-between items-center">
+                  <Link to={`/listing/${listing.id}`} className="hover:text-primary">
+                    {listing.title || `${listing.year} ${listing.make} ${listing.model}`}
+                  </Link>
+                  
+                  {hasUnread && (
+                    <span 
+                      className="bg-red-500 text-white flex items-center gap-1 px-2 py-1 rounded-full text-xs"
+                      aria-label={`${unreadCounts[listing.id]} unread messages`}
+                    >
+                      <MessageSquareIcon className="h-3 w-3" />
                       {unreadCounts[listing.id]}
                     </span>
                   )}
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                </CardTitle>
+              </CardHeader>
+              
+              <CardContent className="pt-0">
+                <p className="font-semibold text-lg text-primary">
+                  {formatCurrency(listing.price)}
+                </p>
+                
+                <div className="mt-4 flex justify-between">
+                  <Link 
+                    to={`/listing/${listing.id}`} 
+                    className="text-sm text-gray-500 hover:text-gray-900"
+                  >
+                    View Listing
+                  </Link>
+                  <Link 
+                    to={`/dashboard/threads/${listing.id}`}
+                    className={cn(
+                      "text-sm flex items-center gap-1",
+                      hasUnread ? "text-primary font-medium" : "text-primary"
+                    )}
+                  >
+                    <MessageSquareIcon className="h-4 w-4" />
+                    Messages 
+                    {hasUnread && (
+                      <span className="bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs">
+                        {unreadCounts[listing.id]}
+                      </span>
+                    )}
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </section>
   );

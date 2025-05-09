@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,7 +8,7 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import CarDetails from '@/components/CarDetails';
 import { Chat } from '@/components/chat/Chat';
-import { MessageSquareIcon } from 'lucide-react';
+import { MessageSquareIcon, X as XIcon } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface CarListing {
@@ -44,6 +43,7 @@ const CarListingPage = () => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [imageLoadErrors, setImageLoadErrors] = useState<boolean[]>([]);
   const [showChat, setShowChat] = useState(false);
+  const [showFloatingChat, setShowFloatingChat] = useState(false);
   
   // Calculate if it's the user's own listing
   const isOwnListing = user && listing && user.id === listing.user_id;
@@ -180,6 +180,27 @@ const CarListingPage = () => {
       navigate(`/auth?redirect=${encodeURIComponent(window.location.pathname)}`);
     } else {
       setShowChat(!showChat);
+      // If we're opening the main chat, close the floating one
+      if (!showChat) {
+        setShowFloatingChat(false);
+      }
+    }
+  };
+
+  const toggleFloatingChat = () => {
+    if (!user) {
+      // Redirect to auth page if user is not logged in
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to contact the seller.",
+      });
+      navigate(`/auth?redirect=${encodeURIComponent(window.location.pathname)}`);
+    } else {
+      setShowFloatingChat(!showFloatingChat);
+      // If we're opening the floating chat, close the main one
+      if (!showFloatingChat) {
+        setShowChat(false);
+      }
     }
   };
 
@@ -291,24 +312,47 @@ const CarListingPage = () => {
         </div>
         
         {/* Floating chat button on mobile - only for logged in users who don't own the listing */}
-        {!isOwnListing && !showChat && (
-          <div className="fixed bottom-6 right-6 z-50 md:hidden">
+        {!isOwnListing && !showChat && !showFloatingChat && (
+          <div className="fixed bottom-6 right-6 z-50">
             <Button 
               className="rounded-full w-16 h-16 shadow-lg bg-[#007ac8] hover:bg-[#0069b4] text-white"
-              onClick={handleContactClick}
+              onClick={toggleFloatingChat}
             >
               <MessageSquareIcon className="h-6 w-6" />
             </Button>
           </div>
         )}
+
+        {/* New Floating Chat Panel */}
+        {showFloatingChat && user && !isOwnListing && (
+          <div className="fixed bottom-6 right-6 z-50 w-80 rounded-lg shadow-xl">
+            <div className="flex justify-between items-center bg-primary text-white p-2 rounded-t-lg">
+              <h3 className="text-sm font-medium">Chat with Seller</h3>
+              <button 
+                onClick={toggleFloatingChat} 
+                className="p-1 rounded-full hover:bg-primary-dark"
+              >
+                <XIcon className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="h-80 bg-white rounded-b-lg overflow-hidden">
+              <Chat 
+                listingId={listing.id} 
+                receiverId={listing.user_id}
+                onClose={toggleFloatingChat} 
+                className="h-full border-0"
+              />
+            </div>
+          </div>
+        )}
         
-        {/* Chat component - only shown when user is logged in */}
+        {/* Main Chat component - only shown when user is logged in */}
         {showChat && user && !isOwnListing && (
           <div className="mt-6 border rounded-lg shadow-md">
             <Chat 
               listingId={listing.id} 
               receiverId={listing.user_id}
-              onClose={() => setShowChat(false)} 
+              onClose={handleContactClick} 
             />
           </div>
         )}

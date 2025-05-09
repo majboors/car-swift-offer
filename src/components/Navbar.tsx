@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 import { MobileSidebar } from "./MobileSidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { AdminNavLink } from "./AdminNavLink";
-import { Bell } from "lucide-react";
+import { Bell, LayoutDashboard } from "lucide-react";
 import { useState, useEffect } from "react";
 import ScrollNav from "./ScrollNav";
 import {
@@ -277,6 +277,12 @@ export function Navbar() {
                 </Button>
               ) : user ? (
                 <div className="flex items-center gap-4">
+                  {/* Dashboard Link */}
+                  <Link to="/dashboard" className="flex items-center gap-1 text-sm text-gray-700 hover:text-primary">
+                    <LayoutDashboard className="h-4 w-4" />
+                    <span>Dashboard</span>
+                  </Link>
+                  
                   <Link to="/add-listing">
                     <Button size="sm" className="px-4">
                       Add Listing
