@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -259,9 +258,8 @@ const SearchResults = () => {
         {/* Breadcrumbs */}
         <Breadcrumb className="mb-6">
           <BreadcrumbItem>
-            {/* Fix: Use href instead of to, and use as Link component */}
-            <BreadcrumbLink asChild>
-              <Link to="/">Home</Link>
+            <BreadcrumbLink as={Link} href="/">
+              Home
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
