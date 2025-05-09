@@ -283,7 +283,7 @@ const CarListingPage = () => {
               </Button>
             )}
             
-            {/* Chat component */}
+            {/* Chat component - Make sure it's visible when showChat is true */}
             {showChat && !isOwnListing && (
               <div className="mt-6 border rounded-lg shadow-md">
                 <Chat 
@@ -295,6 +295,18 @@ const CarListingPage = () => {
             )}
           </div>
         </div>
+        
+        {/* Add floating chat button for better mobile visibility */}
+        {!isOwnListing && !showChat && (
+          <div className="fixed bottom-6 right-6 lg:hidden z-10">
+            <Button 
+              className="rounded-full w-14 h-14 shadow-lg bg-[#007ac8] hover:bg-[#0069b4]"
+              onClick={toggleChat}
+            >
+              <MessageSquareIcon className="h-6 w-6" />
+            </Button>
+          </div>
+        )}
       </div>
       
       <Footer />
