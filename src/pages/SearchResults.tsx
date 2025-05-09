@@ -204,20 +204,26 @@ const SearchResults = () => {
         query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,make.ilike.%${searchQuery}%,model.ilike.%${searchQuery}%`);
       }
       
-      // Apply feature filters - handle complex feature paths properly
-      Object.entries(selectedFeatures).forEach(([category, selectedFeatureList]) => {
-        if (selectedFeatureList.length > 0) {
-          // Convert category names with spaces to proper JSON path format
-          // We need to escape the quotation marks and properly format the JSON path
-          const categoryPath = category.includes(' ') ? `"${category}"` : category;
-          
-          selectedFeatureList.forEach(feature => {
-            // Create a proper JSON containment query for each feature
-            // Using ->> operator for text comparison
-            query = query.or(`features->${categoryPath}::jsonb @> '["${feature}"]'`);
-          });
+      // Apply feature filters - fixing the JSON path syntax for categories with spaces
+      if (Object.keys(selectedFeatures).length > 0) {
+        // Create a filter array to collect all feature conditions
+        const featureFilters: string[] = [];
+        
+        Object.entries(selectedFeatures).forEach(([category, selectedFeatureList]) => {
+          if (selectedFeatureList.length > 0) {
+            selectedFeatureList.forEach(feature => {
+              // PostgreSQL containment operator (@>) properly formatted for JSONB fields
+              // We need to ensure category is properly quoted if it contains spaces
+              featureFilters.push(`features->'${category}'::jsonb @> '"${feature}"'::jsonb`);
+            });
+          }
+        });
+        
+        // Apply the feature filters if we have any
+        if (featureFilters.length > 0) {
+          query = query.or(featureFilters.join(','));
         }
-      });
+      }
       
       // Apply sorting
       switch (currentSort) {
