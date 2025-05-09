@@ -32,7 +32,7 @@ interface CarListing {
   created_at: string;
   features: any;
   user_id: string;
-  seller_name?: string; // New property for seller name
+  seller_name?: string; // Property for seller name
 }
 
 const CarListingPage = () => {
@@ -85,23 +85,19 @@ const CarListingPage = () => {
                 : []
               : [];
           
-          // Fetch the seller's information (email as username for now)
+          // Create a simple seller name using user_id
           let sellerName = "Anonymous";
           
           if (data.user_id) {
             try {
-              // Using a simpler approach to get user information
-              const { data: userData, error: userError } = await supabase
-                .from('profiles')
-                .select('full_name, email')
-                .eq('id', data.user_id)
-                .single();
+              // Get user email from auth.users via RPC function
+              const { data: userData } = await supabase
+                .rpc('get_user_email', { user_id_input: data.user_id });
                 
-              if (userError) {
-                console.error("Error fetching seller profile:", userError);
+              if (userData) {
+                sellerName = userData || `User ${data.user_id.substring(0, 6)}`;
+              } else {
                 sellerName = `User ${data.user_id.substring(0, 6)}`;
-              } else if (userData) {
-                sellerName = userData.full_name || userData.email || `User ${data.user_id.substring(0, 6)}`;
               }
             } catch (error) {
               console.error("Error fetching seller details:", error);
@@ -151,6 +147,15 @@ const CarListingPage = () => {
       fetchListing();
     }
   }, [id]);
+
+  // Add debugging logs
+  useEffect(() => {
+    if (user && listing) {
+      console.log("CarListing - isOwnListing:", isOwnListing);
+      console.log("CarListing - user:", user.id);
+      console.log("CarListing - listing user_id:", listing.user_id);
+    }
+  }, [user, listing, isOwnListing]);
 
   const handleImageError = (index: number) => {
     console.log(`Image at index ${index} failed to load`);

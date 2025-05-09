@@ -1,10 +1,9 @@
 
 import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle2, User, MessageSquareIcon } from "lucide-react";
+import { CheckCircle2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface CarDetailsProps {
   listing: {
@@ -34,6 +33,12 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
   
   // Check if this is the user's own listing
   const isOwnListing = user && listing.user_id === user.id;
+  
+  // Add debugging logs
+  console.log("CarDetails: onContactClick prop exists:", !!onContactClick);
+  console.log("CarDetails: isOwnListing:", isOwnListing);
+  if (user) console.log("CarDetails: user:", user.id);
+  console.log("CarDetails: listing user_id:", listing.user_id);
   
   // Function to flatten features object into an array if needed
   const getFeaturesList = () => {
@@ -68,11 +73,7 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
   
   // Handle button click for anonymous users
   const handleInquiryClick = () => {
-    if (!user && onContactClick) {
-      // Redirect to auth page if user is not logged in
-      window.location.href = `/auth?redirect=${encodeURIComponent(window.location.pathname)}`;
-    } else if (onContactClick) {
-      // Execute onContactClick if user is logged in
+    if (onContactClick) {
       onContactClick();
     }
   };
@@ -95,8 +96,8 @@ const CarDetails = ({ listing, onContactClick }: CarDetailsProps) => {
             <p className="font-medium">{listing.seller_name}</p>
           </div>
           
-          {/* "Inquire Now" button - the only button in seller info section */}
-          {!isOwnListing && (
+          {/* "Inquire Now" button - only show if not owner's listing */}
+          {!isOwnListing && onContactClick && (
             <Button 
               onClick={handleInquiryClick}
               className="bg-[#007ac8] hover:bg-[#0069b4] text-white"
