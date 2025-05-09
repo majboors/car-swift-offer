@@ -15,7 +15,7 @@ interface Listing {
   year: number;
   make: string;
   model: string;
-  images: string[] | null;
+  images: string[] | any; // Updated to accept any to handle JSON
 }
 
 interface UnreadCount {
@@ -43,7 +43,14 @@ const DashboardListings = () => {
         if (error) throw error;
         
         if (data) {
-          setListings(data);
+          // Convert the data to match our Listing type
+          const typedListings = data.map(item => ({
+            ...item,
+            images: Array.isArray(item.images) ? item.images : 
+                   (item.images ? [item.images.toString()] : [])
+          })) as Listing[];
+          
+          setListings(typedListings);
           
           // Fetch unread message counts for each listing
           const { data: unreadData, error: unreadError } = await supabase

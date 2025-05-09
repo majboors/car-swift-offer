@@ -12,7 +12,7 @@ import { formatRelative } from 'date-fns';
 
 interface Thread {
   user_id: string;
-  email?: string;
+  email_or_id?: string; // Changed to be more flexible
   last_message_time: string;
   unread_count: number;
 }
@@ -59,12 +59,9 @@ const ThreadView = () => {
           
           for (const message of data) {
             if (message.sender_id && !threadMap.has(message.sender_id)) {
-              // Get the user email for display
-              const { data: userData } = await supabase
-                .from('profiles')
-                .select('email')
-                .eq('id', message.sender_id)
-                .maybeSingle();
+              // We don't have a profiles table, so we'll use the user ID as identifier
+              // In a real app, you might want to create a profiles table to store user details
+              const senderEmail = message.sender_id;
                 
               // Get unread count for this thread
               const { count, error: countError } = await supabase
@@ -79,7 +76,7 @@ const ThreadView = () => {
               
               threadMap.set(message.sender_id, {
                 user_id: message.sender_id,
-                email: userData?.email || 'Unknown User',
+                email_or_id: senderEmail || 'Unknown User',
                 last_message_time: message.inserted_at,
                 unread_count: count || 0
               });
@@ -119,12 +116,12 @@ const ThreadView = () => {
     <main className="container mx-auto py-6 px-4" aria-labelledby="threads-heading">
       <Breadcrumb className="mb-6">
         <BreadcrumbItem>
-          <BreadcrumbLink as={Link} to="/dashboard">
+          <BreadcrumbLink href="/dashboard">
             Dashboard
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbItem>
-          <BreadcrumbLink as={Link} to="/dashboard">
+          <BreadcrumbLink href="/dashboard">
             My Listings
           </BreadcrumbLink>
         </BreadcrumbItem>
@@ -174,7 +171,7 @@ const ThreadView = () => {
                           <UserIcon className="h-5 w-5 text-gray-500" />
                         </div>
                         <div>
-                          <p className="font-medium">{thread.email}</p>
+                          <p className="font-medium">{thread.email_or_id}</p>
                           <p className="text-xs text-gray-500">
                             {formatTimestamp(thread.last_message_time)}
                           </p>
