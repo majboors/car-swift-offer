@@ -204,27 +204,34 @@ const SearchResults = () => {
         const keywords = searchQuery.toLowerCase().split(/\s+/).filter(word => word.length > 0);
         
         if (keywords.length > 0) {
-          // Create a filter condition for each keyword
-          const filterConditions = keywords.map(keyword => {
-            return `title.ilike.%${keyword}%,` +
-                   `description.ilike.%${keyword}%,` +
-                   `make.ilike.%${keyword}%,` +
-                   `model.ilike.%${keyword}%,` +
-                   `body_type.ilike.%${keyword}%,` +
-                   `fuel_type.ilike.%${keyword}%,` +
-                   `transmission.ilike.%${keyword}%,` +
-                   `car_name.ilike.%${keyword}%,` +
-                   `color.ilike.%${keyword}%,` +
-                   // Add new condition for detailed deep text search
-                   `features::text.ilike.%${keyword}%`;
+          console.log("Search using keywords:", keywords);
+          
+          // Search across multiple columns without using the problematic ::text casting
+          const filterConditions: string[] = [];
+          
+          keywords.forEach(keyword => {
+            // Add conditions for each standard text column
+            filterConditions.push(
+              `title.ilike.%${keyword}%`,
+              `description.ilike.%${keyword}%`,
+              `make.ilike.%${keyword}%`,
+              `model.ilike.%${keyword}%`,
+              `body_type.ilike.%${keyword}%`,
+              `fuel_type.ilike.%${keyword}%`,
+              `transmission.ilike.%${keyword}%`,
+              `car_name.ilike.%${keyword}%`,
+              `color.ilike.%${keyword}%`
+            );
           });
           
           // Combine all keyword filters with OR
-          const combinedFilter = filterConditions.join(',');
-          query = query.or(combinedFilter);
+          if (filterConditions.length > 0) {
+            const combinedFilter = filterConditions.join(',');
+            console.log("Enhanced combined filter:", combinedFilter);
+            query = query.or(combinedFilter);
+          }
           
-          console.log("Search using keywords:", keywords);
-          console.log("Enhanced combined filter:", combinedFilter);
+          console.log("Final query to be executed:", query);
         }
       }
       
@@ -268,9 +275,6 @@ const SearchResults = () => {
         query = query.range(from, to);
       }
       
-      // Log the query for debugging
-      console.log("Final query to be executed:", query);
-      
       // Execute query
       const { data, count, error } = await query;
       
@@ -279,9 +283,29 @@ const SearchResults = () => {
         throw error;
       }
       
-      // If we need to filter by features, do it in memory and then paginate the results
+      // Post-process search for keywords in features - do this client-side since we can't reliably query JSON
       let filteredData = data || [];
       
+      // If we have a search query, also filter for matches in the features object
+      if (searchQuery && filteredData.length > 0) {
+        const keywords = searchQuery.toLowerCase().split(/\s+/).filter(word => word.length > 0);
+        
+        if (keywords.length > 0) {
+          // Additional client-side filtering for features
+          filteredData = filteredData.filter(listing => {
+            // If the listing already matched based on standard columns, keep it
+            // If we want to search features too:
+            if (listing.features) {
+              const featuresStr = JSON.stringify(listing.features).toLowerCase();
+              // Check if any keyword is in the features JSON
+              return keywords.some(keyword => featuresStr.includes(keyword));
+            }
+            return true;
+          });
+        }
+      }
+      
+      // If we need to filter by features, do it in memory and then paginate the results
       if (shouldApplyFeatureFilters && filteredData.length > 0) {
         console.log("Applying client-side feature filters");
         
@@ -875,20 +899,4 @@ const SearchResults = () => {
                   
                   <PaginationItem>
                     <PaginationNext
-                      onClick={() => updateSearchParam("page", (currentPage + 1).toString())}
-                      className={cn(currentPage >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer")}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            )}
-          </div>
-        </div>
-      </main>
-      
-      <Footer />
-    </div>
-  );
-};
-
-export default SearchResults;
+                      onClick={() => updateSearchParam("page", (currentPage + 1
