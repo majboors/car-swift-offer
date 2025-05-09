@@ -71,6 +71,7 @@ export const Chat: React.FC<ChatProps> = ({
         
         if (!initialLoadComplete) {
           setInitialLoadComplete(true);
+          // Don't auto-scroll on initial load
         }
         
         // Mark messages as read if the user is the receiver
@@ -111,10 +112,16 @@ export const Chat: React.FC<ChatProps> = ({
   
   // Handle scroll position
   useEffect(() => {
-    if (shouldScrollToBottom && messagesEndRef.current && !userInitiatedScroll) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-      setShouldScrollToBottom(false);
-    }
+    if (!shouldScrollToBottom || !messagesEndRef.current || userInitiatedScroll) return;
+    
+    // Use scrollIntoView with behavior: 'auto' to prevent page scrolling
+    messagesEndRef.current.scrollIntoView({ 
+      behavior: 'auto', 
+      block: 'end',
+      inline: 'nearest'
+    });
+    
+    setShouldScrollToBottom(false);
   }, [messages, shouldScrollToBottom, userInitiatedScroll]);
   
   // Set up scroll detection
@@ -148,10 +155,6 @@ export const Chat: React.FC<ChatProps> = ({
     if (!newMessage.trim()) return;
     
     setSending(true);
-    // Don't force scroll on send if user has scrolled up to read previous messages
-    if (!userInitiatedScroll) {
-      setShouldScrollToBottom(true);
-    }
     
     try {
       const messageData = {
@@ -176,6 +179,21 @@ export const Chat: React.FC<ChatProps> = ({
       
       setNewMessage('');
       await fetchMessages(); // Fetch messages immediately after sending
+      
+      // Only scroll after sending if the container exists and the user hasn't scrolled up
+      if (messagesContainerRef.current && !userInitiatedScroll) {
+        // Use requestAnimationFrame to ensure the DOM has updated
+        requestAnimationFrame(() => {
+          // Scroll the message container not the whole page
+          if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ 
+              behavior: 'auto',
+              block: 'end',
+              inline: 'nearest'
+            });
+          }
+        });
+      }
       
     } catch (error: any) {
       toast({
