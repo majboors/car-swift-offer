@@ -70,16 +70,6 @@ const Auth = () => {
         
         console.log("Login successful:", data);
         
-        // Update user location if provided
-        if (location && data.user) {
-          const { error: profileError } = await supabase.from('user_profiles')
-            .upsert({ id: data.user.id, location, updated_at: new Date().toISOString() });
-          
-          if (profileError) {
-            console.error("Error updating location:", profileError);
-          }
-        }
-        
         toast({
           title: "Success!",
           description: "You've been logged in.",
@@ -178,23 +168,26 @@ const Auth = () => {
                 </div>
               )}
               
-              <div className="mb-4">
-                <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
-                  Your Location
-                </label>
-                <Select value={location} onValueChange={setLocation}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select your location" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {locations.map((loc) => (
-                      <SelectItem key={loc} value={loc}>
-                        {loc}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Only show location during sign up */}
+              {isSignUp && (
+                <div className="mb-4">
+                  <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+                    Your Location
+                  </label>
+                  <Select value={location} onValueChange={setLocation}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select your location" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {locations.map((loc) => (
+                        <SelectItem key={loc} value={loc}>
+                          {loc}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               
               <div>
                 <label htmlFor="password" className="sr-only">
