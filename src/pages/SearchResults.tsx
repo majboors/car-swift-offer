@@ -901,3 +901,109 @@ const SearchResults = () => {
               <div className="flex justify-center items-center h-64">
                 <Loader className="w-8 h-8 animate-spin text-blue-600" />
               </div>
+            ) : carListings.length > 0 ? (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                  {carListings.map((car) => (
+                    <Link to={`/listing/${car.id}`} key={car.id}>
+                      <Card className="h-full hover:shadow-lg transition-shadow overflow-hidden group">
+                        <div className="relative">
+                          {isPremium(car) && (
+                            <Badge variant="premium" className="absolute top-2 right-2 z-10">
+                              <Trophy className="w-3 h-3 mr-1" /> Premium
+                            </Badge>
+                          )}
+                          <div className="aspect-video bg-gray-100 overflow-hidden">
+                            {car.images && car.images.length > 0 ? (
+                              <img
+                                src={Array.isArray(car.images) ? car.images[0] : car.images}
+                                alt={car.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                                <span className="text-gray-400">No image available</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className="font-semibold text-lg line-clamp-1">
+                              {car.title || `${car.year} ${car.make} ${car.model}`}
+                            </h3>
+                            {car.featured && (
+                              <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                                <Star className="w-3 h-3 mr-1 fill-yellow-400 text-yellow-400" />
+                                Featured
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-lg font-bold text-[#007ac8] mb-2">
+                            {formatPrice(car.price)}
+                          </p>
+                          <div className="text-sm text-gray-600 space-y-1">
+                            <p>Year: {car.year}</p>
+                            {car.mileage && <p>Mileage: {car.mileage.toLocaleString()} km</p>}
+                            {car.location && <p>Location: {car.location}</p>}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+                
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <Pagination className="mt-8">
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={() => currentPage > 1 && updateSearchParam("page", (currentPage - 1).toString())}
+                          className={cn(currentPage <= 1 && "pointer-events-none opacity-50")}
+                        />
+                      </PaginationItem>
+                      
+                      {[...Array(totalPages)].map((_, i) => (
+                        <PaginationItem key={i}>
+                          <PaginationLink
+                            onClick={() => updateSearchParam("page", (i + 1).toString())}
+                            isActive={currentPage === i + 1}
+                          >
+                            {i + 1}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
+                      
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() => currentPage < totalPages && updateSearchParam("page", (currentPage + 1).toString())}
+                          className={cn(currentPage >= totalPages && "pointer-events-none opacity-50")}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                )}
+              </>
+            ) : (
+              <div className="bg-white rounded-lg shadow-md p-8 text-center">
+                <h3 className="text-lg font-semibold mb-2">No results found</h3>
+                <p className="text-gray-600 mb-4">Try adjusting your search filters</p>
+                <Button
+                  variant="outline"
+                  onClick={clearFilters}
+                >
+                  Clear all filters
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+      
+      <Footer />
+    </div>
+  );
+};
+
+export default SearchResults;
