@@ -31,7 +31,8 @@ BreadcrumbItem.displayName = "BreadcrumbItem"
 const BreadcrumbLink = React.forwardRef<
   HTMLAnchorElement,
   React.ComponentPropsWithoutRef<"a"> & {
-    as?: React.ElementType
+    as?: React.ElementType;
+    [key: string]: any; // Allow passing additional props for custom components
   }
 >(({ as: Comp = 'a', className, ...props }, ref) => (
   <Comp
