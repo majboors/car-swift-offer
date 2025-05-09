@@ -206,31 +206,19 @@ const SearchResults = () => {
       
       // Apply feature filters
       if (Object.keys(selectedFeatures).length > 0) {
-        // For each category and feature combination, we'll create a separate filter
-        // and then combine them with OR
-        const filterGroups: string[] = [];
+        // We need to build separate filters for each feature and apply them
+        // This approach uses PostgreSQL's native JSONB functions instead of building complex filter strings
         
         Object.entries(selectedFeatures).forEach(([category, selectedFeatureList]) => {
           if (selectedFeatureList.length > 0) {
-            // For each feature in this category, create a separate filter expression
-            const categoryFeatureFilters = selectedFeatureList.map(feature => {
-              // Use PostgreSQL's raw string literals to properly handle special characters
-              // The syntax is: column::jsonb @> '{"category": ["feature"]}' for array containment
-              return `features::jsonb @> '{"${category}": ["${feature}"]}'`;
+            // Create a filter for each selected feature
+            selectedFeatureList.forEach(feature => {
+              // Use the PostgreSQL containment operator with proper path traversal
+              // This expression checks if the features JSON contains the feature in the specified category
+              query = query.filter(`features->'${category}'`, 'cs', `["${feature}"]`);
             });
-            
-            // Group this category's features together with OR
-            if (categoryFeatureFilters.length > 0) {
-              filterGroups.push(`(${categoryFeatureFilters.join(' OR ')})`);
-            }
           }
         });
-        
-        // Combine all category filters with AND (a car must match at least one feature from each selected category)
-        if (filterGroups.length > 0) {
-          // Apply the feature filters using a custom filter string
-          query = query.or(filterGroups.join(' OR '));
-        }
       }
       
       // Apply sorting
