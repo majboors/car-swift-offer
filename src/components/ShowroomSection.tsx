@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Car } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,8 +40,8 @@ const ShowroomSection = () => {
         const { data, error } = await supabase
           .from("car_listings")
           .select("*")
-          .eq("showcase", true)
-          .eq("status", "approved")
+          .eq("showcase", true)  // Only fetch listings marked as showcase by admins
+          .eq("status", "approved")  // Only approved listings
           .order("created_at", { ascending: false })
           .limit(5);
 
@@ -143,6 +144,9 @@ const ShowroomSection = () => {
           <Car className="w-6 h-6 text-[#007ac8]" />
         </div>
         <h2 className="text-2xl font-semibold">Looking for a brand new car?</h2>
+        {showcaseListings.length > 0 && (
+          <p className="text-gray-600">Featured vehicles selected by our experts</p>
+        )}
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
