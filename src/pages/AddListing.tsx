@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -934,4 +935,99 @@ const AddListing = () => {
               <TabsContent value="images" className="space-y-4 mt-4">
                 <Card>
                   <CardContent className="pt-6">
-                    <div className="space-
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="images">Upload Images</Label>
+                        <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
+                          <Input
+                            id="images"
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={handleImageChange}
+                            className="hidden"
+                          />
+                          <Label htmlFor="images" className="cursor-pointer block">
+                            <div className="space-y-2">
+                              <div className="mx-auto w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-blue-500">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                                </svg>
+                              </div>
+                              <div className="text-blue-500 font-medium">Click to upload</div>
+                              <div className="text-sm text-gray-500">PNG, JPG up to 5MB</div>
+                            </div>
+                          </Label>
+                        </div>
+                      </div>
+                      
+                      {/* Preview images */}
+                      {previewUrls.length > 0 && (
+                        <div className="mt-6">
+                          <h3 className="text-lg font-medium mb-3">Selected Images</h3>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                            {previewUrls.map((url, index) => (
+                              <div key={index} className="relative group">
+                                <img 
+                                  src={url} 
+                                  alt={`Preview ${index+1}`} 
+                                  className="h-40 w-full object-cover rounded-md"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => removeImage(index)}
+                                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <div className="flex justify-between">
+                  <Button 
+                    type="button"
+                    onClick={handlePreviousStep}
+                    variant="outline"
+                    className="px-8"
+                  >
+                    <ArrowLeft className="mr-2" /> Back
+                  </Button>
+                  
+                  <Button 
+                    type="submit"
+                    disabled={loading || uploadingImages}
+                    className="bg-[#007ac8] hover:bg-[#0069b4] px-8"
+                  >
+                    {loading || uploadingImages ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        {uploadingImages ? 'Uploading Images...' : 'Submitting...'}
+                      </>
+                    ) : (
+                      'Submit Listing'
+                    )}
+                  </Button>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </form>
+        </div>
+      </div>
+      
+      <Footer />
+    </div>
+  );
+};
+
+export default AddListing;
