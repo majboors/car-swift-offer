@@ -6,7 +6,7 @@ import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import SearchForm from "@/components/SearchForm";
 import CategoryStrip from "@/components/CategoryStrip";
-import SaveSearchPrompt from "@/components/SaveSearchPrompt";
+import RecommendedCarsSection from "@/components/RecommendedCarsSection";
 import CarValuationSection from "@/components/CarValuationSection";
 import ShowroomSection from "@/components/ShowroomSection";
 import ReviewsSection from "@/components/ReviewsSection";
@@ -33,7 +33,7 @@ const Index: React.FC = () => {
             <SearchForm />
           </div>
           <CategoryStrip />
-          <SaveSearchPrompt />
+          <RecommendedCarsSection />
           <CarValuationSection />
           <ShowroomSection />
           <ReviewsSection />

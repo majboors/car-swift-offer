@@ -36,6 +36,7 @@ export type Database = {
           contact_phone: string | null
           created_at: string
           description: string | null
+          featured: boolean | null
           features: Json | null
           fuel_type: string | null
           id: string
@@ -44,9 +45,13 @@ export type Database = {
           make: string
           mileage: number | null
           model: string
+          nearby_notification_sent: boolean | null
+          package_expires_at: string | null
+          package_level: number | null
           price: number
           status: string
           title: string
+          top_search: boolean | null
           transmission: string | null
           updated_at: string
           user_id: string
@@ -60,6 +65,7 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string
           description?: string | null
+          featured?: boolean | null
           features?: Json | null
           fuel_type?: string | null
           id?: string
@@ -68,9 +74,13 @@ export type Database = {
           make: string
           mileage?: number | null
           model: string
+          nearby_notification_sent?: boolean | null
+          package_expires_at?: string | null
+          package_level?: number | null
           price: number
           status?: string
           title: string
+          top_search?: boolean | null
           transmission?: string | null
           updated_at?: string
           user_id: string
@@ -84,6 +94,7 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string
           description?: string | null
+          featured?: boolean | null
           features?: Json | null
           fuel_type?: string | null
           id?: string
@@ -92,13 +103,50 @@ export type Database = {
           make?: string
           mileage?: number | null
           model?: string
+          nearby_notification_sent?: boolean | null
+          package_expires_at?: string | null
+          package_level?: number | null
           price?: number
           status?: string
           title?: string
+          top_search?: boolean | null
           transmission?: string | null
           updated_at?: string
           user_id?: string
           year?: number
+        }
+        Relationships: []
+      }
+      listing_packages: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          duration_days: number
+          features: Json
+          id: string
+          level: number
+          name: string
+          price: number
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          duration_days: number
+          features?: Json
+          id?: string
+          level: number
+          name: string
+          price: number
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          duration_days?: number
+          features?: Json
+          id?: string
+          level?: number
+          name?: string
+          price?: number
         }
         Relationships: []
       }

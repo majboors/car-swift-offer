@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminListings } from "@/components/admin/AdminListings";
 import { DashboardCharts } from "@/components/admin/DashboardCharts";
+import ManagePackages from "@/components/admin/ManagePackages";
 import { Loader, BarChart } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { Navbar } from "@/components/Navbar";
@@ -223,13 +224,18 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="listings" className="mt-6">
-          <TabsList className="mb-6 grid w-full grid-cols-2 max-w-md">
+          <TabsList className="mb-6 grid w-full grid-cols-3 max-w-md">
             <TabsTrigger value="listings">Manage Listings</TabsTrigger>
+            <TabsTrigger value="packages">Manage Packages</TabsTrigger>
             <TabsTrigger value="users">Manage Users</TabsTrigger>
           </TabsList>
 
           <TabsContent value="listings">
             <AdminListings onListingStatusChange={fetchDashboardData} />
+          </TabsContent>
+          
+          <TabsContent value="packages">
+            <ManagePackages />
           </TabsContent>
 
           <TabsContent value="users">

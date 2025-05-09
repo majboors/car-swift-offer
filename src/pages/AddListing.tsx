@@ -15,6 +15,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from '@/contexts/AuthContext';
+import PackageSelection from '@/components/PackageSelection';
 
 // Feature categories and options
 const featureCategories = {
@@ -58,6 +59,10 @@ const AddListing = () => {
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [selectedFeatures, setSelectedFeatures] = useState<Record<string, string[]>>({});
   const [activeTab, setActiveTab] = useState<string>("details");
+  
+  // Add new states for package selection
+  const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
+  const [selectedPackageLevel, setSelectedPackageLevel] = useState<number>(0);
   
   const [formData, setFormData] = useState({
     car_name: '',
@@ -222,6 +227,11 @@ const AddListing = () => {
     }
   };
   
+  const handlePackageSelect = (packageId: string, packageLevel: number) => {
+    setSelectedPackageId(packageId);
+    setSelectedPackageLevel(packageLevel);
+  };
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -262,6 +272,7 @@ const AddListing = () => {
     try {
       console.log("Form data being submitted:", formData);
       console.log("Selected features:", selectedFeatures);
+      console.log("Selected package:", selectedPackageId, selectedPackageLevel);
       
       // Upload images first
       const imageUrls = await uploadImages();
@@ -276,6 +287,33 @@ const AddListing = () => {
       }, {});
       
       console.log("Processed features data:", featuresData);
+      
+      // Calculate package expiration if a package was selected
+      let packageExpiresAt = null;
+      let featured = false;
+      let topSearch = false;
+      
+      if (selectedPackageId) {
+        // Get package details to determine duration
+        const { data: packageData } = await supabase
+          .from('listing_packages')
+          .select('duration_days')
+          .eq('id', selectedPackageId)
+          .single();
+          
+        if (packageData) {
+          // Calculate expiration date
+          const expirationDate = new Date();
+          expirationDate.setDate(expirationDate.getDate() + packageData.duration_days);
+          packageExpiresAt = expirationDate.toISOString();
+          
+          // Set featured flag for package level 2 or 3
+          featured = selectedPackageLevel >= 2;
+          
+          // Set top search flag for package level 1, 2 or 3
+          topSearch = selectedPackageLevel >= 1;
+        }
+      }
       
       // Format the data
       const listingData = {
@@ -298,6 +336,11 @@ const AddListing = () => {
         features: Object.keys(featuresData).length > 0 ? featuresData : null,
         images: imageUrls,
         status: 'pending', // Set status as pending for new listings
+        // Add package-related fields
+        package_level: selectedPackageLevel,
+        package_expires_at: packageExpiresAt,
+        featured: featured,
+        top_search: topSearch
       };
 
       console.log("Final listing data to be inserted:", listingData);
@@ -340,6 +383,8 @@ const AddListing = () => {
       setActiveTab("features");
     } else if (activeTab === "features") {
       setActiveTab("images");
+    } else if (activeTab === "images") {
+      setActiveTab("packages");
     }
   };
   
@@ -349,6 +394,8 @@ const AddListing = () => {
       setActiveTab("details");
     } else if (activeTab === "images") {
       setActiveTab("features");
+    } else if (activeTab === "packages") {
+      setActiveTab("images");
     }
   };
 
@@ -484,7 +531,12 @@ const AddListing = () => {
         contact_phone: '0412345678',
         features: testFeatures, // Using our direct features object
         images: imageUrls,
-        status: 'pending', // Set status as pending for test listings
+        status: 'approved', // Set as approved for test listings to show up immediately
+        // Add package data
+        package_level: 2, // Premium visibility package
+        package_expires_at: new Date().toISOString(),
+        featured: true,
+        top_search: true
       };
       
       console.log("Final test listing data with features:", listingData);
@@ -648,12 +700,13 @@ const AddListing = () => {
           
           <form onSubmit={handleSubmit} className="space-y-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="details">Car Details</TabsTrigger>
                 <TabsTrigger value="features">
                   Features {totalSelectedFeatures > 0 && `(${totalSelectedFeatures})`}
                 </TabsTrigger>
                 <TabsTrigger value="images">Images</TabsTrigger>
+                <TabsTrigger value="packages">Package</TabsTrigger>
               </TabsList>
 
               <TabsContent value="details" className="space-y-6 mt-4">
@@ -994,6 +1047,46 @@ const AddListing = () => {
                 </Card>
                 
                 <div className="flex justify-between">
+                  <Button 
+                    type="button"
+                    onClick={handlePreviousStep}
+                    variant="outline"
+                    className="px-8"
+                  >
+                    <ArrowLeft className="mr-2" /> Back
+                  </Button>
+                  
+                  <Button 
+                    type="submit"
+                    disabled={loading || uploadingImages}
+                    className="bg-[#007ac8] hover:bg-[#0069b4] px-8"
+                  >
+                    {loading || uploadingImages ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        {uploadingImages ? 'Uploading Images...' : 'Submitting...'}
+                      </>
+                    ) : (
+                      'Submit Listing'
+                    )}
+                  </Button>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="packages" className="mt-4">
+                <Card>
+                  <CardContent className="pt-6">
+                    <PackageSelection 
+                      onSelect={handlePackageSelect} 
+                      selectedPackageId={selectedPackageId} 
+                    />
+                  </CardContent>
+                </Card>
+                
+                <div className="flex justify-between mt-6">
                   <Button 
                     type="button"
                     onClick={handlePreviousStep}
