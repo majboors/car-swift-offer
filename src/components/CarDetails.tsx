@@ -1,7 +1,7 @@
 
 import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, User } from "lucide-react";
 
 interface CarDetailsProps {
   listing: {
@@ -20,6 +20,7 @@ interface CarDetailsProps {
     contact_email: string | null;
     contact_phone: string | null;
     features: any; // Could be string[], object, or null
+    seller_name?: string; // Added seller name property
   }
 }
 
@@ -61,6 +62,19 @@ const CarDetails = ({ listing }: CarDetailsProps) => {
       <p className="text-2xl font-bold text-[#007ac8] mb-6">
         {formatCurrency(listing.price)}
       </p>
+      
+      {/* Seller information - New section */}
+      {listing.seller_name && (
+        <div className="flex items-center mb-6 bg-gray-50 p-3 rounded-lg">
+          <div className="bg-gray-200 rounded-full p-2 mr-3">
+            <User className="h-5 w-5 text-gray-600" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Listed by</p>
+            <p className="font-medium">{listing.seller_name}</p>
+          </div>
+        </div>
+      )}
       
       <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
         <h2 className="text-xl font-bold mb-4">Key Specifications</h2>
@@ -110,7 +124,7 @@ const CarDetails = ({ listing }: CarDetailsProps) => {
         </div>
       </div>
 
-      {/* Features section - Now with improved handling of various feature formats */}
+      {/* Features section */}
       {featuresList && featuresList.length > 0 && (
         <Card className="mb-6">
           <CardContent className="pt-6">

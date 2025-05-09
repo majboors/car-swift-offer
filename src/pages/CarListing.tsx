@@ -32,6 +32,7 @@ interface CarListing {
   created_at: string;
   features: any;
   user_id: string;
+  seller_name?: string; // New property for seller name
 }
 
 const CarListingPage = () => {
@@ -60,11 +61,6 @@ const CarListingPage = () => {
         if (data) {
           console.log("Fetched listing data:", data);
           
-          // Debug logging to check what data we have
-          console.log("Make:", data.make);
-          console.log("Model:", data.model);
-          console.log("Features:", data.features);
-          
           // Make sure features is properly processed
           let processedFeatures = data.features;
           
@@ -88,6 +84,27 @@ const CarListingPage = () => {
                 : []
               : [];
           
+          // Fetch the seller's information (email as username for now)
+          let sellerName = "Anonymous";
+          
+          if (data.user_id) {
+            try {
+              // Get the user email from auth.users via a function
+              const { data: userData, error: userError } = await supabase
+                .rpc('get_user_email', { user_id_input: data.user_id });
+                
+              if (userError) {
+                console.error("Error fetching seller email:", userError);
+              } else if (userData) {
+                sellerName = userData || "Anonymous";
+              }
+            } catch (error) {
+              console.error("Error fetching seller details:", error);
+              // Fall back to user_id if we can't get the email
+              sellerName = `User ${data.user_id.substring(0, 6)}`;
+            }
+          }
+          
           const processedListing: CarListing = {
             ...data,
             features: processedFeatures,
@@ -95,7 +112,8 @@ const CarListingPage = () => {
             make: data.make || '',
             model: data.model || '',
             title: data.title || `${data.year || ''} ${data.make || ''} ${data.model || ''}`.trim(),
-            year: data.year || new Date().getFullYear()
+            year: data.year || new Date().getFullYear(),
+            seller_name: sellerName // Add seller name
           };
           
           console.log("Processed listing for display:", processedListing);
@@ -265,7 +283,7 @@ const CarListingPage = () => {
             
             {/* Chat component */}
             {showChat && !isOwnListing && (
-              <div className="mt-6">
+              <div className="mt-6 border rounded-lg shadow-md">
                 <Chat 
                   listingId={listing.id} 
                   receiverId={listing.user_id}
