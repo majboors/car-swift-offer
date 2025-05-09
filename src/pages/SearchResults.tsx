@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -198,25 +199,35 @@ const SearchResults = () => {
         query = query.ilike("body_type", `%${bodyType}%`);
       }
       
-      // Apply text search if provided - enhanced to search in more fields and with better matching
+      // Apply text search if provided - enhanced to search in more fields with better matching
       if (searchQuery) {
-        // Build a comprehensive search filter with multiple fields
-        // This makes the search more effective by checking various relevant fields
-        query = query.or(
-          `title.ilike.%${searchQuery}%,` +
-          `description.ilike.%${searchQuery}%,` +
-          `make.ilike.%${searchQuery}%,` +
-          `model.ilike.%${searchQuery}%,` +
-          `body_type.ilike.%${searchQuery}%,` +
-          `fuel_type.ilike.%${searchQuery}%,` +
-          `transmission.ilike.%${searchQuery}%,` +
-          `car_name.ilike.%${searchQuery}%,` +
-          `color.ilike.%${searchQuery}%`
-        );
+        // Split the search query into keywords for better partial matching
+        const keywords = searchQuery.toLowerCase().split(/\s+/).filter(word => word.length > 0);
+        
+        if (keywords.length > 0) {
+          // Create a filter condition for each keyword
+          const filterConditions = keywords.map(keyword => {
+            return `title.ilike.%${keyword}%,` +
+                   `description.ilike.%${keyword}%,` +
+                   `make.ilike.%${keyword}%,` +
+                   `model.ilike.%${keyword}%,` +
+                   `body_type.ilike.%${keyword}%,` +
+                   `fuel_type.ilike.%${keyword}%,` +
+                   `transmission.ilike.%${keyword}%,` +
+                   `car_name.ilike.%${keyword}%,` +
+                   `color.ilike.%${keyword}%`;
+          });
+          
+          // Combine all keyword filters with OR
+          const combinedFilter = filterConditions.join(',');
+          query = query.or(combinedFilter);
+          
+          console.log("Search using keywords:", keywords);
+          console.log("Combined filter:", combinedFilter);
+        }
       }
       
       // Handle feature filtering - completely client-side approach
-      // We'll fetch all listings that match the basic criteria and then filter in memory
       let shouldApplyFeatureFilters = false;
       
       if (Object.keys(selectedFeatures).length > 0) {
