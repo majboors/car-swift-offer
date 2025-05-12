@@ -135,7 +135,7 @@ export function Navbar() {
                           <ul className="grid grid-cols-2 gap-2">
                             {popularMakes.map((make) => (
                               <li key={make}>
-                                <Link to={`/search?make=${make}`} className="text-sm hover:text-primary">
+                                <Link to={`/search?${make}`} className="text-sm hover:text-primary">
                                   {make}
                                 </Link>
                               </li>
@@ -148,7 +148,7 @@ export function Navbar() {
                             <ul className="grid grid-cols-2 gap-2">
                               {bodyTypes.map((type) => (
                                 <li key={type}>
-                                  <Link to={`/search?bodyType=${type}`} className="text-sm hover:text-primary">
+                                  <Link to={`/search?${type}`} className="text-sm hover:text-primary">
                                     {type}
                                   </Link>
                                 </li>
@@ -160,7 +160,7 @@ export function Navbar() {
                             <ul className="grid grid-cols-2 gap-2">
                               {locations.map((location) => (
                                 <li key={location}>
-                                  <Link to={`/search?location=${location}`} className="text-sm hover:text-primary">
+                                  <Link to={`/search?${location}`} className="text-sm hover:text-primary">
                                     {location}
                                   </Link>
                                 </li>

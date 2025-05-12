@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,9 +24,19 @@ const SearchForm = () => {
       setSearchQuery(queryParam);
     }
     
+    // Check for direct make/model/bodyType parameters, but also check for
+    // plain value parameters (without the key=value format)
     const makeParam = searchParams.get('make');
     if (makeParam) {
       setSelectedMake(makeParam);
+    } else {
+      // Try to match a parameter against car makes
+      for (const param of searchParams.keys()) {
+        if (carData.some(item => item.car === param)) {
+          setSelectedMake(param);
+          break;
+        }
+      }
     }
     
     const modelParam = searchParams.get('model');
@@ -38,8 +47,18 @@ const SearchForm = () => {
     const bodyTypeParam = searchParams.get('bodyType');
     if (bodyTypeParam) {
       setSelectedBodyType(bodyTypeParam);
+    } else {
+      // Try to match a parameter against body types
+      const bodyTypes = ["Cab Chassis", "Convertible", "Coupe", "Hatch", 
+                         "Sedan", "SUV", "Ute", "Van", "Wagon"];
+      for (const param of searchParams.keys()) {
+        if (bodyTypes.includes(param)) {
+          setSelectedBodyType(param);
+          break;
+        }
+      }
     }
-  }, [searchParams]);
+  }, [searchParams, carData]);
   
   // Fetch car data from public.json
   useEffect(() => {
@@ -101,6 +120,7 @@ const SearchForm = () => {
     // Build search parameters
     const searchParams = new URLSearchParams();
     
+    // Use regular key=value format for proper parameters
     if (selectedMake) searchParams.append("make", selectedMake);
     if (selectedModel) searchParams.append("model", selectedModel);
     if (selectedBodyType) searchParams.append("bodyType", selectedBodyType);
