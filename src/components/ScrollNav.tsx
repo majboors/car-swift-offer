@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
@@ -24,10 +25,11 @@ const buyDropdownItems = [
   { title: "Inspections", href: "/" },
 ];
 
+// Updated sell dropdown items to all point to add-listing
 const sellDropdownItems = [
-  { title: "Create an ad", href: "/" },
-  { title: "Get an Instant Offer™", href: "/" },
-  { title: "Manage my ad", href: "/" },
+  { title: "Create an ad", href: "/add-listing" },
+  { title: "Get an Instant Offer™", href: "/add-listing" },
+  { title: "Manage my ad", href: "/add-listing" },
   { title: "Value my car", href: "/value-my-car" },
 ];
 
