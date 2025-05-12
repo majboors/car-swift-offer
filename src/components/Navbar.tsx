@@ -18,16 +18,16 @@ import {
   NavigationMenuLink
 } from "@/components/ui/navigation-menu";
 
-// Navigation data
+// Navigation data - Updated to point to search page with appropriate queries
 const buyDropdownItems = [
-  { title: "All cars for sale", href: "/" },
-  { title: "New cars", href: "/" },
-  { title: "Used cars", href: "/" },
-  { title: "Dealer cars", href: "/" },
-  { title: "Private seller cars", href: "/" },
-  { title: "Electric cars", href: "/" },
-  { title: "Finance", href: "/" },
-  { title: "Inspections", href: "/" },
+  { title: "All cars for sale", href: "/search" },
+  { title: "New cars", href: "/search?condition=new" },
+  { title: "Used cars", href: "/search?condition=used" },
+  { title: "Dealer cars", href: "/search?sellerType=dealer" },
+  { title: "Private seller cars", href: "/search?sellerType=private" },
+  { title: "Electric cars", href: "/search?fuelType=electric" },
+  { title: "Finance", href: "/search?financeAvailable=true" },
+  { title: "Inspections", href: "/search?inspected=true" },
 ];
 
 // Updated sell dropdown items to all point to add-listing
@@ -135,7 +135,7 @@ export function Navbar() {
                           <ul className="grid grid-cols-2 gap-2">
                             {popularMakes.map((make) => (
                               <li key={make}>
-                                <Link to="/" className="text-sm hover:text-primary">
+                                <Link to={`/search?make=${make}`} className="text-sm hover:text-primary">
                                   {make}
                                 </Link>
                               </li>
@@ -148,7 +148,7 @@ export function Navbar() {
                             <ul className="grid grid-cols-2 gap-2">
                               {bodyTypes.map((type) => (
                                 <li key={type}>
-                                  <Link to="/" className="text-sm hover:text-primary">
+                                  <Link to={`/search?bodyType=${type}`} className="text-sm hover:text-primary">
                                     {type}
                                   </Link>
                                 </li>
@@ -160,7 +160,7 @@ export function Navbar() {
                             <ul className="grid grid-cols-2 gap-2">
                               {locations.map((location) => (
                                 <li key={location}>
-                                  <Link to="/" className="text-sm hover:text-primary">
+                                  <Link to={`/search?location=${location}`} className="text-sm hover:text-primary">
                                     {location}
                                   </Link>
                                 </li>

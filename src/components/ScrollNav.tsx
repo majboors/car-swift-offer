@@ -13,16 +13,16 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 
-// Navigation data
+// Navigation data - Updated to point to search page with appropriate queries
 const buyDropdownItems = [
-  { title: "All cars for sale", href: "/" },
-  { title: "New cars", href: "/" },
-  { title: "Used cars", href: "/" },
-  { title: "Dealer cars", href: "/" },
-  { title: "Private seller cars", href: "/" },
-  { title: "Electric cars", href: "/" },
-  { title: "Finance", href: "/" },
-  { title: "Inspections", href: "/" },
+  { title: "All cars for sale", href: "/search" },
+  { title: "New cars", href: "/search?condition=new" },
+  { title: "Used cars", href: "/search?condition=used" },
+  { title: "Dealer cars", href: "/search?sellerType=dealer" },
+  { title: "Private seller cars", href: "/search?sellerType=private" },
+  { title: "Electric cars", href: "/search?fuelType=electric" },
+  { title: "Finance", href: "/search?financeAvailable=true" },
+  { title: "Inspections", href: "/search?inspected=true" },
 ];
 
 // Updated sell dropdown items to all point to add-listing
