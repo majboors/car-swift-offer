@@ -20,6 +20,27 @@ export default function NotificationDropdown() {
     await markAsRead(notificationId);
   };
 
+  const formatExpirationTime = (expiresAt: string | null) => {
+    if (!expiresAt) return null;
+    
+    const expirationDate = new Date(expiresAt);
+    const now = new Date();
+    const diffMs = expirationDate.getTime() - now.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    
+    if (diffHours < 1) {
+      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      return `Expires in ${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''}`;
+    }
+    
+    if (diffHours < 24) {
+      return `Expires in ${diffHours} hour${diffHours !== 1 ? 's' : ''}`;
+    }
+    
+    const diffDays = Math.floor(diffHours / 24);
+    return `Expires in ${diffDays} day${diffDays !== 1 ? 's' : ''}`;
+  };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -74,6 +95,11 @@ export default function NotificationDropdown() {
                 <p className="text-sm mt-1 text-muted-foreground">
                   {notification.message}
                 </p>
+                {notification.expires_at && (
+                  <div className="mt-1 text-xs text-amber-600">
+                    {formatExpirationTime(notification.expires_at)}
+                  </div>
+                )}
                 {!notification.read && (
                   <div className="flex justify-end mt-2">
                     <div className="h-2 w-2 bg-primary rounded-full" />

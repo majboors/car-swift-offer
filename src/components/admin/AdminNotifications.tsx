@@ -18,10 +18,22 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Bell, Send } from "lucide-react";
+import { Bell, Send, Clock } from "lucide-react";
 
 const locations = [
   'ACT', 'NSW', 'NT', 'QLD', 'SA', 'TAS', 'VIC', 'WA'
+];
+
+// Predefined duration options in hours
+const durationOptions = [
+  { value: "1", label: "1 hour" },
+  { value: "4", label: "4 hours" },
+  { value: "8", label: "8 hours" },
+  { value: "24", label: "1 day" },
+  { value: "72", label: "3 days" },
+  { value: "168", label: "1 week" },
+  { value: "720", label: "30 days" },
+  { value: "0", label: "No expiration" },
 ];
 
 export default function AdminNotifications() {
@@ -31,6 +43,8 @@ export default function AdminNotifications() {
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [isGlobal, setIsGlobal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [duration, setDuration] = useState<string>("0"); // Default: no expiration
+  const [customDuration, setCustomDuration] = useState<string>(""); // For custom duration input
 
   const handleLocationChange = (value: string) => {
     if (selectedLocations.includes(value)) {
@@ -45,6 +59,26 @@ export default function AdminNotifications() {
     if (checked) {
       setSelectedLocations([]);
     }
+  };
+
+  const handleDurationChange = (value: string) => {
+    setDuration(value);
+    // Reset custom duration if a predefined option is selected
+    if (value !== "custom") {
+      setCustomDuration("");
+    }
+  };
+
+  // Calculate expiration date/time preview
+  const getExpirationPreview = () => {
+    if (duration === "0") return "No expiration";
+    
+    const hours = duration === "custom" && customDuration ? parseInt(customDuration) : parseInt(duration);
+    if (isNaN(hours) || hours <= 0) return "Invalid duration";
+    
+    const expirationDate = new Date();
+    expirationDate.setHours(expirationDate.getHours() + hours);
+    return expirationDate.toLocaleString();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,6 +112,24 @@ export default function AdminNotifications() {
     }
     
     setLoading(true);
+
+    // Get duration in hours
+    let durationHours: number | null = null;
+    if (duration !== "0") {
+      durationHours = duration === "custom" && customDuration 
+        ? parseInt(customDuration) 
+        : parseInt(duration);
+      
+      if (isNaN(durationHours) || durationHours <= 0) {
+        toast({
+          title: "Error",
+          description: "Please enter a valid duration",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+    }
     
     try {
       const { data, error } = await supabase.rpc('send_notification_to_users', {
@@ -85,7 +137,8 @@ export default function AdminNotifications() {
         p_message: message,
         p_target_locations: selectedLocations,
         p_is_global: isGlobal,
-        p_admin_id: user?.id
+        p_admin_id: user?.id,
+        p_duration_hours: durationHours
       });
       
       if (error) {
@@ -102,6 +155,8 @@ export default function AdminNotifications() {
       setMessage("");
       setSelectedLocations([]);
       setIsGlobal(false);
+      setDuration("0");
+      setCustomDuration("");
     } catch (error: any) {
       console.error("Error sending notification:", error);
       toast({
@@ -174,6 +229,50 @@ export default function AdminNotifications() {
               </div>
             </div>
           )}
+          
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <Label htmlFor="duration">Notification Duration</Label>
+            </div>
+            <Select value={duration} onValueChange={handleDurationChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select duration" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Duration Options</SelectLabel>
+                  {durationOptions.map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="custom">Custom duration (hours)</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            
+            {duration === "custom" && (
+              <div className="mt-2">
+                <Label htmlFor="custom-duration">Custom Duration (hours)</Label>
+                <Input
+                  id="custom-duration"
+                  type="number"
+                  placeholder="Enter hours"
+                  min="1"
+                  value={customDuration}
+                  onChange={(e) => setCustomDuration(e.target.value)}
+                />
+              </div>
+            )}
+            
+            {duration !== "0" && (
+              <div className="mt-2 text-sm text-muted-foreground">
+                <span className="font-medium">Expires at: </span>
+                {getExpirationPreview()}
+              </div>
+            )}
+          </div>
           
           <Button type="submit" disabled={loading} className="w-full">
             {loading ? (

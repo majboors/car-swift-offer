@@ -195,6 +195,7 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          expires_at: string | null
           id: string
           is_global: boolean | null
           message: string
@@ -204,6 +205,7 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
+          expires_at?: string | null
           id?: string
           is_global?: boolean | null
           message: string
@@ -213,6 +215,7 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
+          expires_at?: string | null
           id?: string
           is_global?: boolean | null
           message?: string
@@ -344,6 +347,7 @@ export type Database = {
           message: string
           created_at: string
           read: boolean
+          expires_at: string
         }[]
       }
       is_admin: {
@@ -367,13 +371,22 @@ export type Database = {
         Returns: undefined
       }
       send_notification_to_users: {
-        Args: {
-          p_title: string
-          p_message: string
-          p_target_locations: string[]
-          p_is_global: boolean
-          p_admin_id: string
-        }
+        Args:
+          | {
+              p_title: string
+              p_message: string
+              p_target_locations: string[]
+              p_is_global: boolean
+              p_admin_id: string
+            }
+          | {
+              p_title: string
+              p_message: string
+              p_target_locations: string[]
+              p_is_global: boolean
+              p_admin_id: string
+              p_duration_hours?: number
+            }
         Returns: string
       }
     }

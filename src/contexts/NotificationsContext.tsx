@@ -11,6 +11,7 @@ interface Notification {
   message: string;
   created_at: string;
   read: boolean;
+  expires_at: string | null;
 }
 
 interface NotificationsContextType {
