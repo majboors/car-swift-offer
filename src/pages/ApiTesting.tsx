@@ -52,6 +52,9 @@ const ApiTesting = () => {
   const [carDetails, setCarDetails] = useState<CarDetails | null>(null);
   const [apiResponseOpen, setApiResponseOpen] = useState<boolean>(false);
   const [apiResponseData, setApiResponseData] = useState<any>(null);
+  
+  // New state to store the full car name from API
+  const [identifiedCarName, setIdentifiedCarName] = useState<string>("");
 
   // Clean up camera stream when component unmounts
   useEffect(() => {
@@ -186,12 +189,21 @@ const ApiTesting = () => {
       // Store raw API response for popup
       setApiResponseData(data);
       
+      // Store the full car name from API
+      const carName = data.car_name || "";
+      setIdentifiedCarName(carName);
+      
+      // Extract make and model from car_name
+      const nameParts = carName.split(" ");
+      const make = nameParts[0] || "";
+      const model = nameParts.slice(1).join(" ") || "";
+      
       // Format the received data for our application state
       const formattedData: CarIdentification = {
-        make: data.make || "",
-        model: data.model || "",
+        make: make,
+        model: model,
         year: data.year || "",
-        confidence: data.confidence || "medium"
+        confidence: data.confidence > 0.8 ? "high" : "medium"
       };
       
       setCarIdentification(formattedData);
@@ -204,7 +216,7 @@ const ApiTesting = () => {
       // Display toast notification for the match
       toast({
         title: "Car Identified",
-        description: `Possible match: ${formattedData.make} ${formattedData.model}`,
+        description: `Possible match: ${carName}`,
         variant: "default",
       });
       
@@ -247,8 +259,8 @@ const ApiTesting = () => {
       // Create form data for the API call
       const formData = new FormData();
       
-      // Construct car name from make, model, and year
-      const carName = `${carIdentification.make} ${carIdentification.model} ${modelYear}`;
+      // Use the full car name if available, or construct one
+      const carName = identifiedCarName || `${carIdentification.make} ${carIdentification.model} ${modelYear}`;
       formData.append('car_name', carName);
       
       // Add the image file
@@ -315,10 +327,13 @@ const ApiTesting = () => {
       description += `Tags: ${carDetails.tags.join(', ')}`;
     }
     
+    // Get the car title from car_name in carDetails or construct it
+    const carTitle = carDetails.car_name || `${carIdentification.make} ${carIdentification.model} ${modelYear}`;
+    
     // Navigate to add-listing with query params for simple data
     // and state for complex data
     navigate(
-      `/add-listing?make=${encodeURIComponent(carIdentification.make)}&model=${encodeURIComponent(carIdentification.model)}&title=${encodeURIComponent(carDetails.car_name || `${carIdentification.make} ${carIdentification.model} ${modelYear}`)}&year=${encodeURIComponent(modelYear)}`, 
+      `/add-listing?make=${encodeURIComponent(carIdentification.make)}&model=${encodeURIComponent(carIdentification.model)}&title=${encodeURIComponent(carTitle)}&year=${encodeURIComponent(modelYear)}`, 
       {
         state: {
           description,
@@ -456,20 +471,21 @@ const ApiTesting = () => {
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="make">Make</Label>
-                          <div className="flex items-center">
-                            <Input 
-                              id="make" 
-                              value={carIdentification.make} 
-                              readOnly 
-                              className="bg-gray-50"
-                            />
-                            {apiResponseData && (
+                        <div className="space-y-2 md:col-span-2">
+                          <Label htmlFor="car_name">Identified Car</Label>
+                          <Input 
+                            id="car_name" 
+                            value={identifiedCarName} 
+                            readOnly 
+                            className="bg-gray-50 font-medium text-center"
+                          />
+                          {apiResponseData && (
+                            <div className="flex justify-end mt-1">
                               <Popover>
                                 <PopoverTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="ml-2">
+                                  <Button variant="outline" size="sm" className="flex items-center gap-1">
                                     <Info className="h-4 w-4" />
+                                    <span>View API Response</span>
                                   </Button>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-80">
@@ -481,8 +497,18 @@ const ApiTesting = () => {
                                   </div>
                                 </PopoverContent>
                               </Popover>
-                            )}
-                          </div>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="make">Make</Label>
+                          <Input 
+                            id="make" 
+                            value={carIdentification.make} 
+                            readOnly 
+                            className="bg-gray-50"
+                          />
                         </div>
                         
                         <div className="space-y-2">
@@ -538,7 +564,7 @@ const ApiTesting = () => {
                 <Card>
                   <CardContent className="pt-6 space-y-6">
                     <div className="text-center">
-                      <h2 className="text-xl font-semibold mb-2">{carDetails.car_name}</h2>
+                      <h2 className="text-xl font-semibold mb-2">{carDetails.car_name || identifiedCarName}</h2>
                       <p className="text-gray-600">
                         Complete car details retrieved
                       </p>
