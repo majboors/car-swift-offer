@@ -1,9 +1,75 @@
 
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { DollarSign, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const CarValuationSection = () => {
+  const navigate = useNavigate();
+  
+  // State management for car data and selections
+  const [carData, setCarData] = useState([]);
+  const [selectedMake, setSelectedMake] = useState("");
+  const [selectedModel, setSelectedModel] = useState("");
+  const [availableModels, setAvailableModels] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Fetch car data from public.json
+  useEffect(() => {
+    setIsLoading(true);
+    fetch('/public.json')
+      .then(response => response.json())
+      .then(data => {
+        setCarData(data);
+        setIsLoading(false);
+      })
+      .catch(error => {
+        console.error('Error loading car data:', error);
+        setIsLoading(false);
+      });
+  }, []);
+  
+  // Get unique car makes
+  const carMakes = [...new Set(carData.map(item => item.car))].sort();
+  
+  // Update available models when make changes
+  useEffect(() => {
+    if (selectedMake) {
+      const models = [...new Set(
+        carData
+          .filter(item => item.car === selectedMake)
+          .map(item => item.model)
+      )].sort();
+      
+      setAvailableModels(models);
+      setSelectedModel("");
+    } else {
+      setAvailableModels([]);
+      setSelectedModel("");
+    }
+  }, [selectedMake, carData]);
+  
+  // Handle form submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    if (!selectedMake || !selectedModel) {
+      // Simple validation
+      alert("Please select both make and model");
+      return;
+    }
+    
+    // Navigate to add-listing page with car information
+    navigate(`/add-listing?make=${selectedMake}&model=${selectedModel}&title=${selectedMake} ${selectedModel}`);
+  };
+
   return (
     <section className="relative mb-12">
       <div className="w-full relative">
@@ -33,27 +99,52 @@ const CarValuationSection = () => {
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div>
-                <label htmlFor="make" className="block text-sm font-medium text-gray-700 mb-1">Make</label>
-                <select id="make" className="w-full p-3 border border-gray-300 rounded-md">
-                  <option value="">Select</option>
-                  <option value="toyota">Toyota</option>
-                  <option value="honda">Honda</option>
-                  <option value="bmw">BMW</option>
-                </select>
+            <form onSubmit={handleSubmit}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label htmlFor="make" className="block text-sm font-medium text-gray-700 mb-1">Make</label>
+                  <Select value={selectedMake} onValueChange={setSelectedMake} disabled={isLoading}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select make" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {carMakes.map((make) => (
+                        <SelectItem key={make} value={make}>
+                          {make}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label htmlFor="model" className="block text-sm font-medium text-gray-700 mb-1">Model</label>
+                  <Select 
+                    value={selectedModel} 
+                    onValueChange={setSelectedModel} 
+                    disabled={!selectedMake || isLoading}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableModels.map((model) => (
+                        <SelectItem key={model} value={model}>
+                          {model}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <div>
-                <label htmlFor="model" className="block text-sm font-medium text-gray-700 mb-1">Model</label>
-                <select id="model" className="w-full p-3 border border-gray-300 rounded-md">
-                  <option value="">Select</option>
-                </select>
-              </div>
-            </div>
-            
-            <Button className="bg-[#007ac8] hover:bg-[#0069b4] text-white w-full py-6 text-lg">
-              Value your car
-            </Button>
+              
+              <Button 
+                type="submit"
+                className="bg-[#007ac8] hover:bg-[#0069b4] text-white w-full py-6 text-lg"
+                disabled={!selectedMake || !selectedModel || isLoading}
+              >
+                {isLoading ? "Loading..." : "Value your car"}
+              </Button>
+            </form>
           </div>
         </div>
       </div>
