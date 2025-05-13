@@ -41,6 +41,14 @@ export const LoadingContainer = ({ isLoading, onComplete, duration = 10000 }: Lo
     const totalSteps = steps.length;
     const timePerStep = duration / totalSteps;
     
+    // Start with first step active
+    setSteps(prevSteps => 
+      prevSteps.map((step, index) => ({
+        ...step,
+        status: index === 0 ? "active" : "upcoming",
+      }))
+    );
+    
     const interval = setInterval(() => {
       setCurrentStep((prevStep) => {
         const nextStep = prevStep + 1;
@@ -74,7 +82,7 @@ export const LoadingContainer = ({ isLoading, onComplete, duration = 10000 }: Lo
   if (!isLoading) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50">
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 touch-manipulation">
       <div className="bg-white rounded-lg shadow-lg p-6 max-w-[360px] w-full">
         <h3 className="text-lg font-medium mb-4 text-center">Analyzing Your Car</h3>
         

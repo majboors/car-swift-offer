@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from "react-router-dom";
 import { Home, CarFront, Plus, LogOut, LogIn, ChevronDown, ChevronUp, Bell, ShoppingBag, Search, CircleHelp, User, Camera } from "lucide-react";
@@ -109,7 +110,7 @@ export function MobileSidebar() {
   };
 
   return (
-    <div className="md:hidden h-full bg-white overflow-y-auto">
+    <div className="md:hidden h-full bg-white overflow-y-auto touch-manipulation">
       <div className="border-b p-4 flex items-center justify-between">
         <Link to="/">
           <span className="font-bold inline-block">CarTrade</span>
@@ -145,7 +146,7 @@ export function MobileSidebar() {
               <CollapsibleTrigger asChild>
                 <Button 
                   variant="ghost" 
-                  className="w-full flex items-center justify-between p-2 hover:bg-gray-100 rounded-md"
+                  className="w-full flex items-center justify-between p-2 active:bg-gray-100 rounded-md touch-manipulation"
                   onClick={() => toggleDropdown('buy')}
                 >
                   <div className="flex items-center gap-3">
@@ -159,7 +160,7 @@ export function MobileSidebar() {
                 <div className="ml-8 mt-2 border-l pl-4 space-y-2">
                   {buyDropdownItems.map((item) => (
                     <div key={item.title}>
-                      <Link to={item.href} className="block py-1.5 text-gray-700 hover:text-[#007ac8]">
+                      <Link to={item.href} className="block py-1.5 text-gray-700 active:text-[#007ac8] touch-manipulation">
                         {item.title}
                       </Link>
                     </div>
@@ -170,7 +171,7 @@ export function MobileSidebar() {
                       <Link 
                         key={make} 
                         to="/cars" 
-                        className="block py-1.5 text-gray-700 hover:text-[#007ac8]"
+                        className="block py-1.5 text-gray-700 active:text-[#007ac8] touch-manipulation"
                       >
                         {make}
                       </Link>
@@ -182,7 +183,7 @@ export function MobileSidebar() {
                       <Link 
                         key={type} 
                         to="/cars" 
-                        className="block py-1.5 text-gray-700 hover:text-[#007ac8]"
+                        className="block py-1.5 text-gray-700 active:text-[#007ac8] touch-manipulation"
                       >
                         {type}
                       </Link>
@@ -194,7 +195,7 @@ export function MobileSidebar() {
                       <Link 
                         key={location} 
                         to="/cars" 
-                        className="block py-1.5 text-gray-700 hover:text-[#007ac8]"
+                        className="block py-1.5 text-gray-700 active:text-[#007ac8] touch-manipulation"
                       >
                         {location}
                       </Link>
@@ -211,7 +212,7 @@ export function MobileSidebar() {
               <CollapsibleTrigger asChild>
                 <Button 
                   variant="ghost" 
-                  className="w-full flex items-center justify-between p-2 hover:bg-gray-100 rounded-md"
+                  className="w-full flex items-center justify-between p-2 active:bg-gray-100 rounded-md touch-manipulation"
                   onClick={() => toggleDropdown('sell')}
                 >
                   <div className="flex items-center gap-3">
@@ -225,7 +226,7 @@ export function MobileSidebar() {
                 <div className="ml-8 mt-2 border-l pl-4 space-y-2">
                   {sellDropdownItems.map((item) => (
                     <div key={item.title}>
-                      <Link to={item.href} className="block py-1.5 text-gray-700 hover:text-[#007ac8]">
+                      <Link to={item.href} className="block py-1.5 text-gray-700 active:text-[#007ac8] touch-manipulation">
                         {item.title}
                       </Link>
                     </div>
@@ -241,7 +242,7 @@ export function MobileSidebar() {
               <CollapsibleTrigger asChild>
                 <Button 
                   variant="ghost" 
-                  className="w-full flex items-center justify-between p-2 hover:bg-gray-100 rounded-md"
+                  className="w-full flex items-center justify-between p-2 active:bg-gray-100 rounded-md touch-manipulation"
                   onClick={() => toggleDropdown('research')}
                 >
                   <div className="flex items-center gap-3">
@@ -255,7 +256,7 @@ export function MobileSidebar() {
                 <div className="ml-8 mt-2 border-l pl-4 space-y-2">
                   {researchDropdownItems.map((item) => (
                     <div key={item.title}>
-                      <Link to={item.href} className="block py-1.5 text-gray-700 hover:text-[#007ac8]">
+                      <Link to={item.href} className="block py-1.5 text-gray-700 active:text-[#007ac8] touch-manipulation">
                         {item.title}
                       </Link>
                     </div>
@@ -266,7 +267,7 @@ export function MobileSidebar() {
                       <Link 
                         key={make} 
                         to="/research" 
-                        className="block py-1.5 text-gray-700 hover:text-[#007ac8]"
+                        className="block py-1.5 text-gray-700 active:text-[#007ac8] touch-manipulation"
                       >
                         {make}
                       </Link>
@@ -283,7 +284,7 @@ export function MobileSidebar() {
               <CollapsibleTrigger asChild>
                 <Button 
                   variant="ghost" 
-                  className="w-full flex items-center justify-between p-2 hover:bg-gray-100 rounded-md"
+                  className="w-full flex items-center justify-between p-2 active:bg-gray-100 rounded-md touch-manipulation"
                   onClick={() => toggleDropdown('showroom')}
                 >
                   <div className="flex items-center gap-3">
@@ -297,7 +298,7 @@ export function MobileSidebar() {
                 <div className="ml-8 mt-2 border-l pl-4 space-y-2">
                   {showroomDropdownItems.map((item) => (
                     <div key={item.title}>
-                      <Link to={item.href} className="block py-1.5 text-gray-700 hover:text-[#007ac8]">
+                      <Link to={item.href} className="block py-1.5 text-gray-700 active:text-[#007ac8] touch-manipulation">
                         {item.title}
                       </Link>
                     </div>
@@ -308,7 +309,7 @@ export function MobileSidebar() {
                       <Link 
                         key={type} 
                         to="/showroom" 
-                        className="block py-1.5 text-gray-700 hover:text-[#007ac8]"
+                        className="block py-1.5 text-gray-700 active:text-[#007ac8] touch-manipulation"
                       >
                         {type}
                       </Link>
@@ -322,18 +323,18 @@ export function MobileSidebar() {
           <div>
             <Link 
               to="/value-my-car" 
-              className={`flex items-center gap-3 py-2 ${isCurrentPath('/value-my-car') ? 'text-[#007ac8] font-medium' : 'text-gray-700'}`}
+              className={`flex items-center gap-3 py-2 ${isCurrentPath('/value-my-car') ? 'text-[#007ac8] font-medium' : 'text-gray-700'} touch-manipulation`}
             >
               <CarFront className="h-5 w-5" />
               <span className="text-base">Value my car</span>
             </Link>
           </div>
 
-          {/* Add AI Car ID Link */}
+          {/* Add Snap-AI Link */}
           <div>
             <Link 
               to="/snap-ai" 
-              className={`flex items-center gap-3 py-2 ${isCurrentPath('/snap-ai') ? 'text-[#007ac8] font-medium' : 'text-gray-700'}`}
+              className={`flex items-center gap-3 py-2 ${isCurrentPath('/snap-ai') ? 'text-[#007ac8] font-medium' : 'text-gray-700'} touch-manipulation`}
             >
               <Camera className="h-5 w-5" />
               <span className="text-base">Snap-AI</span>
@@ -347,7 +348,7 @@ export function MobileSidebar() {
               <div>
                 <Link 
                   to="/add-listing" 
-                  className={`flex items-center gap-3 py-2 ${isCurrentPath('/add-listing') ? 'text-[#007ac8] font-medium' : 'text-gray-700'}`}
+                  className={`flex items-center gap-3 py-2 ${isCurrentPath('/add-listing') ? 'text-[#007ac8] font-medium' : 'text-gray-700'} touch-manipulation`}
                 >
                   <Plus className="h-5 w-5" />
                   <span className="text-base">Add Listing</span>
@@ -357,7 +358,7 @@ export function MobileSidebar() {
               <div>
                 <Link 
                   to="/account" 
-                  className={`flex items-center gap-3 py-2 ${isCurrentPath('/account') ? 'text-[#007ac8] font-medium' : 'text-gray-700'}`}
+                  className={`flex items-center gap-3 py-2 ${isCurrentPath('/account') ? 'text-[#007ac8] font-medium' : 'text-gray-700'} touch-manipulation`}
                 >
                   <User className="h-5 w-5" />
                   <span className="text-base">My Account</span>
@@ -367,7 +368,7 @@ export function MobileSidebar() {
               <div>
                 <Button 
                   variant="ghost" 
-                  className="w-full flex items-center justify-start gap-3 p-2 hover:bg-gray-100 rounded-md"
+                  className="w-full flex items-center justify-start gap-3 p-2 active:bg-gray-100 rounded-md touch-manipulation"
                   onClick={handleSignOut}
                 >
                   <LogOut className="h-5 w-5" />
@@ -379,7 +380,7 @@ export function MobileSidebar() {
             <div>
               <Link 
                 to="/auth" 
-                className={`flex items-center gap-3 py-2 ${isCurrentPath('/auth') ? 'text-[#007ac8] font-medium' : 'text-gray-700'}`}
+                className={`flex items-center gap-3 py-2 ${isCurrentPath('/auth') ? 'text-[#007ac8] font-medium' : 'text-gray-700'} touch-manipulation`}
               >
                 <LogIn className="h-5 w-5" />
                 <span className="text-base">Sign In / Sign Up</span>
@@ -390,7 +391,7 @@ export function MobileSidebar() {
           <div>
             <Link 
               to="/help" 
-              className="flex items-center gap-3 py-2 text-gray-700"
+              className="flex items-center gap-3 py-2 text-gray-700 touch-manipulation"
             >
               <CircleHelp className="h-5 w-5" />
               <span className="text-base">Help</span>
