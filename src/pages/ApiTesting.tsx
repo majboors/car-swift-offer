@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
-import { Camera, Upload, Check, Info } from "lucide-react";
+import { Camera, Upload, Check, Info, AlertCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -17,6 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface CarIdentification {
   make: string;
@@ -31,6 +32,17 @@ interface CarDetails {
   specifications: Record<string, string>;
   tags: string[];
 }
+
+// Feature categories (for sorting and display)
+const FEATURE_CATEGORIES = [
+  "Factory fitted",
+  "Audio, Visual & Communication",
+  "Safety & Security",
+  "Comfort & Convenience",
+  "Lights & Windows",
+  "Interior",
+  "Seating"
+];
 
 const API_BASE_URL = "https://car.applytocollege.pk";
 
@@ -52,6 +64,7 @@ const ApiTesting = () => {
   const [carDetails, setCarDetails] = useState<CarDetails | null>(null);
   const [apiResponseOpen, setApiResponseOpen] = useState<boolean>(false);
   const [apiResponseData, setApiResponseData] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
   
   // New state to store the full car name from API
   const [identifiedCarName, setIdentifiedCarName] = useState<string>("");
@@ -71,25 +84,32 @@ const ApiTesting = () => {
 
   // Camera functions
   const startCamera = async () => {
+    setError(null);
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error("Camera access not supported in this browser");
       }
       
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: "environment", // Prefer rear camera
+          width: { ideal: 1280 },
+          height: { ideal: 720 } 
+        } 
+      });
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
       setStreamActive(true);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error accessing camera:', error);
+      setError(`Camera error: ${error.message || "Could not access camera"}`);
       toast({
         title: "Camera Error",
         description: "Could not access your camera. Please check permissions.",
         variant: "destructive",
       });
-      setCameraDialogOpen(false);
     }
   };
 
@@ -113,10 +133,14 @@ const ApiTesting = () => {
     const context = canvasRef.current.getContext('2d');
     if (!context) return;
     
+    // Set canvas dimensions to match video
     canvasRef.current.width = videoRef.current.videoWidth;
     canvasRef.current.height = videoRef.current.videoHeight;
+    
+    // Draw the video frame to the canvas
     context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
     
+    // Convert canvas to blob
     canvasRef.current.toBlob((blob) => {
       if (blob) {
         const file = new File([blob], "camera-capture.jpg", { type: "image/jpeg" });
@@ -125,7 +149,7 @@ const ApiTesting = () => {
         setCameraDialogOpen(false); // Close dialog after capturing
         stopCamera();
       }
-    }, 'image/jpeg');
+    }, 'image/jpeg', 0.9); // 0.9 quality
   };
 
   // File upload handling
@@ -144,6 +168,7 @@ const ApiTesting = () => {
     
     setSelectedImage(file);
     setImagePreviewUrl(URL.createObjectURL(file));
+    setError(null);
   };
   
   const triggerFileInput = () => {
@@ -164,6 +189,7 @@ const ApiTesting = () => {
     }
     
     setLoading(true);
+    setError(null);
     
     try {
       // Create form data for the API call
@@ -223,6 +249,7 @@ const ApiTesting = () => {
       setActiveTab("year-input");
     } catch (error: any) {
       console.error('Error identifying car:', error);
+      setError(error.message || "Failed to identify car");
       toast({
         title: "Error",
         description: error.message || "An unexpected error occurred",
@@ -254,6 +281,7 @@ const ApiTesting = () => {
     }
     
     setLoading(true);
+    setError(null);
     
     try {
       // Create form data for the API call
@@ -284,13 +312,25 @@ const ApiTesting = () => {
       // Log the car details response
       console.log("Car details API response:", data);
       
+      // Update API response data for popup
+      setApiResponseData(data);
+      
+      // Ensure features are properly structured
+      const formattedDetails: CarDetails = {
+        car_name: data.car_name || carName,
+        features: data.features || {},
+        specifications: data.specifications || {},
+        tags: data.tags || []
+      };
+      
       // Update state with car details
-      setCarDetails(data);
+      setCarDetails(formattedDetails);
       
       // Move to next step
       setActiveTab("car-details");
     } catch (error: any) {
       console.error('Error getting car details:', error);
+      setError(error.message || "Failed to get car details");
       toast({
         title: "Error",
         description: error.message || "An unexpected error occurred",
@@ -299,6 +339,28 @@ const ApiTesting = () => {
     } finally {
       setLoading(false);
     }
+  };
+  
+  // Generate a description with specifications and tags in a readable format
+  const generateDescription = (specs: Record<string, string>, tags: string[]) => {
+    let description = 'This vehicle comes with the following specifications:\n\n';
+    
+    // Add specifications
+    if (Object.keys(specs).length > 0) {
+      Object.entries(specs).forEach(([key, value]) => {
+        description += `- ${key}: ${value}\n`;
+      });
+      description += '\n';
+    }
+    
+    // Add tags
+    if (tags && tags.length > 0) {
+      description += 'This car is perfect for those looking for a ';
+      description += tags.join(', ').toLowerCase();
+      description += ' driving experience.';
+    }
+    
+    return description;
   };
   
   // Create listing with car details
@@ -312,20 +374,11 @@ const ApiTesting = () => {
       return;
     }
     
-    // Create description with specifications and tags
-    let description = '';
-    
-    if (carDetails.specifications) {
-      description += "Specifications:\n";
-      Object.entries(carDetails.specifications).forEach(([key, value]) => {
-        description += `- ${key}: ${value}\n`;
-      });
-      description += "\n";
-    }
-    
-    if (carDetails.tags && carDetails.tags.length > 0) {
-      description += `Tags: ${carDetails.tags.join(', ')}`;
-    }
+    // Generate a well-formatted description with specifications and tags
+    const description = generateDescription(
+      carDetails.specifications, 
+      carDetails.tags
+    );
     
     // Get the car title from car_name in carDetails or construct it
     const carTitle = carDetails.car_name || `${carIdentification.make} ${carIdentification.model} ${modelYear}`;
@@ -338,6 +391,8 @@ const ApiTesting = () => {
         state: {
           description,
           features: carDetails.features,
+          specifications: carDetails.specifications,
+          tags: carDetails.tags,
           preFilledFromApi: true
         }
       }
@@ -350,13 +405,27 @@ const ApiTesting = () => {
     return JSON.stringify(data, null, 2);
   };
 
+  // Check if a category exists in the features
+  const hasFeatureCategory = (category: string) => {
+    if (!carDetails?.features) return false;
+    return !!carDetails.features[category] && carDetails.features[category].length > 0;
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
       
       <div className="flex-grow container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6">Car Identification API Testing</h1>
+          <h1 className="text-3xl font-bold mb-6">Car Identification</h1>
+          
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
           
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
@@ -491,7 +560,7 @@ const ApiTesting = () => {
                                 <PopoverContent className="w-80">
                                   <div className="space-y-2">
                                     <h4 className="font-medium">API Response</h4>
-                                    <pre className="bg-slate-100 p-2 rounded text-xs overflow-auto">
+                                    <pre className="bg-slate-100 p-2 rounded text-xs overflow-auto max-h-[400px]">
                                       {formatApiResponse(apiResponseData)}
                                     </pre>
                                   </div>
@@ -568,42 +637,85 @@ const ApiTesting = () => {
                       <p className="text-gray-600">
                         Complete car details retrieved
                       </p>
+                      
+                      {apiResponseData && (
+                        <div className="flex justify-center mt-2">
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" size="sm" className="flex items-center gap-1">
+                                <Info className="h-4 w-4" />
+                                <span>View Raw API Response</span>
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80">
+                              <div className="space-y-2">
+                                <h4 className="font-medium">API Response</h4>
+                                <pre className="bg-slate-100 p-2 rounded text-xs overflow-auto max-h-[400px]">
+                                  {formatApiResponse(apiResponseData)}
+                                </pre>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                      )}
                     </div>
                     
                     <Separator />
                     
-                    {/* Features Section */}
+                    {/* Features Section - Organized by category */}
                     <div>
                       <h3 className="text-lg font-semibold mb-3">Features</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {Object.entries(carDetails.features).map(([category, items]) => (
-                          <div key={category} className="border rounded-md p-4">
-                            <h4 className="font-medium mb-2">{category}</h4>
-                            <ul className="space-y-1">
-                              {items.map((item, index) => (
-                                <li key={index} className="flex items-center gap-2 text-sm">
-                                  <Check className="h-4 w-4 text-green-500" />
-                                  {item}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        ))}
+                        {/* Display features organized by categories from the API */}
+                        {FEATURE_CATEGORIES.map((category) => 
+                          hasFeatureCategory(category) && (
+                            <div key={category} className="border rounded-md p-4">
+                              <h4 className="font-medium mb-2">{category}</h4>
+                              <ul className="space-y-1">
+                                {carDetails.features[category]?.map((item, index) => (
+                                  <li key={index} className="flex items-center gap-2 text-sm">
+                                    <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                                    <span>{item}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )
+                        )}
+                        
+                        {/* Check if there are any categories not in our predefined list */}
+                        {Object.keys(carDetails.features || {}).map(category => 
+                          !FEATURE_CATEGORIES.includes(category) && (
+                            <div key={category} className="border rounded-md p-4">
+                              <h4 className="font-medium mb-2">{category}</h4>
+                              <ul className="space-y-1">
+                                {carDetails.features[category]?.map((item, index) => (
+                                  <li key={index} className="flex items-center gap-2 text-sm">
+                                    <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                                    <span>{item}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )
+                        )}
                       </div>
                     </div>
                     
                     {/* Specifications Section */}
-                    <div>
-                      <h3 className="text-lg font-semibold mb-3">Specifications</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {Object.entries(carDetails.specifications).map(([name, value]) => (
-                          <div key={name} className="flex justify-between border-b py-2">
-                            <span className="font-medium">{name}</span>
-                            <span>{value}</span>
-                          </div>
-                        ))}
+                    {Object.keys(carDetails.specifications).length > 0 && (
+                      <div>
+                        <h3 className="text-lg font-semibold mb-3">Specifications</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {Object.entries(carDetails.specifications).map(([name, value]) => (
+                            <div key={name} className="flex justify-between border-b py-2">
+                              <span className="font-medium">{name}</span>
+                              <span>{value}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
+                    )}
                     
                     {/* Tags Section */}
                     {carDetails.tags && carDetails.tags.length > 0 && (
@@ -621,6 +733,16 @@ const ApiTesting = () => {
                         </div>
                       </div>
                     )}
+
+                    {/* Description Preview */}
+                    <div>
+                      <h3 className="text-lg font-semibold mb-3">Generated Description</h3>
+                      <div className="border rounded-md p-4 bg-gray-50">
+                        <pre className="whitespace-pre-wrap text-sm">
+                          {generateDescription(carDetails.specifications, carDetails.tags)}
+                        </pre>
+                      </div>
+                    </div>
                     
                     <div className="flex justify-between mt-6">
                       <Button 
@@ -658,6 +780,14 @@ const ApiTesting = () => {
               className="w-full h-auto border rounded-md mb-4"
             />
             <canvas ref={canvasRef} className="hidden" />
+            
+            {error && (
+              <Alert variant="destructive" className="mb-4 w-full">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
             
             <div className="flex justify-center gap-4">
               <Button 
