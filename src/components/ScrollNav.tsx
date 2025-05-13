@@ -100,6 +100,13 @@ const ScrollNav: React.FC<{ visible: boolean }> = ({ visible }) => {
                     Value my car
                   </Link>
                 </NavigationMenuItem>
+                
+                {/* AI Car ID - Direct Link */}
+                <NavigationMenuItem>
+                  <Link to="/api-testing" className="text-sm block select-none rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                    AI Car ID
+                  </Link>
+                </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
           </nav>

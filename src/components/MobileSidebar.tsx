@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from "react-router-dom";
-import { Home, CarFront, Plus, LogOut, LogIn, ChevronDown, ChevronUp, Bell, ShoppingBag, Search, CircleHelp, User } from "lucide-react";
+import { Home, CarFront, Plus, LogOut, LogIn, ChevronDown, ChevronUp, Bell, ShoppingBag, Search, CircleHelp, User, Camera } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback } from "./ui/avatar";
@@ -330,6 +329,17 @@ export function MobileSidebar() {
             </Link>
           </div>
 
+          {/* Add AI Car ID Link */}
+          <div>
+            <Link 
+              to="/api-testing" 
+              className={`flex items-center gap-3 py-2 ${isCurrentPath('/api-testing') ? 'text-[#007ac8] font-medium' : 'text-gray-700'}`}
+            >
+              <Camera className="h-5 w-5" />
+              <span className="text-base">AI Car ID</span>
+            </Link>
+          </div>
+
           <div className="border-t my-4"></div>
           
           {user ? (
@@ -391,3 +401,5 @@ export function MobileSidebar() {
     </div>
   );
 }
+
+export default MobileSidebar;
