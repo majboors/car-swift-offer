@@ -70,20 +70,28 @@ const AddListing = () => {
   const makeParam = queryParams.get('make') || '';
   const modelParam = queryParams.get('model') || '';
   const titleParam = queryParams.get('title') || '';
+  const yearParam = queryParams.get('year') || '';
+  
+  // Check for state passed from API testing page
+  const locationState = location.state as {
+    description?: string;
+    features?: Record<string, string[]>;
+    preFilledFromApi?: boolean;
+  } | undefined;
   
   const [formData, setFormData] = useState({
     car_name: titleParam,
     title: titleParam,
     make: makeParam,
     model: modelParam,
-    year: new Date().getFullYear(),
+    year: yearParam ? parseInt(yearParam) : new Date().getFullYear(),
     price: '',
     mileage: '',
     color: '',
     transmission: '',
     fuel_type: '',
     body_type: '',
-    description: '',
+    description: locationState?.description || '',
     location: '',
     contact_email: '',
     contact_phone: '',
@@ -117,7 +125,29 @@ const AddListing = () => {
     // Set active tab to details when component mounts
     setActiveTab("details");
     
-  }, [user, navigate, authLoading]);
+    // If we have features from the API, set them
+    if (locationState?.features) {
+      // Merge API features with our feature categories
+      const mergedFeatures: Record<string, string[]> = {};
+      
+      // Process API features
+      Object.entries(locationState.features).forEach(([category, features]) => {
+        // Check if this category exists in our featureCategories
+        if (featureCategories[category as keyof typeof featureCategories]) {
+          // Filter features to only include ones in our predefined list
+          const existingFeatures = featureCategories[category as keyof typeof featureCategories];
+          const validFeatures = features.filter(feature => existingFeatures.includes(feature));
+          
+          if (validFeatures.length > 0) {
+            mergedFeatures[category] = validFeatures;
+          }
+        }
+      });
+      
+      setSelectedFeatures(mergedFeatures);
+    }
+    
+  }, [user, navigate, authLoading, locationState]);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
