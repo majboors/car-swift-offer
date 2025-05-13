@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -8,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
-import { Camera, Upload, Check, Info, AlertCircle } from "lucide-react";
+import { Camera, Upload, Check, Info, AlertCircle, ChevronRight, X } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -823,19 +822,29 @@ const SnapAI = () => {
                 </ul>
               </div>
               
-              <div className="flex justify-end gap-3">
+              {/* Updated navigation buttons with clear next/skip options */}
+              <div className="flex justify-between items-center mt-8 pt-4 border-t">
                 <Button 
                   variant="outline" 
                   onClick={() => setCurrentEditingCategory(null)}
+                  className="flex items-center gap-1"
                 >
-                  Skip
+                  <X className="h-4 w-4" />
+                  Skip All
                 </Button>
+                
                 <Button 
                   onClick={moveToNextCategory} 
-                  className="bg-[#007ac8] hover:bg-[#0069b4]"
+                  className="bg-[#007ac8] hover:bg-[#0069b4] flex items-center gap-1"
                 >
                   Next Category
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
+              </div>
+              
+              {/* Progress indicator showing which category we're on */}
+              <div className="text-center text-sm text-gray-500">
+                Category {FEATURE_CATEGORIES.indexOf(currentEditingCategory) + 1} of {FEATURE_CATEGORIES.length}
               </div>
             </div>
           )}
