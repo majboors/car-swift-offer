@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/contexts/NotificationsContext';
@@ -10,7 +11,7 @@ import MobileSidebar from './MobileSidebar';
 import SearchBar from './SearchBar';
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const { notifications } = useNotifications();
   const navigate = useNavigate();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -18,7 +19,7 @@ const Navbar = () => {
   const unreadNotificationsCount = notifications.filter(notification => !notification.read).length;
 
   const handleLogout = async () => {
-    await logout();
+    await signOut();
     navigate('/auth');
   };
 
@@ -58,7 +59,7 @@ const Navbar = () => {
               
               <Link to="/dashboard">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user.avatar_url || ""} alt={user.email || "User Avatar"} />
+                  <AvatarImage src={user.user_metadata?.avatar_url || ""} alt={user.email || "User Avatar"} />
                   <AvatarFallback>{user.email ? user.email[0].toUpperCase() : 'U'}</AvatarFallback>
                 </Avatar>
               </Link>
@@ -89,9 +90,6 @@ const Navbar = () => {
           </Sheet>
         </div>
       </div>
-
-      {/* Scrolling Categories Nav (Example - replace with your actual categories) */}
-      {/* You can add a scrolling categories navigation here if needed */}
     </header>
   );
 };
