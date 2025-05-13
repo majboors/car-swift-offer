@@ -1,5 +1,5 @@
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -8,10 +8,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
-import { Camera, Upload, Check } from "lucide-react";
+import { Camera, Upload, Check, Info } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { 
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface CarIdentification {
   make: string;
@@ -26,6 +31,8 @@ interface CarDetails {
   specifications: Record<string, string>;
   tags: string[];
 }
+
+const API_BASE_URL = "https://car.applytocollege.pk";
 
 const ApiTesting = () => {
   const navigate = useNavigate();
@@ -43,6 +50,21 @@ const ApiTesting = () => {
   const [modelYear, setModelYear] = useState<string>("");
   const [carIdentification, setCarIdentification] = useState<CarIdentification | null>(null);
   const [carDetails, setCarDetails] = useState<CarDetails | null>(null);
+  const [apiResponseOpen, setApiResponseOpen] = useState<boolean>(false);
+  const [apiResponseData, setApiResponseData] = useState<any>(null);
+
+  // Clean up camera stream when component unmounts
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!cameraDialogOpen) {
+      stopCamera();
+    }
+  }, [cameraDialogOpen]);
 
   // Camera functions
   const startCamera = async () => {
@@ -127,7 +149,7 @@ const ApiTesting = () => {
     }
   };
 
-  // Mock API call (replace with real API when available)
+  // Real API call to identify car
   const identifyCar = async () => {
     if (!selectedImage) {
       toast({
@@ -141,31 +163,52 @@ const ApiTesting = () => {
     setLoading(true);
     
     try {
-      // Simulating API call with timeout
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Create form data for the API call
+      const formData = new FormData();
+      formData.append('image', selectedImage);
       
-      // Log the image to console for debugging
-      console.log("Selected image:", selectedImage);
+      // Call the first API endpoint
+      const response = await fetch(`${API_BASE_URL}/get-car-name`, {
+        method: 'POST',
+        body: formData,
+      });
       
-      // Mock response - This would be replaced with actual API call
-      const mockCarIdentification: CarIdentification = {
-        make: "Toyota",
-        model: "Camry",
-        confidence: "high"
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to identify car');
+      }
+      
+      const data = await response.json();
+      
+      // Log the API response to console
+      console.log("Car identification API response:", data);
+      
+      // Store raw API response for popup
+      setApiResponseData(data);
+      
+      // Format the received data for our application state
+      const formattedData: CarIdentification = {
+        make: data.make || "",
+        model: data.model || "",
+        year: data.year || "",
+        confidence: data.confidence || "medium"
       };
       
-      setCarIdentification(mockCarIdentification);
-      setActiveTab("year-input");
+      setCarIdentification(formattedData);
       
-      // Log response to console
-      console.log("Car identified:", mockCarIdentification);
-
-      // Show toast with possible match
+      // If API already provided year, pre-fill it
+      if (data.year) {
+        setModelYear(data.year);
+      }
+      
+      // Display toast notification for the match
       toast({
         title: "Car Identified",
-        description: `Possible match: ${mockCarIdentification.make} ${mockCarIdentification.model}`,
+        description: `Possible match: ${formattedData.make} ${formattedData.model}`,
         variant: "default",
       });
+      
+      setActiveTab("year-input");
     } catch (error: any) {
       console.error('Error identifying car:', error);
       toast({
@@ -178,7 +221,7 @@ const ApiTesting = () => {
     }
   };
 
-  // Mock API call for car details
+  // Real API call to get car details
   const getCarDetails = async () => {
     if (!carIdentification) {
       toast({
@@ -201,32 +244,39 @@ const ApiTesting = () => {
     setLoading(true);
     
     try {
-      // Simulating API call with timeout
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Create form data for the API call
+      const formData = new FormData();
       
-      // Mock car details - This would be replaced with actual API call
-      const mockCarDetails: CarDetails = {
-        car_name: `${carIdentification.make} ${carIdentification.model} ${modelYear}`,
-        features: {
-          "Safety": ["Anti-lock Braking System", "Electronic Stability Control", "Airbags"],
-          "Comfort": ["Air Conditioning", "Power Windows", "Cruise Control"],
-          "Technology": ["Bluetooth", "Navigation System", "Backup Camera"]
-        },
-        specifications: {
-          "Engine": "2.5L 4-Cylinder",
-          "Transmission": "8-Speed Automatic",
-          "Fuel Economy": "28 city / 39 highway",
-          "Horsepower": "203 hp",
-          "Torque": "184 lb-ft"
-        },
-        tags: ["Sedan", "Reliable", "Fuel Efficient", "Family Car"]
-      };
+      // Construct car name from make, model, and year
+      const carName = `${carIdentification.make} ${carIdentification.model} ${modelYear}`;
+      formData.append('car_name', carName);
       
-      setCarDetails(mockCarDetails);
+      // Add the image file
+      if (selectedImage) {
+        formData.append('image', selectedImage);
+      }
+      
+      // Call the second API endpoint
+      const response = await fetch(`${API_BASE_URL}/get-car-details`, {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to get car details');
+      }
+      
+      const data = await response.json();
+      
+      // Log the car details response
+      console.log("Car details API response:", data);
+      
+      // Update state with car details
+      setCarDetails(data);
+      
+      // Move to next step
       setActiveTab("car-details");
-      
-      // Log details to console
-      console.log("Car details retrieved:", mockCarDetails);
     } catch (error: any) {
       console.error('Error getting car details:', error);
       toast({
@@ -268,7 +318,7 @@ const ApiTesting = () => {
     // Navigate to add-listing with query params for simple data
     // and state for complex data
     navigate(
-      `/add-listing?make=${encodeURIComponent(carIdentification.make)}&model=${encodeURIComponent(carIdentification.model)}&title=${encodeURIComponent(carDetails.car_name)}&year=${encodeURIComponent(modelYear)}`, 
+      `/add-listing?make=${encodeURIComponent(carIdentification.make)}&model=${encodeURIComponent(carIdentification.model)}&title=${encodeURIComponent(carDetails.car_name || `${carIdentification.make} ${carIdentification.model} ${modelYear}`)}&year=${encodeURIComponent(modelYear)}`, 
       {
         state: {
           description,
@@ -277,6 +327,12 @@ const ApiTesting = () => {
         }
       }
     );
+  };
+
+  // Format the API response for display
+  const formatApiResponse = (data: any) => {
+    if (!data) return "";
+    return JSON.stringify(data, null, 2);
   };
 
   return (
@@ -402,12 +458,31 @@ const ApiTesting = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="make">Make</Label>
-                          <Input 
-                            id="make" 
-                            value={carIdentification.make} 
-                            readOnly 
-                            className="bg-gray-50"
-                          />
+                          <div className="flex items-center">
+                            <Input 
+                              id="make" 
+                              value={carIdentification.make} 
+                              readOnly 
+                              className="bg-gray-50"
+                            />
+                            {apiResponseData && (
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="ml-2">
+                                    <Info className="h-4 w-4" />
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-80">
+                                  <div className="space-y-2">
+                                    <h4 className="font-medium">API Response</h4>
+                                    <pre className="bg-slate-100 p-2 rounded text-xs overflow-auto">
+                                      {formatApiResponse(apiResponseData)}
+                                    </pre>
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
+                            )}
+                          </div>
                         </div>
                         
                         <div className="space-y-2">
