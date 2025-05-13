@@ -17,46 +17,50 @@ const SearchForm = () => {
   
   const navigate = useNavigate();
   
-  // Initialize search query from URL params if available
+  // Parse search parameters
   useEffect(() => {
-    const queryParam = searchParams.get('query');
-    if (queryParam) {
-      setSearchQuery(queryParam);
+    // Extract search query from URL if any
+    for (const param of searchParams.keys()) {
+      // If it's an empty param key (e.g. "/search?" with no value), skip it
+      if (!param) continue;
+      
+      // Check if parameter is a car make
+      if (carData.some(item => item.car === param)) {
+        setSelectedMake(param);
+        continue;
+      }
+      
+      // Check if parameter is a body type
+      const bodyTypes = ["Cab Chassis", "Convertible", "Coupe", "Hatch", 
+                         "Sedan", "SUV", "Ute", "Van", "Wagon"];
+      if (bodyTypes.includes(param)) {
+        setSelectedBodyType(param);
+        continue;
+      }
+      
+      // Otherwise, treat it as a search query
+      setSearchQuery(param);
     }
     
-    // Check for direct make/model/bodyType parameters, but also check for
-    // plain value parameters (without the key=value format)
+    // For backward compatibility, also check for specific named parameters
     const makeParam = searchParams.get('make');
-    if (makeParam) {
+    if (makeParam && !selectedMake) {
       setSelectedMake(makeParam);
-    } else {
-      // Try to match a parameter against car makes
-      for (const param of searchParams.keys()) {
-        if (carData.some(item => item.car === param)) {
-          setSelectedMake(param);
-          break;
-        }
-      }
     }
     
     const modelParam = searchParams.get('model');
-    if (modelParam) {
+    if (modelParam && !selectedModel) {
       setSelectedModel(modelParam);
     }
     
     const bodyTypeParam = searchParams.get('bodyType');
-    if (bodyTypeParam) {
+    if (bodyTypeParam && !selectedBodyType) {
       setSelectedBodyType(bodyTypeParam);
-    } else {
-      // Try to match a parameter against body types
-      const bodyTypes = ["Cab Chassis", "Convertible", "Coupe", "Hatch", 
-                         "Sedan", "SUV", "Ute", "Van", "Wagon"];
-      for (const param of searchParams.keys()) {
-        if (bodyTypes.includes(param)) {
-          setSelectedBodyType(param);
-          break;
-        }
-      }
+    }
+    
+    const queryParam = searchParams.get('query');
+    if (queryParam && !searchQuery) {
+      setSearchQuery(queryParam);
     }
   }, [searchParams, carData]);
   
@@ -117,33 +121,25 @@ const SearchForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Build search parameters
-    const searchParams = new URLSearchParams();
+    // Build search parameters in the simplest form possible
+    const params = [];
     
-    // Use regular key=value format for proper parameters
-    if (selectedMake) searchParams.append("make", selectedMake);
-    if (selectedModel) searchParams.append("model", selectedModel);
-    if (selectedBodyType) searchParams.append("bodyType", selectedBodyType);
-    if (searchQuery) {
-      // Normalize the search query to improve matching
-      const normalizedQuery = searchQuery.trim().toLowerCase();
-      searchParams.append("query", normalizedQuery);
+    // Add primary search terms
+    if (selectedMake) params.push(selectedMake);
+    if (selectedModel) params.push(selectedModel);
+    if (selectedBodyType) params.push(selectedBodyType);
+    if (searchQuery && searchQuery.trim()) params.push(searchQuery.trim());
+    
+    // Construct the URL with simple parameters
+    let searchUrl = "/search";
+    if (params.length > 0) {
+      searchUrl += "?" + params.map(p => encodeURIComponent(p)).join("&");
     }
     
-    // Add a timestamp parameter to force refresh of data and prevent caching issues
-    searchParams.append("t", Date.now().toString());
+    console.log("Navigating to:", searchUrl);
     
-    // Add a parameter to exclude featured listings so normal search results don't show them twice
-    // They will be shown as special "featured" results at the top
-    searchParams.append("showFeatured", "false");
-    
-    console.log("Submitting search with params:", Object.fromEntries(searchParams.entries()));
-    
-    // Redirect to search results page with query parameters
-    navigate({
-      pathname: "/search",
-      search: searchParams.toString()
-    });
+    // Redirect to search results page
+    navigate(searchUrl);
   };
   
   return (
