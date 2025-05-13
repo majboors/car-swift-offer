@@ -1,4 +1,3 @@
-
 import { Link, NavLink } from "react-router-dom";
 import { Button } from "./ui/button";
 import { MobileSidebar } from "./MobileSidebar";
@@ -261,10 +260,10 @@ export function Navbar() {
                     </Link>
                   </NavigationMenuItem>
                   
-                  {/* AI Car ID (new link) */}
+                  {/* Snap-AI (renamed from AI Car ID) */}
                   <NavigationMenuItem>
-                    <Link to="/api-testing" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                      AI Car ID
+                    <Link to="/snap-ai" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                      Snap-AI
                     </Link>
                   </NavigationMenuItem>
                 </NavigationMenuList>

@@ -332,11 +332,11 @@ export function MobileSidebar() {
           {/* Add AI Car ID Link */}
           <div>
             <Link 
-              to="/api-testing" 
-              className={`flex items-center gap-3 py-2 ${isCurrentPath('/api-testing') ? 'text-[#007ac8] font-medium' : 'text-gray-700'}`}
+              to="/snap-ai" 
+              className={`flex items-center gap-3 py-2 ${isCurrentPath('/snap-ai') ? 'text-[#007ac8] font-medium' : 'text-gray-700'}`}
             >
               <Camera className="h-5 w-5" />
-              <span className="text-base">AI Car ID</span>
+              <span className="text-base">Snap-AI</span>
             </Link>
           </div>
 

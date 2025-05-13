@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -19,6 +18,7 @@ import {
 } from "@/components/ui/popover";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { processCarFeatures } from "@/lib/feature-utils";
+import { LoadingContainer } from "@/components/LoadingContainer";
 
 interface CarIdentification {
   make: string;
@@ -47,7 +47,7 @@ const FEATURE_CATEGORIES = [
 
 const API_BASE_URL = "https://car.applytocollege.pk";
 
-const ApiTesting = () => {
+const SnapAI = () => {
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -69,6 +69,9 @@ const ApiTesting = () => {
   
   // New state to store the full car name from API
   const [identifiedCarName, setIdentifiedCarName] = useState<string>("");
+  
+  // Add a state to track loading progress for the LoadingContainer
+  const [loadingDetails, setLoadingDetails] = useState<boolean>(false);
 
   // Clean up camera stream when component unmounts
   useEffect(() => {
@@ -282,6 +285,7 @@ const ApiTesting = () => {
     }
     
     setLoading(true);
+    setLoadingDetails(true); // Show the loading container
     setError(null);
     
     try {
@@ -344,6 +348,9 @@ const ApiTesting = () => {
       });
     } finally {
       setLoading(false);
+      setTimeout(() => {
+        setLoadingDetails(false); // Hide the loading container after a brief delay
+      }, 1000);
     }
   };
   
@@ -448,6 +455,9 @@ const ApiTesting = () => {
       <div className="flex-grow container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-6">Car Identification</h1>
+          
+          {/* Show the LoadingContainer when loadingDetails is true */}
+          <LoadingContainer isLoading={loadingDetails} />
           
           {error && (
             <Alert variant="destructive" className="mb-6">
@@ -829,4 +839,4 @@ const ApiTesting = () => {
   );
 };
 
-export default ApiTesting;
+export default SnapAI;
