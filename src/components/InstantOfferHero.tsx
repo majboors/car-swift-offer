@@ -93,7 +93,7 @@ const InstantOfferHero = () => {
     <section className="relative">
       <div className="absolute inset-0">
         <img
-          src="/lovable-uploads/b6da5a4b-2b70-44f4-9c22-61c2228cf0d3.png"
+          src="/hero-image.png"
           alt="Background"
           className="w-full h-full object-cover"
         />
