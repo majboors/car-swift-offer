@@ -18,6 +18,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { processCarFeatures } from "@/lib/feature-utils";
 
 interface CarIdentification {
   make: string;
@@ -315,13 +316,18 @@ const ApiTesting = () => {
       // Update API response data for popup
       setApiResponseData(data);
       
+      // Process features to properly categorize them
+      const processedFeatures = processCarFeatures(data.features || {});
+      
       // Ensure features are properly structured
       const formattedDetails: CarDetails = {
         car_name: data.car_name || carName,
-        features: data.features || {},
+        features: processedFeatures,
         specifications: data.specifications || {},
         tags: data.tags || []
       };
+      
+      console.log("Processed features:", processedFeatures);
       
       // Update state with car details
       setCarDetails(formattedDetails);
@@ -350,6 +356,30 @@ const ApiTesting = () => {
       Object.entries(specs).forEach(([key, value]) => {
         description += `- ${key}: ${value}\n`;
       });
+      description += '\n';
+    } else {
+      description = 'This vehicle features:'; // Fallback if no specs
+    }
+    
+    // Add list of key features
+    if (carDetails && carDetails.features) {
+      let featureCount = 0;
+      description += '\nKey features include:\n';
+      
+      // Add a selection of features from each category
+      Object.entries(carDetails.features).forEach(([category, features]) => {
+        if (features && features.length > 0) {
+          // Add up to 3 features from each non-empty category
+          const categoryFeatures = features.slice(0, 3);
+          categoryFeatures.forEach(feature => {
+            if (featureCount < 12) { // Limit to 12 total features
+              description += `- ${feature}\n`;
+              featureCount++;
+            }
+          });
+        }
+      });
+      
       description += '\n';
     }
     
@@ -669,23 +699,6 @@ const ApiTesting = () => {
                         {/* Display features organized by categories from the API */}
                         {FEATURE_CATEGORIES.map((category) => 
                           hasFeatureCategory(category) && (
-                            <div key={category} className="border rounded-md p-4">
-                              <h4 className="font-medium mb-2">{category}</h4>
-                              <ul className="space-y-1">
-                                {carDetails.features[category]?.map((item, index) => (
-                                  <li key={index} className="flex items-center gap-2 text-sm">
-                                    <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                                    <span>{item}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )
-                        )}
-                        
-                        {/* Check if there are any categories not in our predefined list */}
-                        {Object.keys(carDetails.features || {}).map(category => 
-                          !FEATURE_CATEGORIES.includes(category) && (
                             <div key={category} className="border rounded-md p-4">
                               <h4 className="font-medium mb-2">{category}</h4>
                               <ul className="space-y-1">
