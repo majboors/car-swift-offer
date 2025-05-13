@@ -12,10 +12,11 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { processCarFeatures } from "@/lib/feature-utils";
 import { LoadingContainer } from "@/components/LoadingContainer";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter, DrawerDescription } from "@/components/ui/drawer";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CarIdentification {
   make: string;
@@ -64,6 +65,9 @@ const SnapAI = () => {
 
   // Add a state to track loading progress for the LoadingContainer
   const [loadingDetails, setLoadingDetails] = useState<boolean>(false);
+
+  // Hook to determine if the screen is mobile
+  const isMobile = useIsMobile();
 
   // Clean up camera stream when component unmounts
   useEffect(() => {
@@ -344,6 +348,25 @@ const SnapAI = () => {
     }
   };
 
+  // Move to next category in the features editing flow
+  const moveToNextCategory = () => {
+    if (!currentEditingCategory) return;
+    
+    const currentIndex = FEATURE_CATEGORIES.indexOf(currentEditingCategory);
+    if (currentIndex < FEATURE_CATEGORIES.length - 1) {
+      setCurrentEditingCategory(FEATURE_CATEGORIES[currentIndex + 1]);
+    } else {
+      setCurrentEditingCategory(null);
+      setActiveTab("car-details");
+    }
+  };
+
+  // Check if a category exists in the features
+  const hasFeatureCategory = (category: string) => {
+    if (!carDetails?.features) return false;
+    return !!carDetails.features[category] && carDetails.features[category].length > 0;
+  };
+
   // Generate a description with specifications and tags in a readable format
   const generateDescription = (specs: Record<string, string>, tags: string[]) => {
     let description = 'This vehicle comes with the following specifications:\n\n';
@@ -416,31 +439,6 @@ const SnapAI = () => {
         preFilledFromApi: true
       }
     });
-  };
-
-  // Move to next category in the features editing flow
-  const moveToNextCategory = () => {
-    if (!currentEditingCategory) return;
-    
-    const currentIndex = FEATURE_CATEGORIES.indexOf(currentEditingCategory);
-    if (currentIndex < FEATURE_CATEGORIES.length - 1) {
-      setCurrentEditingCategory(FEATURE_CATEGORIES[currentIndex + 1]);
-    } else {
-      setCurrentEditingCategory(null);
-      setActiveTab("car-details");
-    }
-  };
-
-  // Format the API response for display
-  const formatApiResponse = (data: any) => {
-    if (!data) return "";
-    return JSON.stringify(data, null, 2);
-  };
-
-  // Check if a category exists in the features
-  const hasFeatureCategory = (category: string) => {
-    if (!carDetails?.features) return false;
-    return !!carDetails.features[category] && carDetails.features[category].length > 0;
   };
 
   return (
@@ -530,27 +528,6 @@ const SnapAI = () => {
                       <p className="text-gray-600">
                         Complete car details retrieved
                       </p>
-                      
-                      {apiResponseData && (
-                        <div className="flex justify-center mt-2">
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button variant="outline" size="sm" className="flex items-center gap-1">
-                                <Info className="h-4 w-4" />
-                                <span>View Raw API Response</span>
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-80">
-                              <div className="space-y-2">
-                                <h4 className="font-medium">API Response</h4>
-                                <pre className="bg-slate-100 p-2 rounded text-xs overflow-auto max-h-[400px]">
-                                  {formatApiResponse(apiResponseData)}
-                                </pre>
-                              </div>
-                            </PopoverContent>
-                          </Popover>
-                        </div>
-                      )}
                     </div>
                     
                     <Separator />
@@ -793,37 +770,45 @@ const SnapAI = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Category Editing Sheet */}
-      <Sheet 
-        open={!!currentEditingCategory} 
-        onOpenChange={(open) => {
+      {/* Category Editing - Using Drawer with sticky footer on mobile, Sheet on desktop */}
+      {isMobile ? (
+        <Drawer open={!!currentEditingCategory} onOpenChange={(open) => {
           if (!open) setCurrentEditingCategory(null);
-        }}
-      >
-        <SheetContent className="sm:max-w-md">
-          <SheetHeader>
-            <SheetTitle>Edit {currentEditingCategory} Features</SheetTitle>
-            <SheetDescription>
-              Review and customize the features for this category
-            </SheetDescription>
-          </SheetHeader>
-          
-          {carDetails && currentEditingCategory && (
-            <div className="mt-6 space-y-6">
-              <div className="border rounded-md p-4">
-                <h4 className="font-medium mb-3">{currentEditingCategory}</h4>
-                <ul className="space-y-2">
-                  {(carDetails.features[currentEditingCategory] || []).map((item, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              
-              {/* Updated navigation buttons with clear next/skip options */}
-              <div className="flex justify-between items-center mt-8 pt-4 border-t">
+        }}>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>Edit {currentEditingCategory} Features</DrawerTitle>
+              <DrawerDescription>
+                Review and customize the features for this category
+              </DrawerDescription>
+            </DrawerHeader>
+            
+            <div className="px-4 overflow-y-auto flex-1 pb-[88px]">
+              {carDetails && currentEditingCategory && (
+                <div className="space-y-4">
+                  <div className="border rounded-md p-4">
+                    <h4 className="font-medium mb-3">{currentEditingCategory}</h4>
+                    <ul className="space-y-2">
+                      {(carDetails.features[currentEditingCategory] || []).map((item, index) => (
+                        <li key={index} className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  {/* Progress indicator showing which category we're on */}
+                  <div className="text-center text-sm text-gray-500">
+                    Category {FEATURE_CATEGORIES.indexOf(currentEditingCategory) + 1} of {FEATURE_CATEGORIES.length}
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Sticky drawer footer with navigation buttons */}
+            <DrawerFooter className="fixed inset-x-0 bottom-0">
+              <div className="flex justify-between w-full">
                 <Button 
                   variant="outline" 
                   onClick={() => setCurrentEditingCategory(null)}
@@ -841,15 +826,71 @@ const SnapAI = () => {
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
-              
-              {/* Progress indicator showing which category we're on */}
-              <div className="text-center text-sm text-gray-500">
-                Category {FEATURE_CATEGORIES.indexOf(currentEditingCategory) + 1} of {FEATURE_CATEGORIES.length}
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Sheet 
+          open={!!currentEditingCategory} 
+          onOpenChange={(open) => {
+            if (!open) setCurrentEditingCategory(null);
+          }}
+        >
+          <SheetContent className="sm:max-w-md flex flex-col">
+            <SheetHeader>
+              <SheetTitle>Edit {currentEditingCategory} Features</SheetTitle>
+              <SheetDescription>
+                Review and customize the features for this category
+              </SheetDescription>
+            </SheetHeader>
+            
+            <div className="mt-6 flex-1 overflow-y-auto">
+              {carDetails && currentEditingCategory && (
+                <div className="space-y-4">
+                  <div className="border rounded-md p-4">
+                    <h4 className="font-medium mb-3">{currentEditingCategory}</h4>
+                    <ul className="space-y-2">
+                      {(carDetails.features[currentEditingCategory] || []).map((item, index) => (
+                        <li key={index} className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  {/* Progress indicator showing which category we're on */}
+                  <div className="text-center text-sm text-gray-500">
+                    Category {FEATURE_CATEGORIES.indexOf(currentEditingCategory) + 1} of {FEATURE_CATEGORIES.length}
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Fixed actions at bottom */}
+            <div className="mt-auto border-t pt-4 sticky bottom-0 bg-background">
+              <div className="flex justify-between items-center">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setCurrentEditingCategory(null)}
+                  className="flex items-center gap-1"
+                >
+                  <X className="h-4 w-4" />
+                  Skip All
+                </Button>
+                
+                <Button 
+                  onClick={moveToNextCategory} 
+                  className="bg-[#007ac8] hover:bg-[#0069b4] flex items-center gap-1"
+                >
+                  Next Category
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
             </div>
-          )}
-        </SheetContent>
-      </Sheet>
+          </SheetContent>
+        </Sheet>
+      )}
 
       <Footer />
     </div>

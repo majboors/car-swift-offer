@@ -1,13 +1,15 @@
+
 import { Link, NavLink } from "react-router-dom";
 import { Button } from "./ui/button";
-import { MobileSidebar } from "./MobileSidebar";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { AdminNavLink } from "./AdminNavLink";
-import { Bell, LayoutDashboard } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Bell, LayoutDashboard, Menu } from "lucide-react";
 import ScrollNav from "./ScrollNav";
 import { useNotifications } from "@/contexts/NotificationsContext";
 import NotificationDropdown from "./NotificationDropdown";
+import { MobileSidebar } from "./MobileSidebar";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -74,6 +76,7 @@ const locations = [
 export function Navbar() {
   const { user, signOut, loading } = useAuth();
   const [scrolled, setScrolled] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Add scroll event listener
   useEffect(() => {
@@ -98,7 +101,15 @@ export function Navbar() {
       <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 max-w-screen-2xl items-center">
           <div className="md:hidden">
-            <MobileSidebar />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setIsMobileSidebarOpen(true)}
+              className="mr-2"
+            >
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle menu</span>
+            </Button>
           </div>
           <div className="mr-4 hidden md:flex">
             <Link to="/" className="mr-6 flex items-center space-x-2">
@@ -272,6 +283,17 @@ export function Navbar() {
             </nav>
           </div>
           
+          {/* Logo for mobile */}
+          <div className="md:hidden">
+            <Link to="/" className="flex items-center">
+              <img 
+                src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg" 
+                alt="CarTrade"
+                className="h-8 w-auto"
+              />
+            </Link>
+          </div>
+          
           {/* Right Side Utility Buttons */}
           <div className="flex flex-1 items-center justify-end space-x-4">
             <nav className="flex items-center gap-2">
@@ -319,6 +341,13 @@ export function Navbar() {
           </div>
         </div>
       </header>
+
+      {/* Mobile Sidebar Sheet - Only shown when trigger is clicked */}
+      <Sheet open={isMobileSidebarOpen} onOpenChange={setIsMobileSidebarOpen}>
+        <SheetContent side="left" className="p-0 w-[85%] max-w-[300px]">
+          <MobileSidebar onNavItemClick={() => setIsMobileSidebarOpen(false)} />
+        </SheetContent>
+      </Sheet>
     </>
   );
 }

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from "react-router-dom";
 import { Home, CarFront, Plus, LogOut, LogIn, ChevronDown, ChevronUp, Bell, ShoppingBag, Search, CircleHelp, User, Camera } from "lucide-react";
@@ -12,7 +11,11 @@ import {
 } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 
-export function MobileSidebar() {
+interface MobileSidebarProps {
+  onNavItemClick?: () => void;
+}
+
+export function MobileSidebar({ onNavItemClick }: MobileSidebarProps) {
   const location = useLocation();
   const { user, signOut, username } = useAuth();
   const isCurrentPath = (path: string) => location.pathname === path;
@@ -38,6 +41,14 @@ export function MobileSidebar() {
       return username.substring(0, 2).toUpperCase();
     }
     return user?.email ? user.email.substring(0, 2).toUpperCase() : 'U';
+  };
+
+  // Function to handle navigation item clicks
+  const handleNavItemClick = (href: string) => {
+    // Close the sidebar when a navigation item is clicked
+    if (onNavItemClick) {
+      onNavItemClick();
+    }
   };
 
   // Navigation items for dropdown menus
@@ -100,6 +111,9 @@ export function MobileSidebar() {
         title: "Signed out",
         description: "You have been signed out successfully.",
       });
+      if (onNavItemClick) {
+        onNavItemClick();
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -110,9 +124,9 @@ export function MobileSidebar() {
   };
 
   return (
-    <div className="md:hidden h-full bg-white overflow-y-auto touch-manipulation">
+    <div className="h-full bg-white overflow-y-auto touch-manipulation flex flex-col">
       <div className="border-b p-4 flex items-center justify-between">
-        <Link to="/">
+        <Link to="/" onClick={() => handleNavItemClick('/')}>
           <span className="font-bold inline-block">CarTrade</span>
         </Link>
         {user && (
@@ -128,12 +142,13 @@ export function MobileSidebar() {
           </div>
         )}
       </div>
-      <div className="p-4">
+      <div className="p-4 flex-1 overflow-y-auto">
         <nav className="space-y-4">
           <div>
             <Link 
               to="/" 
               className={`flex items-center gap-3 py-2 ${isCurrentPath('/') ? 'text-[#007ac8] font-medium' : 'text-gray-700'}`}
+              onClick={() => handleNavItemClick('/')}
             >
               <Home className="h-5 w-5" />
               <span className="text-base">Home</span>
@@ -160,7 +175,11 @@ export function MobileSidebar() {
                 <div className="ml-8 mt-2 border-l pl-4 space-y-2">
                   {buyDropdownItems.map((item) => (
                     <div key={item.title}>
-                      <Link to={item.href} className="block py-1.5 text-gray-700 active:text-[#007ac8] touch-manipulation">
+                      <Link 
+                        to={item.href} 
+                        className="block py-1.5 text-gray-700 active:text-[#007ac8] touch-manipulation"
+                        onClick={() => handleNavItemClick(item.href)}
+                      >
                         {item.title}
                       </Link>
                     </div>
@@ -324,6 +343,7 @@ export function MobileSidebar() {
             <Link 
               to="/value-my-car" 
               className={`flex items-center gap-3 py-2 ${isCurrentPath('/value-my-car') ? 'text-[#007ac8] font-medium' : 'text-gray-700'} touch-manipulation`}
+              onClick={() => handleNavItemClick('/value-my-car')}
             >
               <CarFront className="h-5 w-5" />
               <span className="text-base">Value my car</span>
@@ -335,6 +355,7 @@ export function MobileSidebar() {
             <Link 
               to="/snap-ai" 
               className={`flex items-center gap-3 py-2 ${isCurrentPath('/snap-ai') ? 'text-[#007ac8] font-medium' : 'text-gray-700'} touch-manipulation`}
+              onClick={() => handleNavItemClick('/snap-ai')}
             >
               <Camera className="h-5 w-5" />
               <span className="text-base">Snap-AI</span>
@@ -349,6 +370,7 @@ export function MobileSidebar() {
                 <Link 
                   to="/add-listing" 
                   className={`flex items-center gap-3 py-2 ${isCurrentPath('/add-listing') ? 'text-[#007ac8] font-medium' : 'text-gray-700'} touch-manipulation`}
+                  onClick={() => handleNavItemClick('/add-listing')}
                 >
                   <Plus className="h-5 w-5" />
                   <span className="text-base">Add Listing</span>
@@ -359,6 +381,7 @@ export function MobileSidebar() {
                 <Link 
                   to="/account" 
                   className={`flex items-center gap-3 py-2 ${isCurrentPath('/account') ? 'text-[#007ac8] font-medium' : 'text-gray-700'} touch-manipulation`}
+                  onClick={() => handleNavItemClick('/account')}
                 >
                   <User className="h-5 w-5" />
                   <span className="text-base">My Account</span>
@@ -381,6 +404,7 @@ export function MobileSidebar() {
               <Link 
                 to="/auth" 
                 className={`flex items-center gap-3 py-2 ${isCurrentPath('/auth') ? 'text-[#007ac8] font-medium' : 'text-gray-700'} touch-manipulation`}
+                onClick={() => handleNavItemClick('/auth')}
               >
                 <LogIn className="h-5 w-5" />
                 <span className="text-base">Sign In / Sign Up</span>
@@ -392,6 +416,7 @@ export function MobileSidebar() {
             <Link 
               to="/help" 
               className="flex items-center gap-3 py-2 text-gray-700 touch-manipulation"
+              onClick={() => handleNavItemClick('/help')}
             >
               <CircleHelp className="h-5 w-5" />
               <span className="text-base">Help</span>
