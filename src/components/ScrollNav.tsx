@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
@@ -15,13 +16,13 @@ import {
 // Navigation data - Updated to point to search page with appropriate queries
 const buyDropdownItems = [
   { title: "All cars for sale", href: "/search" },
-  { title: "New cars", href: "/search?new" },
-  { title: "Used cars", href: "/search?used" },
-  { title: "Dealer cars", href: "/search?dealer" },
-  { title: "Private seller cars", href: "/search?private" },
-  { title: "Electric cars", href: "/search?electric" },
-  { title: "Finance", href: "/search?finance" },
-  { title: "Inspections", href: "/search?inspected" },
+  { title: "New cars", href: "/search?condition=new" },
+  { title: "Used cars", href: "/search?condition=used" },
+  { title: "Dealer cars", href: "/search?sellerType=dealer" },
+  { title: "Private seller cars", href: "/search?sellerType=private" },
+  { title: "Electric cars", href: "/search?fuelType=electric" },
+  { title: "Finance", href: "/search?financeAvailable=true" },
+  { title: "Inspections", href: "/search?inspected=true" },
 ];
 
 // Updated sell dropdown items to all point to add-listing

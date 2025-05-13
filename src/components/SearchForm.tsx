@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,52 +18,28 @@ const SearchForm = () => {
   
   const navigate = useNavigate();
   
-  // Parse search parameters
+  // Initialize search query from URL params if available
   useEffect(() => {
-    // Extract search query from URL if any
-    for (const param of searchParams.keys()) {
-      // If it's an empty param key (e.g. "/search?" with no value), skip it
-      if (!param) continue;
-      
-      // Check if parameter is a car make
-      if (carData.some(item => item.car === param)) {
-        setSelectedMake(param);
-        continue;
-      }
-      
-      // Check if parameter is a body type
-      const bodyTypes = ["Cab Chassis", "Convertible", "Coupe", "Hatch", 
-                         "Sedan", "SUV", "Ute", "Van", "Wagon"];
-      if (bodyTypes.includes(param)) {
-        setSelectedBodyType(param);
-        continue;
-      }
-      
-      // Otherwise, treat it as a search query
-      setSearchQuery(param);
+    const queryParam = searchParams.get('query');
+    if (queryParam) {
+      setSearchQuery(queryParam);
     }
     
-    // For backward compatibility, also check for specific named parameters
     const makeParam = searchParams.get('make');
-    if (makeParam && !selectedMake) {
+    if (makeParam) {
       setSelectedMake(makeParam);
     }
     
     const modelParam = searchParams.get('model');
-    if (modelParam && !selectedModel) {
+    if (modelParam) {
       setSelectedModel(modelParam);
     }
     
     const bodyTypeParam = searchParams.get('bodyType');
-    if (bodyTypeParam && !selectedBodyType) {
+    if (bodyTypeParam) {
       setSelectedBodyType(bodyTypeParam);
     }
-    
-    const queryParam = searchParams.get('query');
-    if (queryParam && !searchQuery) {
-      setSearchQuery(queryParam);
-    }
-  }, [searchParams, carData]);
+  }, [searchParams]);
   
   // Fetch car data from public.json
   useEffect(() => {
@@ -121,25 +98,32 @@ const SearchForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Build search parameters in the simplest form possible
-    const params = [];
+    // Build search parameters
+    const searchParams = new URLSearchParams();
     
-    // Add primary search terms
-    if (selectedMake) params.push(selectedMake);
-    if (selectedModel) params.push(selectedModel);
-    if (selectedBodyType) params.push(selectedBodyType);
-    if (searchQuery && searchQuery.trim()) params.push(searchQuery.trim());
-    
-    // Construct the URL with simple parameters
-    let searchUrl = "/search";
-    if (params.length > 0) {
-      searchUrl += "?" + params.map(p => encodeURIComponent(p)).join("&");
+    if (selectedMake) searchParams.append("make", selectedMake);
+    if (selectedModel) searchParams.append("model", selectedModel);
+    if (selectedBodyType) searchParams.append("bodyType", selectedBodyType);
+    if (searchQuery) {
+      // Normalize the search query to improve matching
+      const normalizedQuery = searchQuery.trim().toLowerCase();
+      searchParams.append("query", normalizedQuery);
     }
     
-    console.log("Navigating to:", searchUrl);
+    // Add a timestamp parameter to force refresh of data and prevent caching issues
+    searchParams.append("t", Date.now().toString());
     
-    // Redirect to search results page
-    navigate(searchUrl);
+    // Add a parameter to exclude featured listings so normal search results don't show them twice
+    // They will be shown as special "featured" results at the top
+    searchParams.append("showFeatured", "false");
+    
+    console.log("Submitting search with params:", Object.fromEntries(searchParams.entries()));
+    
+    // Redirect to search results page with query parameters
+    navigate({
+      pathname: "/search",
+      search: searchParams.toString()
+    });
   };
   
   return (
