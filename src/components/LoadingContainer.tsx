@@ -8,9 +8,11 @@ interface LoadingStep {
 
 interface LoadingContainerProps {
   isLoading: boolean;
+  onComplete?: () => void;
+  duration?: number;
 }
 
-export const LoadingContainer = ({ isLoading }: LoadingContainerProps) => {
+export const LoadingContainer = ({ isLoading, onComplete, duration = 10000 }: LoadingContainerProps) => {
   const initialSteps: LoadingStep[] = [
     { label: "Processing car image...", status: "active" },
     { label: "Using our AI search agent to find latest car details...", status: "upcoming" },
@@ -21,18 +23,34 @@ export const LoadingContainer = ({ isLoading }: LoadingContainerProps) => {
 
   const [steps, setSteps] = useState<LoadingStep[]>(initialSteps);
   const [currentStep, setCurrentStep] = useState(0);
+  const [completed, setCompleted] = useState(false);
+
+  // Reset state when loading changes
+  useEffect(() => {
+    if (isLoading) {
+      setSteps(initialSteps);
+      setCurrentStep(0);
+      setCompleted(false);
+    }
+  }, [isLoading]);
 
   // Only advance steps when loading is true
   useEffect(() => {
-    if (!isLoading) {
-      setSteps(initialSteps);
-      setCurrentStep(0);
-      return;
-    }
+    if (!isLoading) return;
 
+    const totalSteps = steps.length;
+    const timePerStep = duration / totalSteps;
+    
     const interval = setInterval(() => {
       setCurrentStep((prevStep) => {
-        const nextStep = (prevStep + 1) % steps.length;
+        const nextStep = prevStep + 1;
+        
+        if (nextStep >= totalSteps) {
+          clearInterval(interval);
+          setCompleted(true);
+          onComplete?.();
+          return prevStep; // Keep at last step
+        }
         
         setSteps((prevSteps) => 
           prevSteps.map((step, index) => ({
@@ -48,10 +66,10 @@ export const LoadingContainer = ({ isLoading }: LoadingContainerProps) => {
         
         return nextStep;
       });
-    }, 2000);
+    }, timePerStep);
 
     return () => clearInterval(interval);
-  }, [isLoading, steps.length]);
+  }, [isLoading, steps.length, duration, onComplete]);
 
   if (!isLoading) return null;
 

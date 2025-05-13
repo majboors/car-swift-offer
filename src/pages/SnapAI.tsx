@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -11,16 +12,19 @@ import { Camera, Upload, Check, Info, AlertCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { processCarFeatures } from "@/lib/feature-utils";
 import { LoadingContainer } from "@/components/LoadingContainer";
+
 interface CarIdentification {
   make: string;
   model: string;
   year?: string;
   confidence?: string;
 }
+
 interface CarDetails {
   car_name: string;
   features: Record<string, string[]>;
@@ -30,7 +34,9 @@ interface CarDetails {
 
 // Feature categories (for sorting and display)
 const FEATURE_CATEGORIES = ["Factory fitted", "Audio, Visual & Communication", "Safety & Security", "Comfort & Convenience", "Lights & Windows", "Interior", "Seating"];
+
 const API_BASE_URL = "https://car.applytocollege.pk";
+
 const SnapAI = () => {
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -43,6 +49,7 @@ const SnapAI = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string>("");
   const [cameraDialogOpen, setCameraDialogOpen] = useState<boolean>(false);
+  const [selectedImageDialogOpen, setSelectedImageDialogOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [modelYear, setModelYear] = useState<string>("");
   const [carIdentification, setCarIdentification] = useState<CarIdentification | null>(null);
@@ -50,6 +57,8 @@ const SnapAI = () => {
   const [apiResponseOpen, setApiResponseOpen] = useState<boolean>(false);
   const [apiResponseData, setApiResponseData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [currentEditingCategory, setCurrentEditingCategory] = useState<string | null>(null);
+  const [yearInputDialogOpen, setYearInputDialogOpen] = useState<boolean>(false);
 
   // New state to store the full car name from API
   const [identifiedCarName, setIdentifiedCarName] = useState<string>("");
@@ -63,6 +72,7 @@ const SnapAI = () => {
       stopCamera();
     };
   }, []);
+  
   useEffect(() => {
     if (!cameraDialogOpen) {
       stopCamera();
@@ -78,14 +88,9 @@ const SnapAI = () => {
       }
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: "environment",
-          // Prefer rear camera
-          width: {
-            ideal: 1280
-          },
-          height: {
-            ideal: 720
-          }
+          facingMode: "environment", // Prefer rear camera
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
         }
       });
       if (videoRef.current) {
@@ -102,6 +107,7 @@ const SnapAI = () => {
       });
     }
   };
+
   const stopCamera = () => {
     if (videoRef.current && videoRef.current.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
@@ -113,6 +119,7 @@ const SnapAI = () => {
       setStreamActive(false);
     }
   };
+
   const captureImage = () => {
     if (!videoRef.current || !canvasRef.current) return;
     const context = canvasRef.current.getContext('2d');
@@ -133,7 +140,8 @@ const SnapAI = () => {
         });
         setSelectedImage(file);
         setImagePreviewUrl(URL.createObjectURL(file));
-        setCameraDialogOpen(false); // Close dialog after capturing
+        setCameraDialogOpen(false);
+        setSelectedImageDialogOpen(true); // Show image preview dialog
         stopCamera();
       }
     }, 'image/jpeg', 0.9); // 0.9 quality
@@ -153,8 +161,10 @@ const SnapAI = () => {
     }
     setSelectedImage(file);
     setImagePreviewUrl(URL.createObjectURL(file));
+    setSelectedImageDialogOpen(true); // Show image preview dialog
     setError(null);
   };
+
   const triggerFileInput = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
@@ -171,8 +181,12 @@ const SnapAI = () => {
       });
       return;
     }
+    
+    setSelectedImageDialogOpen(false); // Close the image preview
     setLoading(true);
+    setLoadingDetails(true); // Show loading container
     setError(null);
+    
     try {
       // Create form data for the API call
       const formData = new FormData();
@@ -224,7 +238,10 @@ const SnapAI = () => {
         description: `Possible match: ${carName}`,
         variant: "default"
       });
-      setActiveTab("year-input");
+      
+      // Open the year input dialog
+      setYearInputDialogOpen(true);
+      
     } catch (error: any) {
       console.error('Error identifying car:', error);
       setError(error.message || "Failed to identify car");
@@ -235,6 +252,7 @@ const SnapAI = () => {
       });
     } finally {
       setLoading(false);
+      setLoadingDetails(false);
     }
   };
 
@@ -256,9 +274,12 @@ const SnapAI = () => {
       });
       return;
     }
+    
+    setYearInputDialogOpen(false); // Close the year input dialog
     setLoading(true);
-    setLoadingDetails(true); // Show the loading container
+    setLoadingDetails(true); // Show the loading container with longer duration
     setError(null);
+    
     try {
       // Create form data for the API call
       const formData = new FormData();
@@ -303,9 +324,10 @@ const SnapAI = () => {
 
       // Update state with car details
       setCarDetails(formattedDetails);
-
-      // Move to next step
-      setActiveTab("car-details");
+      
+      // Start showing categories one by one
+      setCurrentEditingCategory(FEATURE_CATEGORIES[0]);
+      
     } catch (error: any) {
       console.error('Error getting car details:', error);
       setError(error.message || "Failed to get car details");
@@ -318,6 +340,7 @@ const SnapAI = () => {
       setLoading(false);
       setTimeout(() => {
         setLoadingDetails(false); // Hide the loading container after a brief delay
+        setActiveTab("car-details");
       }, 1000);
     }
   };
@@ -347,8 +370,7 @@ const SnapAI = () => {
           // Add up to 3 features from each non-empty category
           const categoryFeatures = features.slice(0, 3);
           categoryFeatures.forEach(feature => {
-            if (featureCount < 12) {
-              // Limit to 12 total features
+            if (featureCount < 12) { // Limit to 12 total features
               description += `- ${feature}\n`;
               featureCount++;
             }
@@ -397,6 +419,19 @@ const SnapAI = () => {
     });
   };
 
+  // Move to next category in the features editing flow
+  const moveToNextCategory = () => {
+    if (!currentEditingCategory) return;
+    
+    const currentIndex = FEATURE_CATEGORIES.indexOf(currentEditingCategory);
+    if (currentIndex < FEATURE_CATEGORIES.length - 1) {
+      setCurrentEditingCategory(FEATURE_CATEGORIES[currentIndex + 1]);
+    } else {
+      setCurrentEditingCategory(null);
+      setActiveTab("car-details");
+    }
+  };
+
   // Format the API response for display
   const formatApiResponse = (data: any) => {
     if (!data) return "";
@@ -408,7 +443,9 @@ const SnapAI = () => {
     if (!carDetails?.features) return false;
     return !!carDetails.features[category] && carDetails.features[category].length > 0;
   };
-  return <div className="flex flex-col min-h-screen">
+
+  return (
+    <div className="flex flex-col min-h-screen">
       <Navbar />
       
       <div className="flex-grow container mx-auto px-4 py-8">
@@ -416,13 +453,18 @@ const SnapAI = () => {
           <h1 className="text-3xl font-bold mb-6">From snap to sale—AI-powered car selling, simplified.</h1>
           
           {/* Show the LoadingContainer when loadingDetails is true */}
-          <LoadingContainer isLoading={loadingDetails} />
+          <LoadingContainer 
+            isLoading={loadingDetails} 
+            duration={15000} 
+          />
           
-          {error && <Alert variant="destructive" className="mb-6">
+          {error && (
+            <Alert variant="destructive" className="mb-6">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
-            </Alert>}
+            </Alert>
+          )}
           
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
@@ -446,120 +488,43 @@ const SnapAI = () => {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Image Upload */}
-                    <div className="border-2 border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50" onClick={triggerFileInput}>
+                    <div 
+                      className="border-2 border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50" 
+                      onClick={triggerFileInput}
+                    >
                       <Upload className="h-10 w-10 text-gray-400 mb-3" />
                       <p className="font-medium">Upload image</p>
                       <p className="text-sm text-gray-500">Click to browse files</p>
-                      <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+                      <input 
+                        ref={fileInputRef} 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleFileChange} 
+                        className="hidden" 
+                      />
                     </div>
                     
                     {/* Camera Capture */}
-                    <div className="border-2 border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50" onClick={() => {
-                    setCameraDialogOpen(true);
-                    startCamera();
-                  }}>
+                    <div 
+                      className="border-2 border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50" 
+                      onClick={() => {
+                        setCameraDialogOpen(true);
+                        startCamera();
+                      }}
+                    >
                       <Camera className="h-10 w-10 text-gray-400 mb-3" />
                       <p className="font-medium">Take photo</p>
                       <p className="text-sm text-gray-500">Use your device camera</p>
                     </div>
                   </div>
-                  
-                  {/* Image Preview */}
-                  {imagePreviewUrl && <div className="mt-4">
-                      <h3 className="text-lg font-medium mb-3">Selected Image</h3>
-                      <div className="relative">
-                        <img src={imagePreviewUrl} alt="Car Preview" className="w-full max-h-[300px] object-contain border rounded-md" />
-                        <div className="mt-2 flex justify-end">
-                          <Button variant="outline" onClick={() => {
-                        setSelectedImage(null);
-                        setImagePreviewUrl('');
-                      }} className="mr-2">
-                            Remove
-                          </Button>
-                          <Button onClick={identifyCar} disabled={loading} className="bg-[#007ac8] hover:bg-[#0069b4]">
-                            {loading ? 'Identifying...' : 'Identify Car'}
-                          </Button>
-                        </div>
-                      </div>
-                    </div>}
                 </CardContent>
               </Card>
             </TabsContent>
 
-            {/* Step 2: Year Input and Identified Car Info */}
-            <TabsContent value="year-input" className="space-y-6">
-              <Card>
-                <CardContent className="pt-6 space-y-6">
-                  {carIdentification && <div className="space-y-6">
-                      <div className="text-center">
-                        <h2 className="text-xl font-semibold mb-2">Car Identified</h2>
-                        <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-3 py-1 rounded-full">
-                          <Check className="h-4 w-4" />
-                          <span>
-                            {carIdentification.confidence === 'high' ? 'High confidence match' : 'Possible match'}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2 md:col-span-2">
-                          <Label htmlFor="car_name">Identified Car</Label>
-                          <Input id="car_name" value={identifiedCarName} readOnly className="bg-gray-50 font-medium text-center" />
-                          {apiResponseData && <div className="flex justify-end mt-1">
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <Button variant="outline" size="sm" className="flex items-center gap-1">
-                                    <Info className="h-4 w-4" />
-                                    <span>View API Response</span>
-                                  </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-80">
-                                  <div className="space-y-2">
-                                    <h4 className="font-medium">API Response</h4>
-                                    <pre className="bg-slate-100 p-2 rounded text-xs overflow-auto max-h-[400px]">
-                                      {formatApiResponse(apiResponseData)}
-                                    </pre>
-                                  </div>
-                                </PopoverContent>
-                              </Popover>
-                            </div>}
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="make">Make</Label>
-                          <Input id="make" value={carIdentification.make} readOnly className="bg-gray-50" />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="model">Model</Label>
-                          <Input id="model" value={carIdentification.model} readOnly className="bg-gray-50" />
-                        </div>
-                        
-                        <div className="space-y-2 md:col-span-2">
-                          <Label htmlFor="year">Model Year</Label>
-                          <Input id="year" value={modelYear} onChange={e => setModelYear(e.target.value)} placeholder="Enter year (e.g., 2022)" pattern="\\d{4}" maxLength={4} />
-                          <p className="text-sm text-gray-500 mt-1">
-                            Enter the model year to get detailed specifications
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex justify-between mt-6">
-                        <Button variant="outline" onClick={() => setActiveTab('image-upload')}>
-                          Back
-                        </Button>
-                        <Button onClick={getCarDetails} disabled={!modelYear || loading} className="bg-[#007ac8] hover:bg-[#0069b4]">
-                          {loading ? 'Loading...' : 'Get Car Details'}
-                        </Button>
-                      </div>
-                    </div>}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Step 3: Car Details Results */}
+            {/* Step 2: Car Details Results */}
             <TabsContent value="car-details" className="space-y-6">
-              {carDetails && <Card>
+              {carDetails && (
+                <Card>
                   <CardContent className="pt-6 space-y-6">
                     <div className="text-center">
                       <h2 className="text-xl font-semibold mb-2">{carDetails.car_name || identifiedCarName}</h2>
@@ -567,7 +532,8 @@ const SnapAI = () => {
                         Complete car details retrieved
                       </p>
                       
-                      {apiResponseData && <div className="flex justify-center mt-2">
+                      {apiResponseData && (
+                        <div className="flex justify-center mt-2">
                           <Popover>
                             <PopoverTrigger asChild>
                               <Button variant="outline" size="sm" className="flex items-center gap-1">
@@ -584,7 +550,8 @@ const SnapAI = () => {
                               </div>
                             </PopoverContent>
                           </Popover>
-                        </div>}
+                        </div>
+                      )}
                     </div>
                     
                     <Separator />
@@ -594,38 +561,52 @@ const SnapAI = () => {
                       <h3 className="text-lg font-semibold mb-3">Features</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Display features organized by categories from the API */}
-                        {FEATURE_CATEGORIES.map(category => hasFeatureCategory(category) && <div key={category} className="border rounded-md p-4">
+                        {FEATURE_CATEGORIES.map(category => 
+                          hasFeatureCategory(category) && (
+                            <div key={category} className="border rounded-md p-4">
                               <h4 className="font-medium mb-2">{category}</h4>
                               <ul className="space-y-1">
-                                {carDetails.features[category]?.map((item, index) => <li key={index} className="flex items-center gap-2 text-sm">
+                                {carDetails.features[category]?.map((item, index) => (
+                                  <li key={index} className="flex items-center gap-2 text-sm">
                                     <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
                                     <span>{item}</span>
-                                  </li>)}
+                                  </li>
+                                ))}
                               </ul>
-                            </div>)}
+                            </div>
+                          )
+                        )}
                       </div>
                     </div>
                     
                     {/* Specifications Section */}
-                    {Object.keys(carDetails.specifications).length > 0 && <div>
+                    {Object.keys(carDetails.specifications).length > 0 && (
+                      <div>
                         <h3 className="text-lg font-semibold mb-3">Specifications</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {Object.entries(carDetails.specifications).map(([name, value]) => <div key={name} className="flex justify-between border-b py-2">
+                          {Object.entries(carDetails.specifications).map(([name, value]) => (
+                            <div key={name} className="flex justify-between border-b py-2">
                               <span className="font-medium">{name}</span>
                               <span>{value}</span>
-                            </div>)}
+                            </div>
+                          ))}
                         </div>
-                      </div>}
+                      </div>
+                    )}
                     
                     {/* Tags Section */}
-                    {carDetails.tags && carDetails.tags.length > 0 && <div>
+                    {carDetails.tags && carDetails.tags.length > 0 && (
+                      <div>
                         <h3 className="text-lg font-semibold mb-3">Tags</h3>
                         <div className="flex flex-wrap gap-2">
-                          {carDetails.tags.map((tag, index) => <div key={index} className="bg-gray-100 px-3 py-1 rounded-full text-sm">
+                          {carDetails.tags.map((tag, index) => (
+                            <div key={index} className="bg-gray-100 px-3 py-1 rounded-full text-sm">
                               {tag}
-                            </div>)}
+                            </div>
+                          ))}
                         </div>
-                      </div>}
+                      </div>
+                    )}
 
                     {/* Description Preview */}
                     <div>
@@ -637,16 +618,14 @@ const SnapAI = () => {
                       </div>
                     </div>
                     
-                    <div className="flex justify-between mt-6">
-                      <Button variant="outline" onClick={() => setActiveTab('year-input')}>
-                        Back
-                      </Button>
+                    <div className="flex justify-end mt-6">
                       <Button onClick={createListing} className="bg-[#007ac8] hover:bg-[#0069b4]">
                         Create Listing with These Details
                       </Button>
                     </div>
                   </CardContent>
-                </Card>}
+                </Card>
+              )}
             </TabsContent>
           </Tabs>
         </div>
@@ -659,23 +638,37 @@ const SnapAI = () => {
             <DialogTitle>Take a Photo</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col items-center">
-            <video ref={videoRef} autoPlay playsInline className="w-full h-auto border rounded-md mb-4" />
+            <video 
+              ref={videoRef} 
+              autoPlay 
+              playsInline 
+              className="w-full h-auto border rounded-md mb-4" 
+            />
             <canvas ref={canvasRef} className="hidden" />
             
-            {error && <Alert variant="destructive" className="mb-4 w-full">
+            {error && (
+              <Alert variant="destructive" className="mb-4 w-full">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Error</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
-              </Alert>}
+              </Alert>
+            )}
             
             <div className="flex justify-center gap-4">
-              <Button variant="outline" onClick={() => {
-              stopCamera();
-              setCameraDialogOpen(false);
-            }}>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  stopCamera();
+                  setCameraDialogOpen(false);
+                }}
+              >
                 Cancel
               </Button>
-              <Button onClick={captureImage} className="bg-[#007ac8] hover:bg-[#0069b4]" disabled={!streamActive}>
+              <Button 
+                onClick={captureImage} 
+                className="bg-[#007ac8] hover:bg-[#0069b4]" 
+                disabled={!streamActive}
+              >
                 Capture
               </Button>
             </div>
@@ -683,7 +676,175 @@ const SnapAI = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Selected Image Dialog */}
+      <Dialog open={selectedImageDialogOpen} onOpenChange={setSelectedImageDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirm Image</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center">
+            {imagePreviewUrl && (
+              <img 
+                src={imagePreviewUrl} 
+                alt="Car Preview" 
+                className="w-full max-h-[300px] object-contain border rounded-md mb-4" 
+              />
+            )}
+            
+            <div className="flex justify-center gap-4 w-full">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setSelectedImage(null);
+                  setImagePreviewUrl('');
+                  setSelectedImageDialogOpen(false);
+                }}
+              >
+                Remove
+              </Button>
+              <Button 
+                onClick={identifyCar} 
+                className="bg-[#007ac8] hover:bg-[#0069b4]" 
+                disabled={loading}
+              >
+                {loading ? 'Identifying...' : 'Identify Car'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Year Input Dialog */}
+      <Dialog open={yearInputDialogOpen} onOpenChange={setYearInputDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Car Identified</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {carIdentification && (
+              <>
+                <div className="text-center mb-2">
+                  <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-3 py-1 rounded-full">
+                    <Check className="h-4 w-4" />
+                    <span>
+                      {carIdentification.confidence === 'high' ? 'High confidence match' : 'Possible match'}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="car_name">Identified Car</Label>
+                  <Input 
+                    id="car_name" 
+                    value={identifiedCarName} 
+                    readOnly 
+                    className="bg-gray-50 font-medium text-center" 
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="make">Make</Label>
+                    <Input 
+                      id="make" 
+                      value={carIdentification.make} 
+                      readOnly 
+                      className="bg-gray-50" 
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="model">Model</Label>
+                    <Input 
+                      id="model" 
+                      value={carIdentification.model} 
+                      readOnly 
+                      className="bg-gray-50" 
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="year">Model Year</Label>
+                  <Input 
+                    id="year" 
+                    value={modelYear} 
+                    onChange={e => setModelYear(e.target.value)} 
+                    placeholder="Enter year (e.g., 2022)" 
+                    pattern="\\d{4}" 
+                    maxLength={4} 
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    Enter the model year to get detailed specifications
+                  </p>
+                </div>
+                
+                <div className="flex justify-end mt-4">
+                  <Button 
+                    onClick={getCarDetails} 
+                    disabled={!modelYear || loading} 
+                    className="bg-[#007ac8] hover:bg-[#0069b4]"
+                  >
+                    {loading ? 'Loading...' : 'Get Car Details'}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Category Editing Sheet */}
+      <Sheet 
+        open={!!currentEditingCategory} 
+        onOpenChange={(open) => {
+          if (!open) setCurrentEditingCategory(null);
+        }}
+      >
+        <SheetContent className="sm:max-w-md">
+          <SheetHeader>
+            <SheetTitle>Edit {currentEditingCategory} Features</SheetTitle>
+            <SheetDescription>
+              Review and customize the features for this category
+            </SheetDescription>
+          </SheetHeader>
+          
+          {carDetails && currentEditingCategory && (
+            <div className="mt-6 space-y-6">
+              <div className="border rounded-md p-4">
+                <h4 className="font-medium mb-3">{currentEditingCategory}</h4>
+                <ul className="space-y-2">
+                  {(carDetails.features[currentEditingCategory] || []).map((item, index) => (
+                    <li key={index} className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div className="flex justify-end gap-3">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setCurrentEditingCategory(null)}
+                >
+                  Skip
+                </Button>
+                <Button 
+                  onClick={moveToNextCategory} 
+                  className="bg-[#007ac8] hover:bg-[#0069b4]"
+                >
+                  Next Category
+                </Button>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
+
       <Footer />
-    </div>;
+    </div>
+  );
 };
+
 export default SnapAI;
