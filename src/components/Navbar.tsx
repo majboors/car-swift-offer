@@ -1,97 +1,321 @@
 
-import React, { useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { useNotifications } from '@/contexts/NotificationsContext';
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
-import MobileSidebar from './MobileSidebar';
-import SearchBar from './SearchBar';
+import { Link } from "react-router-dom";
+import { Button } from "./ui/button";
+import { MobileSidebar } from "./MobileSidebar";
+import { useAuth } from "@/contexts/AuthContext";
+import { AdminNavLink } from "./AdminNavLink";
+import { Bell, LayoutDashboard } from "lucide-react";
+import { useState, useEffect } from "react";
+import ScrollNav from "./ScrollNav";
+import { useNotifications } from "@/contexts/NotificationsContext";
+import NotificationDropdown from "./NotificationDropdown";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  NavigationMenuLink
+} from "@/components/ui/navigation-menu";
 
-const Navbar = () => {
-  const { user, signOut } = useAuth();
-  const { notifications } = useNotifications();
-  const navigate = useNavigate();
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+// Navigation data - Updated to point to search page with appropriate queries
+const buyDropdownItems = [
+  { title: "All cars for sale", href: "/search" },
+  { title: "New cars", href: "/search?condition=new" },
+  { title: "Used cars", href: "/search?condition=used" },
+  { title: "Dealer cars", href: "/search?sellerType=dealer" },
+  { title: "Private seller cars", href: "/search?sellerType=private" },
+  { title: "Electric cars", href: "/search?fuelType=electric" },
+  { title: "Finance", href: "/search?financeAvailable=true" },
+  { title: "Inspections", href: "/search?inspected=true" },
+];
 
-  const unreadNotificationsCount = notifications.filter(notification => !notification.read).length;
+// Updated sell dropdown items to all point to add-listing
+const sellDropdownItems = [
+  { title: "Create an ad", href: "/add-listing" },
+  { title: "Get an Instant Offer™", href: "/add-listing" },
+  { title: "Manage my ad", href: "/add-listing" },
+  { title: "Value my car", href: "/value-my-car" },
+];
 
-  const handleLogout = async () => {
-    await signOut();
-    navigate('/auth');
-  };
+const researchDropdownItems = [
+  { title: "Research all cars", href: "/" },
+  { title: "All news and reviews", href: "/" },
+  { title: "News", href: "/" },
+  { title: "Reviews", href: "/" },
+  { title: "Advice", href: "/" },
+  { title: "Best cars", href: "/" },
+  { title: "Owner reviews", href: "/" },
+  { title: "Compare cars", href: "/" },
+  { title: "Electric cars", href: "/" },
+  { title: "Car of the year", href: "/" },
+];
+
+const showroomDropdownItems = [
+  { title: "Showroom", href: "/" },
+  { title: "Electric cars", href: "/" },
+  { title: "Certified pre-owned", href: "/" },
+  { title: "New car calendar", href: "/" },
+];
+
+const popularMakes = [
+  "Audi", "BMW", "Ford", "Holden", "Hyundai", "Kia", "Mazda",
+  "Mercedes-Benz", "Mitsubishi", "Nissan", "Tesla", "Toyota"
+];
+
+const bodyTypes = [
+  "Cab Chassis", "Convertible", "Coupe", "Hatch", "Sedan",
+  "SUV", "Ute", "Van", "Wagon"
+];
+
+const locations = [
+  "ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA"
+];
+
+export function Navbar() {
+  const { user, signOut, loading } = useAuth();
+  const [scrolled, setScrolled] = useState(false);
+
+  // Add scroll event listener
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show compact navbar when scrolled past 200px
+      const isScrolled = window.scrollY > 200;
+      if (isScrolled !== scrolled) {
+        setScrolled(isScrolled);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [scrolled]);
 
   return (
-    <header className="bg-white border-b border-gray-200">
-      <div className="container mx-auto flex items-center justify-between p-4">
-        <div className="flex items-center space-x-8">
-          {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <img 
-              src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg" 
-              alt="Car Trader Logo" 
-              className="h-10 w-auto"
-            />
-          </Link>
+    <>
+      {/* Compact navbar that appears on scroll */}
+      {scrolled && <ScrollNav visible={scrolled} />}
+      
+      {/* Main navbar */}
+      <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-14 max-w-screen-2xl items-center">
+          <div className="md:hidden">
+            <MobileSidebar />
+          </div>
+          <div className="mr-4 hidden md:flex">
+            <Link to="/" className="mr-6 flex items-center space-x-2">
+              <img 
+                src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg" 
+                alt="CarTrade"
+                className="h-10 w-auto"
+              />
+            </Link>
+            <nav className="hidden md:flex gap-6 items-center">
+              {/* Main Navigation Menu */}
+              <NavigationMenu>
+                <NavigationMenuList>
+                  {/* Buy Dropdown */}
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger>Buy</NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <div className="grid grid-cols-3 p-4 w-[800px]">
+                        <div>
+                          <h3 className="font-medium mb-2 text-sm">Primary Links</h3>
+                          <ul className="space-y-2">
+                            {buyDropdownItems.map((item) => (
+                              <li key={item.title}>
+                                <Link to={item.href} className="text-sm hover:text-primary">
+                                  {item.title}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h3 className="font-medium mb-2 text-sm">Popular Makes</h3>
+                          <ul className="grid grid-cols-2 gap-2">
+                            {popularMakes.map((make) => (
+                              <li key={make}>
+                                <Link to={`/search?make=${make}`} className="text-sm hover:text-primary">
+                                  {make}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <div className="mb-4">
+                            <h3 className="font-medium mb-2 text-sm">Body Types</h3>
+                            <ul className="grid grid-cols-2 gap-2">
+                              {bodyTypes.map((type) => (
+                                <li key={type}>
+                                  <Link to={`/search?bodyType=${type}`} className="text-sm hover:text-primary">
+                                    {type}
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <h3 className="font-medium mb-2 text-sm">Locations</h3>
+                            <ul className="grid grid-cols-2 gap-2">
+                              {locations.map((location) => (
+                                <li key={location}>
+                                  <Link to={`/search?location=${location}`} className="text-sm hover:text-primary">
+                                    {location}
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
 
-          {/* Desktop Navigation - visible on md breakpoint and up */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <NavLink to="/" className="text-gray-700 hover:text-[#007ac8]">Home</NavLink>
-            <NavLink to="/search" className="text-gray-700 hover:text-[#007ac8]">All Cars</NavLink>
-            <NavLink to="/value-my-car" className="text-gray-700 hover:text-[#007ac8]">Value My Car</NavLink>
-            <NavLink to="/api-testing" className="text-gray-700 hover:text-[#007ac8]">AI Car ID</NavLink>
-          </nav>
-        </div>
+                  {/* Sell Dropdown */}
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger>Sell</NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <ul className="grid p-4 w-[200px] gap-2">
+                        {sellDropdownItems.map((item) => (
+                          <li key={item.title}>
+                            <Link to={item.href} className="text-sm hover:text-primary">
+                              {item.title}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
 
-        {/* User Navigation & Buttons */}
-        <div className="flex items-center space-x-4">
-          <SearchBar />
+                  {/* Research Dropdown */}
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger>Research</NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <div className="grid grid-cols-2 p-4 w-[600px]">
+                        <div>
+                          <h3 className="font-medium mb-2 text-sm">Research Links</h3>
+                          <ul className="space-y-2">
+                            {researchDropdownItems.map((item) => (
+                              <li key={item.title}>
+                                <Link to={item.href} className="text-sm hover:text-primary">
+                                  {item.title}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h3 className="font-medium mb-2 text-sm">Popular Makes</h3>
+                          <ul className="grid grid-cols-2 gap-2">
+                            {popularMakes.map((make) => (
+                              <li key={make}>
+                                <Link to="/" className="text-sm hover:text-primary">
+                                  {make}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
 
-          {user ? (
-            <div className="flex items-center space-x-4">
-              <Link to="/add-listing">
-                <Button className="bg-[#007ac8] hover:bg-[#0069b4] text-white">
-                  Add Listing
+                  {/* Showroom Dropdown */}
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger>Showroom</NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <div className="grid grid-cols-2 p-4 w-[500px]">
+                        <div>
+                          <h3 className="font-medium mb-2 text-sm">Showroom Links</h3>
+                          <ul className="space-y-2">
+                            {showroomDropdownItems.map((item) => (
+                              <li key={item.title}>
+                                <Link to={item.href} className="text-sm hover:text-primary">
+                                  {item.title}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h3 className="font-medium mb-2 text-sm">Popular Body Types</h3>
+                          <ul className="space-y-2">
+                            {bodyTypes.map((type) => (
+                              <li key={type}>
+                                <Link to="/" className="text-sm hover:text-primary">
+                                  {type}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+
+                  {/* Value My Car (single link) */}
+                  <NavigationMenuItem>
+                    <Link to="/value-my-car" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                      Value my car
+                    </Link>
+                  </NavigationMenuItem>
+                </NavigationMenuList>
+              </NavigationMenu>
+              <AdminNavLink />
+            </nav>
+          </div>
+          
+          {/* Right Side Utility Buttons */}
+          <div className="flex flex-1 items-center justify-end space-x-4">
+            <nav className="flex items-center gap-2">
+              {user && <NotificationDropdown />}
+              
+              {loading ? (
+                <Button variant="ghost" size="sm" disabled>
+                  Loading...
                 </Button>
-              </Link>
-              
-              <Link to="/dashboard">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={user.user_metadata?.avatar_url || ""} alt={user.email || "User Avatar"} />
-                  <AvatarFallback>{user.email ? user.email[0].toUpperCase() : 'U'}</AvatarFallback>
-                </Avatar>
-              </Link>
-              
-              <Button variant="outline" onClick={handleLogout}>Logout</Button>
-            </div>
-          ) : (
-            <>
-              <Link to="/auth">
-                <Button variant="outline">Log In</Button>
-              </Link>
-              <Link to="/auth">
-                <Button className="bg-[#007ac8] hover:bg-[#0069b4] text-white">Sign Up</Button>
-              </Link>
-            </>
-          )}
-
-          {/* Mobile Navigation Button */}
-          <Sheet open={isMobileSidebarOpen} onOpenChange={setIsMobileSidebarOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="sm" className="md:hidden">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-              <MobileSidebar />
-            </SheetContent>
-          </Sheet>
+              ) : user ? (
+                <div className="flex items-center gap-4">
+                  {/* Dashboard Link */}
+                  <Link to="/dashboard" className="flex items-center gap-1 text-sm text-gray-700 hover:text-primary">
+                    <LayoutDashboard className="h-4 w-4" />
+                    <span>Dashboard</span>
+                  </Link>
+                  
+                  <Link to="/add-listing">
+                    <Button size="sm" className="px-4">
+                      Add Listing
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="px-4"
+                    onClick={() => signOut()}
+                  >
+                    Log Out
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <Link to="/auth">
+                    <Button size="sm" variant="ghost">
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Button size="sm" variant="default" className="ml-2">
+                    Sell my car
+                  </Button>
+                </>
+              )}
+            </nav>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
-};
+}
 
+// Need to add a default export to match the import in Index.tsx
 export default Navbar;

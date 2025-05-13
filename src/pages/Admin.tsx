@@ -12,7 +12,7 @@ import ManagePackages from "@/components/admin/ManagePackages";
 import AdminNotifications from "@/components/admin/AdminNotifications";
 import { Loader, BarChart, Bell } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-import Navbar from "@/components/Navbar"; // Changed from { Navbar } to default import
+import { Navbar } from "@/components/Navbar";
 import { supabase } from "@/integrations/supabase/client";
 
 interface CountData {
