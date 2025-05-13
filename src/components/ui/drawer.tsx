@@ -33,13 +33,16 @@ const DrawerOverlay = React.forwardRef<
 ))
 DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName
 
+// Define custom props interface to extend the DrawerPrimitive.Content props
+interface DrawerContentProps extends React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> {
+  snapPoints?: Array<number>;
+  activeSnapPoint?: number;
+  setActiveSnapPoint?: (snapPoint: number) => void;
+}
+
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & {
-    snapPoints?: Array<number>
-    activeSnapPoint?: number
-    setActiveSnapPoint?: (snapPoint: number) => void
-  }
+  DrawerContentProps
 >(({ className, children, snapPoints, activeSnapPoint, setActiveSnapPoint, ...props }, ref) => (
   <DrawerPortal>
     <DrawerOverlay />
@@ -49,6 +52,8 @@ const DrawerContent = React.forwardRef<
         "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-[85vh] max-h-[85vh] flex-col rounded-t-[10px] border bg-background",
         className
       )}
+      // Pass the custom props to DrawerPrimitive.Content
+      // @ts-expect-error - the vaul types don't include snapPoints, activeSnapPoint, and setActiveSnapPoint
       snapPoints={snapPoints}
       activeSnapPoint={activeSnapPoint}
       setActiveSnapPoint={setActiveSnapPoint}
