@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Input } from '@/components/ui/input';
@@ -52,6 +52,7 @@ const featureCategories = {
 
 const AddListing = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
@@ -64,11 +65,17 @@ const AddListing = () => {
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
   const [selectedPackageLevel, setSelectedPackageLevel] = useState<number>(0);
   
+  // Parse URL parameters
+  const queryParams = new URLSearchParams(location.search);
+  const makeParam = queryParams.get('make') || '';
+  const modelParam = queryParams.get('model') || '';
+  const titleParam = queryParams.get('title') || '';
+  
   const [formData, setFormData] = useState({
-    car_name: '',
-    title: '',
-    make: '',
-    model: '',
+    car_name: titleParam,
+    title: titleParam,
+    make: makeParam,
+    model: modelParam,
     year: new Date().getFullYear(),
     price: '',
     mileage: '',
@@ -106,6 +113,10 @@ const AddListing = () => {
       
       console.log("User authenticated:", user.id);
     }
+    
+    // Set active tab to details when component mounts
+    setActiveTab("details");
+    
   }, [user, navigate, authLoading]);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {

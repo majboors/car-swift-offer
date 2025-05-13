@@ -66,8 +66,11 @@ const CarValuationSection = () => {
       return;
     }
     
+    // Create a title combining make and model
+    const title = `${selectedMake} ${selectedModel}`;
+    
     // Navigate to add-listing page with car information
-    navigate(`/add-listing?make=${selectedMake}&model=${selectedModel}&title=${selectedMake} ${selectedModel}`);
+    navigate(`/add-listing?make=${encodeURIComponent(selectedMake)}&model=${encodeURIComponent(selectedModel)}&title=${encodeURIComponent(title)}`);
   };
 
   return (
