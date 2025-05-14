@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "@/components/ui/use-toast";
 
 interface EditListingDialogProps {
   isOpen: boolean;
@@ -84,6 +85,18 @@ export const EditListingDialog = ({
     setIsLoading(true);
     try {
       await onSave(listing.id, formData);
+      toast({
+        title: "Success",
+        description: "Listing updated successfully",
+        variant: "default"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update listing",
+        variant: "destructive"
+      });
+      console.error("Error updating listing:", error);
     } finally {
       setIsLoading(false);
     }

@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -428,16 +429,60 @@ const SnapAI = () => {
     // Get the car title from car_name in carDetails or construct it
     const carTitle = carDetails.car_name || `${carIdentification.make} ${carIdentification.model} ${modelYear}`;
 
+    // Prepare specifications as a formatted string to be stored in the description field
+    const specsFormatted = Object.entries(carDetails.specifications)
+      .map(([key, value]) => `${key}: ${value}`)
+      .join('\n');
+
+    // Extract body type from specifications if available
+    const bodyType = carDetails.specifications["Body style"] || "";
+    
+    // Extract transmission from specifications if available
+    const transmission = carDetails.specifications["Transmission"] || "";
+    
+    // Extract fuel type from specifications if available
+    const fuelType = carDetails.specifications["Engine"] || "";
+    
+    // Extract color if available in specifications
+    const color = carDetails.specifications["Color"] || "";
+    
+    // Log the data being passed to ensure it's correct
+    console.log("Data being passed to AddListing:", {
+      make: carIdentification.make,
+      model: carIdentification.model,
+      title: carTitle,
+      year: modelYear,
+      description,
+      bodyType,
+      transmission,
+      fuelType,
+      color,
+      features: carDetails.features,
+      specifications: carDetails.specifications,
+      tags: carDetails.tags,
+    });
+
     // Navigate to add-listing with query params for simple data
-    // and state for complex data
+    // and state for complex data and formatted strings
     navigate(`/add-listing?make=${encodeURIComponent(carIdentification.make)}&model=${encodeURIComponent(carIdentification.model)}&title=${encodeURIComponent(carTitle)}&year=${encodeURIComponent(modelYear)}`, {
       state: {
         description,
         features: carDetails.features,
         specifications: carDetails.specifications,
         tags: carDetails.tags,
+        specsFormatted,
+        bodyType,
+        transmission,
+        fuelType,
+        color,
         preFilledFromApi: true
       }
+    });
+    
+    toast({
+      title: "Data transferred",
+      description: "Car details have been transferred to the listing form",
+      variant: "default"
     });
   };
 
@@ -807,7 +852,7 @@ const SnapAI = () => {
             </div>
             
             {/* Sticky drawer footer with navigation buttons */}
-            <DrawerFooter className="fixed inset-x-0 bottom-0">
+            <DrawerFooter className="fixed inset-x-0 bottom-0 bg-background border-t">
               <div className="flex justify-between w-full">
                 <Button 
                   variant="outline" 
