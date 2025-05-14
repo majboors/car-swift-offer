@@ -70,20 +70,24 @@ const AddListing = () => {
   const makeParam = queryParams.get('make') || '';
   const modelParam = queryParams.get('model') || '';
   const titleParam = queryParams.get('title') || '';
+  const yearParam = queryParams.get('year') || new Date().getFullYear().toString();
+  
+  // Get state from navigation if available
+  const locationState = location.state as any;
   
   const [formData, setFormData] = useState({
-    car_name: titleParam,
-    title: titleParam,
-    make: makeParam,
-    model: modelParam,
-    year: new Date().getFullYear(),
+    car_name: titleParam || '',
+    title: titleParam || '',
+    make: makeParam || '',
+    model: modelParam || '',
+    year: parseInt(yearParam) || new Date().getFullYear(),
     price: '',
     mileage: '',
-    color: '',
-    transmission: '',
-    fuel_type: '',
-    body_type: '',
-    description: '',
+    color: locationState?.color || '',
+    transmission: locationState?.transmission || '',
+    fuel_type: locationState?.fuelType || '',
+    body_type: locationState?.bodyType || '',
+    description: locationState?.description || '',
     location: '',
     contact_email: '',
     contact_phone: '',
@@ -117,8 +121,19 @@ const AddListing = () => {
     // Set active tab to details when component mounts
     setActiveTab("details");
     
-  }, [user, navigate, authLoading]);
-  
+    // Initialize features from state if provided
+    if (locationState?.features) {
+      console.log("Features from navigation state:", locationState.features);
+      setSelectedFeatures(locationState.features);
+    }
+    
+    // Log all the props coming from navigation state
+    if (locationState) {
+      console.log("All location state data:", locationState);
+    }
+    
+  }, [user, navigate, authLoading, locationState]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     
@@ -147,7 +162,6 @@ const AddListing = () => {
     setPreviewUrls(prevUrls => prevUrls.filter((_, i) => i !== index));
   };
   
-  // Fix the toggleFeature function to safely handle state updates
   const toggleFeature = (category: string, feature: string) => {
     setSelectedFeatures(prev => {
       // Create a deep copy of the previous state to avoid mutation issues
@@ -242,7 +256,7 @@ const AddListing = () => {
     setSelectedPackageId(packageId);
     setSelectedPackageLevel(packageLevel);
   };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -407,184 +421,6 @@ const AddListing = () => {
       setActiveTab("features");
     } else if (activeTab === "packages") {
       setActiveTab("images");
-    }
-  };
-
-  // Function to fetch placeholder images for testing
-  const fetchPlaceholderImages = async () => {
-    try {
-      // Define placeholders to use
-      const placeholderImageUrls = [
-        'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=800&auto=format&fit=crop',
-        'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=80&w=800&auto=format&fit=crop',
-        'https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=800&auto=format&fit=crop'
-      ];
-      
-      // Convert URLs to image files
-      const imagePromises = placeholderImageUrls.map(async (url, index) => {
-        const response = await fetch(url);
-        const blob = await response.blob();
-        const fileName = `placeholder-${index + 1}.jpg`;
-        return new File([blob], fileName, { type: 'image/jpeg' });
-      });
-      
-      const imageFiles = await Promise.all(imagePromises);
-      
-      // Create object URLs for preview
-      const newPreviewUrls = imageFiles.map(file => URL.createObjectURL(file));
-      
-      // Set the fetched images and preview URLs
-      setSelectedImages(imageFiles);
-      setPreviewUrls(newPreviewUrls);
-      
-      return imageFiles;
-    } catch (error) {
-      console.error('Error fetching placeholder images:', error);
-      toast({
-        title: "Error loading test images",
-        description: "Could not fetch placeholder images for testing.",
-        variant: "destructive",
-      });
-      return [];
-    }
-  };
-  
-  // Function to populate test data
-  const populateTestData = () => {
-    // Populate form data with test values
-    setFormData({
-      car_name: '2022 Tesla Model 3 Long Range',
-      title: '2022 Tesla Model 3 Long Range - Excellent Condition',
-      make: 'Tesla',
-      model: 'Model 3',
-      year: 2022,
-      price: '49990',
-      mileage: '15000',
-      color: 'Midnight Silver',
-      transmission: 'Automatic',
-      fuel_type: 'Electric',
-      body_type: 'Sedan',
-      description: 'This Tesla Model 3 Long Range is in excellent condition with only 15,000 km. Features include Autopilot, premium interior, and glass roof. Full service history available. Car is located in Sydney and available for inspection.',
-      location: 'Sydney, NSW',
-      contact_email: user?.email || 'test@example.com',
-      contact_phone: '0412345678',
-    });
-    
-    console.log("Test data populated:", formData);
-    
-    // Select some features for testing
-    setSelectedFeatures({
-      'Audio, Visual & Communication': ['Bluetooth', 'Navigation System', 'Smartphone Integration', 'USB Port', 'Apple CarPlay', 'Android Auto'],
-      'Comfort & Convenience': ['Automatic Climate Control', 'Cruise Control', 'Electric Parking Brake', 'Keyless Entry', 'Push Button Start'],
-      'Interior': ['Adjustable Steering Column', 'Cup Holders', 'Front Center Armrest', 'Leather Steering Wheel'],
-      'Safety & Security': ['ABS', 'Airbags', 'Electronic Stability Control', 'Lane Departure Warning', 'Parking Sensors', 'Reversing Camera'],
-      'Seating': ['Electric Seats', 'Heated Seats', 'Leather Seats']
-    });
-    
-    console.log("Test features populated:", selectedFeatures);
-  };
-  
-  // Function to handle the test submission
-  const handleTestSubmit = async () => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to use the test feature.",
-        variant: "destructive",
-      });
-      navigate('/auth');
-      return;
-    }
-    
-    setLoading(true);
-    
-    try {
-      // Populate test data first - this will update state but won't be immediately available
-      populateTestData();
-      
-      // Instead of relying on the state update from populateTestData,
-      // we'll create the features object directly here
-      const testFeatures = {
-        'Audio, Visual & Communication': ['Bluetooth', 'Navigation System', 'Smartphone Integration', 'USB Port', 'Apple CarPlay', 'Android Auto'],
-        'Comfort & Convenience': ['Automatic Climate Control', 'Cruise Control', 'Electric Parking Brake', 'Keyless Entry', 'Push Button Start'],
-        'Interior': ['Adjustable Steering Column', 'Cup Holders', 'Front Center Armrest', 'Leather Steering Wheel'],
-        'Safety & Security': ['ABS', 'Airbags', 'Electronic Stability Control', 'Lane Departure Warning', 'Parking Sensors', 'Reversing Camera'],
-        'Seating': ['Electric Seats', 'Heated Seats', 'Leather Seats']
-      };
-      
-      console.log("Direct test features object:", testFeatures);
-      
-      // Fetch placeholder images
-      const testImages = await fetchPlaceholderImages();
-      console.log("Test images fetched:", testImages.length);
-      
-      // Upload images
-      const imageUrls = await uploadImages(testImages);
-      console.log("Test images uploaded:", imageUrls);
-      
-      // Format the listing data using our direct features object, not relying on state
-      const listingData = {
-        user_id: user.id,
-        title: '2022 Tesla Model 3 Long Range - Excellent Condition',
-        car_name: '2022 Tesla Model 3 Long Range',
-        make: 'Tesla',
-        model: 'Model 3',
-        year: 2022,
-        price: 49990, 
-        mileage: 15000,
-        color: 'Midnight Silver',
-        transmission: 'Automatic',
-        fuel_type: 'Electric',
-        body_type: 'Sedan',
-        description: 'This Tesla Model 3 Long Range is in excellent condition with only 15,000 km. Features include Autopilot, premium interior, and glass roof. Full service history available. Car is located in Sydney and available for inspection.',
-        location: 'Sydney, NSW',
-        contact_email: user?.email || 'test@example.com',
-        contact_phone: '0412345678',
-        features: testFeatures, // Using our direct features object
-        images: imageUrls,
-        status: 'approved', // Set as approved for test listings to show up immediately
-        // Add package data
-        package_level: 2, // Premium visibility package
-        package_expires_at: new Date().toISOString(),
-        featured: true,
-        top_search: true
-      };
-      
-      console.log("Final test listing data with features:", listingData);
-      console.log("Features object structure:", JSON.stringify(listingData.features, null, 2));
-      
-      // Insert the listing
-      const { data, error } = await supabase
-        .from('car_listings')
-        .insert(listingData)
-        .select('id')
-        .single();
-        
-      if (error) {
-        console.error("Error inserting test listing:", error);
-        throw error;
-      }
-      
-      console.log("Test listing created successfully:", data);
-      
-      // Set submission success state
-      setSubmissionSuccess(true);
-      setSubmittedListingId(data.id);
-      
-      toast({
-        title: "Test Listing Created!",
-        description: "Your test listing has been submitted for review.",
-      });
-      
-    } catch (error: any) {
-      console.error("Error adding test listing:", error);
-      toast({
-        title: "Error adding test listing",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
     }
   };
 
