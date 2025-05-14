@@ -536,12 +536,12 @@ const AddListing = () => {
             
             <Button 
               type="button" 
-              onClick={handleTestSubmit} 
+              onClick={handleSubmit} 
               variant="outline" 
               className="border-blue-500 text-blue-500 hover:bg-blue-100"
               disabled={loading || uploadingImages}
             >
-              {loading ? 'Creating Test...' : 'Create Test Listing'}
+              {loading ? 'Creating...' : 'Create Listing'}
             </Button>
           </div>
           

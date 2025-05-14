@@ -1,9 +1,21 @@
 
 // Re-export from our custom toast implementation
-import { toast as sonnerToast, useToast as useSonnerToast } from "sonner";
-import type { Toast } from "sonner";
+import { toast as sonnerToast } from "sonner";
+import type { ToastT } from "sonner";
 
-const useToast = useSonnerToast;
+// The useToast function to match shadcn/ui expected interface
+const useToast = () => {
+  // Get toasts from the store (this is a simple version that doesn't actually track toasts)
+  return {
+    toasts: [] as any[],
+    toast,
+    dismiss: (id?: string) => {
+      if (id) {
+        sonnerToast.dismiss(id);
+      }
+    },
+  };
+};
 
 type ToastProps = {
   title?: string;
@@ -23,7 +35,7 @@ const toast = ({
   variant = "default",
   duration = 5000,
   action
-}: ToastProps): Toast => {
+}: ToastProps) => {
   const toastType = variant === "destructive" ? "error" : "default";
   
   return sonnerToast[toastType](title, {
