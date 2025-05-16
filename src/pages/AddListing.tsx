@@ -85,8 +85,8 @@ const AddListing = () => {
     mileage: '',
     color: locationState?.color || '',
     transmission: locationState?.transmission || '',
-    fuel_type: locationState?.fuelType || '',
-    body_type: locationState?.bodyType || '',
+    fuel_type: locationState?.fuelType || locationState?.fuel_type || '',
+    body_type: locationState?.bodyType || locationState?.body_type || '',
     description: locationState?.description || '',
     location: '',
     contact_email: '',
@@ -97,6 +97,8 @@ const AddListing = () => {
   const [submittedListingId, setSubmittedListingId] = useState<string | null>(null);
   
   useEffect(() => {
+    console.log("AddListing component mounted, locationState:", locationState);
+    
     // Wait for auth to finish loading before checking
     if (!authLoading && !user) {
       toast({
@@ -131,22 +133,61 @@ const AddListing = () => {
     if (locationState) {
       console.log("All location state data:", locationState);
       
-      // Update form data with values from location state
+      // More robust approach to extract data from specifications when direct properties are not available
+      const specs = locationState.specifications || {};
+      
+      // Try to get body type from various possible specification fields
+      let bodyType = locationState.bodyType || locationState.body_type || '';
+      if (!bodyType) {
+        bodyType = specs["Body style"] || specs["Body Style"] || specs["Body Type"] || specs["body type"] || '';
+      }
+      
+      // Try to get transmission from various possible specification fields
+      let transmission = locationState.transmission || '';
+      if (!transmission) {
+        transmission = specs["Transmission"] || specs["transmission"] || '';
+      }
+      
+      // Try to get fuel type from various possible specification fields
+      let fuelType = locationState.fuelType || locationState.fuel_type || '';
+      if (!fuelType) {
+        fuelType = specs["Fuel Type"] || specs["fuel type"] || specs["Engine"] || '';
+        // Extract fuel type from engine description if needed
+        if (fuelType.includes("petrol")) fuelType = "Petrol";
+        else if (fuelType.includes("diesel")) fuelType = "Diesel";
+        else if (fuelType.includes("hybrid")) fuelType = "Hybrid";
+        else if (fuelType.includes("electric")) fuelType = "Electric";
+      }
+      
+      // Try to get color from various possible specification fields
+      let color = locationState.color || '';
+      if (!color) {
+        color = specs["Color"] || specs["Exterior Color"] || specs["color"] || '';
+      }
+      
+      // Update form data with values from location state with better fallbacks
       setFormData(prevState => ({
         ...prevState,
-        car_name: titleParam || locationState?.car_name || '',
-        title: titleParam || locationState?.title || '',
-        make: makeParam || locationState?.make || '',
-        model: modelParam || locationState?.model || '',
-        year: parseInt(yearParam) || locationState?.year || new Date().getFullYear(),
-        price: locationState?.price || '',
-        mileage: locationState?.mileage || '',
-        color: locationState?.color || '',
-        transmission: locationState?.transmission || '',
-        fuel_type: locationState?.fuelType || '',
-        body_type: locationState?.bodyType || '',
-        description: locationState?.description || '',
+        car_name: titleParam || locationState.car_name || locationState.title || '',
+        title: titleParam || locationState.title || locationState.car_name || '',
+        make: makeParam || locationState.make || '',
+        model: modelParam || locationState.model || '',
+        year: parseInt(yearParam) || locationState.year || new Date().getFullYear(),
+        price: locationState.price || '',
+        mileage: locationState.mileage || '',
+        color: color,
+        transmission: transmission,
+        fuel_type: fuelType,
+        body_type: bodyType,
+        description: locationState.description || '',
       }));
+      
+      console.log("Form data after processing:", {
+        bodyType,
+        transmission,
+        fuelType,
+        color
+      });
     }
     
   }, [user, navigate, authLoading, locationState, makeParam, modelParam, titleParam, yearParam]);

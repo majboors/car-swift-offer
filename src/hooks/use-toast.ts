@@ -35,7 +35,7 @@ const toast = ({
   duration = 5000,
   action
 }: ToastProps) => {
-  // Fix: Use conditionals instead of bracket notation for toast types
+  // Use conditionals instead of bracket notation for toast types
   if (variant === "destructive") {
     return sonnerToast.error(title, {
       description,

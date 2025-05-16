@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { Camera, Upload, Check, Info, AlertCircle, ChevronRight, X, Code } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -208,6 +208,8 @@ const SnapAI = () => {
       const rawText = await response.text();
       setRawApiResponse(rawText);
       
+      console.log("Raw API response text:", rawText);
+      
       // Try to parse as JSON
       let data;
       try {
@@ -224,12 +226,12 @@ const SnapAI = () => {
       // Store raw API response for popup
       setApiResponseData(data);
 
-      // Store the full car name from API
+      // Store the full car name from API - handle undefined case
       const carName = data.car_name || "";
       setIdentifiedCarName(carName);
 
       // Extract make and model from car_name
-      const nameParts = carName.split(" ");
+      const nameParts = (carName || "").split(" ");
       const make = nameParts[0] || "";
       const model = nameParts.slice(1).join(" ") || "";
 
@@ -435,7 +437,7 @@ const SnapAI = () => {
     return description;
   };
 
-  // Create listing with car details
+  // Create listing with car details - UPDATED to ensure all data is passed correctly
   const createListing = () => {
     if (!carDetails || !carIdentification || !modelYear) {
       toast({
@@ -457,17 +459,20 @@ const SnapAI = () => {
       .map(([key, value]) => `${key}: ${value}`)
       .join('\n');
 
-    // Extract body type from specifications if available
-    const bodyType = carDetails.specifications["Body style"] || carDetails.specifications["Body Style"] || "";
+    // Extract field values with better fallbacks
+    const specs = carDetails.specifications || {};
+    
+    // Extract body type from specifications if available with multiple options
+    const bodyType = specs["Body style"] || specs["Body Style"] || specs["Body Type"] || "";
     
     // Extract transmission from specifications if available
-    const transmission = carDetails.specifications["Transmission"] || "";
+    const transmission = specs["Transmission"] || "";
     
-    // Extract fuel type from specifications if available
-    const fuelType = carDetails.specifications["Fuel Type"] || carDetails.specifications["Engine"] || "";
+    // Extract fuel type from specifications with multiple options
+    const fuelType = specs["Fuel Type"] || specs["Engine"] || specs["Fuel type"] || "";
     
-    // Extract color if available in specifications
-    const color = carDetails.specifications["Color"] || carDetails.specifications["Exterior Color"] || "";
+    // Extract color if available in specifications with multiple options
+    const color = specs["Color"] || specs["Exterior Color"] || specs["colour"] || specs["Colour"] || "";
     
     // Log the data being passed to ensure it's correct
     console.log("Data being passed to AddListing:", {
@@ -477,8 +482,10 @@ const SnapAI = () => {
       year: modelYear,
       description,
       bodyType,
+      body_type: bodyType,
       transmission,
       fuelType,
+      fuel_type: fuelType,
       color,
       features: carDetails.features,
       specifications: carDetails.specifications,
@@ -500,8 +507,10 @@ const SnapAI = () => {
         tags: carDetails.tags,
         specsFormatted,
         bodyType,
+        body_type: bodyType,
         transmission,
         fuelType,
+        fuel_type: fuelType,
         color,
         preFilledFromApi: true
       }
