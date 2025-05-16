@@ -1,7 +1,6 @@
 
 // Re-export from our custom toast implementation
 import { toast as sonnerToast } from "sonner";
-import type { ToastT } from "sonner";
 
 // The useToast function to match shadcn/ui expected interface
 const useToast = () => {
@@ -36,16 +35,26 @@ const toast = ({
   duration = 5000,
   action
 }: ToastProps) => {
-  const toastType = variant === "destructive" ? "error" : "default";
-  
-  return sonnerToast[toastType](title, {
-    description,
-    duration,
-    action: action ? {
-      label: action.label,
-      onClick: action.onClick,
-    } : undefined,
-  });
+  // Fix: Use conditionals instead of bracket notation for toast types
+  if (variant === "destructive") {
+    return sonnerToast.error(title, {
+      description,
+      duration,
+      action: action ? {
+        label: action.label,
+        onClick: action.onClick,
+      } : undefined,
+    });
+  } else {
+    return sonnerToast(title, {
+      description,
+      duration,
+      action: action ? {
+        label: action.label,
+        onClick: action.onClick,
+      } : undefined,
+    });
+  }
 };
 
 export { useToast, toast };
