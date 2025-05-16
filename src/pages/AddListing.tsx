@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -88,7 +87,7 @@ const bodyTypeOptions = [
 ];
 
 // Helper function to find best match option based on input string
-const findBestMatchOption = (input, options) => {
+const findBestMatchOption = (input: string | undefined, options: { value: string; display: string }[]): string => {
   if (!input) return '';
   
   // Direct match (case-insensitive)
@@ -109,10 +108,10 @@ const findBestMatchOption = (input, options) => {
 };
 
 // Helper function to extract features from description or other properties
-const extractFeaturesFromText = (text, categories) => {
+const extractFeaturesFromText = (text: string | undefined, categories: Record<string, string[]>): Record<string, string[]> => {
   if (!text) return {};
   
-  const result = {};
+  const result: Record<string, string[]> = {};
   
   // For each category, check if any of its features are mentioned in the text
   Object.entries(categories).forEach(([category, features]) => {
