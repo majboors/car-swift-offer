@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -48,6 +49,83 @@ const featureCategories = {
     'Electric Seats', 'Heated Seats', 'Isofix Anchor Points', 'Leather Seats', 
     'Memory Seats', 'Ventilated Seats'
   ]
+};
+
+// Transmission options with case-insensitive mapping
+const transmissionOptions = [
+  { value: 'Automatic', display: 'Automatic' },
+  { value: 'Manual', display: 'Manual' },
+  { value: 'CVT', display: 'CVT' },
+  { value: 'Semi-Automatic', display: 'Semi-Automatic' },
+  { value: 'PDK', display: 'PDK (Porsche Dual-Clutch)' },
+  { value: 'DCT', display: 'DCT (Dual-Clutch)' },
+  { value: 'Automated Manual', display: 'Automated Manual' }
+];
+
+// Fuel type options with case-insensitive mapping
+const fuelTypeOptions = [
+  { value: 'Petrol', display: 'Petrol' },
+  { value: 'Diesel', display: 'Diesel' },
+  { value: 'Hybrid', display: 'Hybrid' },
+  { value: 'Electric', display: 'Electric' },
+  { value: 'LPG', display: 'LPG' },
+  { value: 'CNG', display: 'CNG' },
+  { value: 'Hydrogen', display: 'Hydrogen' }
+];
+
+// Body type options with case-insensitive mapping
+const bodyTypeOptions = [
+  { value: 'Sedan', display: 'Sedan' },
+  { value: 'Hatchback', display: 'Hatchback' },
+  { value: 'SUV', display: 'SUV' },
+  { value: 'Wagon', display: 'Wagon' },
+  { value: 'Coupe', display: 'Coupe' },
+  { value: 'Convertible', display: 'Convertible' },
+  { value: 'Fastback', display: 'Fastback' },
+  { value: 'Ute', display: 'Ute' },
+  { value: 'Van', display: 'Van' },
+  { value: 'Truck', display: 'Truck' }
+];
+
+// Helper function to find best match option based on input string
+const findBestMatchOption = (input, options) => {
+  if (!input) return '';
+  
+  // Direct match (case-insensitive)
+  const directMatch = options.find(
+    opt => opt.value.toLowerCase() === input.toLowerCase()
+  );
+  if (directMatch) return directMatch.value;
+  
+  // Partial match (contains)
+  const partialMatch = options.find(
+    opt => opt.value.toLowerCase().includes(input.toLowerCase()) ||
+           input.toLowerCase().includes(opt.value.toLowerCase())
+  );
+  if (partialMatch) return partialMatch.value;
+  
+  // No match
+  return input;
+};
+
+// Helper function to extract features from description or other properties
+const extractFeaturesFromText = (text, categories) => {
+  if (!text) return {};
+  
+  const result = {};
+  
+  // For each category, check if any of its features are mentioned in the text
+  Object.entries(categories).forEach(([category, features]) => {
+    const foundFeatures = features.filter(feature => 
+      text.toLowerCase().includes(feature.toLowerCase())
+    );
+    
+    if (foundFeatures.length > 0) {
+      result[category] = foundFeatures;
+    }
+  });
+  
+  return result;
 };
 
 const AddListing = () => {
@@ -123,47 +201,103 @@ const AddListing = () => {
     // Set active tab to details when component mounts
     setActiveTab("details");
     
-    // Initialize features from state if provided
-    if (locationState?.features) {
-      console.log("Features from navigation state:", locationState.features);
-      setSelectedFeatures(locationState.features);
-    }
-    
-    // Log all the props coming from navigation state
+    // Process the incoming data
     if (locationState) {
       console.log("All location state data:", locationState);
+
+      // Extract features from locationState if available
+      if (locationState.features) {
+        console.log("Features from navigation state:", locationState.features);
+        setSelectedFeatures(locationState.features);
+      } else if (locationState.description) {
+        // Try to extract features from description if no features are provided
+        const extractedFeatures = extractFeaturesFromText(locationState.description, featureCategories);
+        if (Object.keys(extractedFeatures).length > 0) {
+          console.log("Extracted features from description:", extractedFeatures);
+          setSelectedFeatures(extractedFeatures);
+        }
+      }
       
-      // More robust approach to extract data from specifications when direct properties are not available
+      // More robust approach to extract data from specifications
       const specs = locationState.specifications || {};
       
-      // Try to get body type from various possible specification fields
+      // Process body type
       let bodyType = locationState.bodyType || locationState.body_type || '';
       if (!bodyType) {
         bodyType = specs["Body style"] || specs["Body Style"] || specs["Body Type"] || specs["body type"] || '';
+        // Check for partial matches in specs
+        if (!bodyType) {
+          for (const [key, value] of Object.entries(specs)) {
+            if (key.toLowerCase().includes('body') && value) {
+              bodyType = String(value);
+              break;
+            }
+          }
+        }
       }
       
-      // Try to get transmission from various possible specification fields
+      // Process transmission
       let transmission = locationState.transmission || '';
       if (!transmission) {
         transmission = specs["Transmission"] || specs["transmission"] || '';
+        // Look for PDK, DCT, etc. in specifications
+        if (!transmission) {
+          for (const [key, value] of Object.entries(specs)) {
+            if (
+              value && 
+              typeof value === 'string' && 
+              (value.toLowerCase().includes('pdk') || 
+               value.toLowerCase().includes('dct') || 
+               value.toLowerCase().includes('automatic') || 
+               value.toLowerCase().includes('manual'))
+            ) {
+              transmission = String(value);
+              break;
+            }
+          }
+        }
       }
       
-      // Try to get fuel type from various possible specification fields
+      // Process fuel type
       let fuelType = locationState.fuelType || locationState.fuel_type || '';
       if (!fuelType) {
         fuelType = specs["Fuel Type"] || specs["fuel type"] || specs["Engine"] || '';
         // Extract fuel type from engine description if needed
-        if (fuelType.includes("petrol")) fuelType = "Petrol";
-        else if (fuelType.includes("diesel")) fuelType = "Diesel";
-        else if (fuelType.includes("hybrid")) fuelType = "Hybrid";
-        else if (fuelType.includes("electric")) fuelType = "Electric";
+        if (fuelType.toLowerCase().includes('petrol')) fuelType = "Petrol";
+        else if (fuelType.toLowerCase().includes('diesel')) fuelType = "Diesel";
+        else if (fuelType.toLowerCase().includes('hybrid')) fuelType = "Hybrid";
+        else if (fuelType.toLowerCase().includes('electric')) fuelType = "Electric";
       }
       
-      // Try to get color from various possible specification fields
+      // Process color
       let color = locationState.color || '';
       if (!color) {
         color = specs["Color"] || specs["Exterior Color"] || specs["color"] || '';
       }
+
+      // Process mileage (could be in km or odometer)
+      let mileage = locationState.mileage || '';
+      if (!mileage) {
+        mileage = specs["Mileage"] || specs["Odometer"] || specs["KM"] || specs["Kilometers"] || '';
+        // Convert to numeric value if it's a string with units
+        if (typeof mileage === 'string') {
+          const numericMatch = mileage.match(/\d+/);
+          if (numericMatch) {
+            mileage = numericMatch[0];
+          }
+        }
+      }
+
+      // Map to best matching values for dropdowns
+      const mappedTransmission = findBestMatchOption(transmission, transmissionOptions);
+      const mappedFuelType = findBestMatchOption(fuelType, fuelTypeOptions);
+      const mappedBodyType = findBestMatchOption(bodyType, bodyTypeOptions);
+      
+      console.log("Mapped dropdown values:", {
+        transmission: mappedTransmission,
+        fuelType: mappedFuelType,
+        bodyType: mappedBodyType
+      });
       
       // Update form data with values from location state with better fallbacks
       setFormData(prevState => ({
@@ -174,18 +308,18 @@ const AddListing = () => {
         model: modelParam || locationState.model || '',
         year: parseInt(yearParam) || locationState.year || new Date().getFullYear(),
         price: locationState.price || '',
-        mileage: locationState.mileage || '',
+        mileage: mileage || locationState.mileage || '',
         color: color,
-        transmission: transmission,
-        fuel_type: fuelType,
-        body_type: bodyType,
+        transmission: mappedTransmission,
+        fuel_type: mappedFuelType,
+        body_type: mappedBodyType,
         description: locationState.description || '',
       }));
       
       console.log("Form data after processing:", {
-        bodyType,
-        transmission,
-        fuelType,
+        bodyType: mappedBodyType,
+        transmission: mappedTransmission,
+        fuelType: mappedFuelType,
         color
       });
     }
@@ -717,10 +851,11 @@ const AddListing = () => {
                           className="w-full p-2 border rounded-md"
                         >
                           <option value="">Select Transmission</option>
-                          <option value="Automatic">Automatic</option>
-                          <option value="Manual">Manual</option>
-                          <option value="CVT">CVT</option>
-                          <option value="Semi-Automatic">Semi-Automatic</option>
+                          {transmissionOptions.map(option => (
+                            <option key={option.value} value={option.value}>
+                              {option.display}
+                            </option>
+                          ))}
                         </select>
                       </div>
                       
@@ -734,11 +869,11 @@ const AddListing = () => {
                           className="w-full p-2 border rounded-md"
                         >
                           <option value="">Select Fuel Type</option>
-                          <option value="Petrol">Petrol</option>
-                          <option value="Diesel">Diesel</option>
-                          <option value="Hybrid">Hybrid</option>
-                          <option value="Electric">Electric</option>
-                          <option value="LPG">LPG</option>
+                          {fuelTypeOptions.map(option => (
+                            <option key={option.value} value={option.value}>
+                              {option.display}
+                            </option>
+                          ))}
                         </select>
                       </div>
                       
@@ -752,15 +887,11 @@ const AddListing = () => {
                           className="w-full p-2 border rounded-md"
                         >
                           <option value="">Select Body Type</option>
-                          <option value="Sedan">Sedan</option>
-                          <option value="Hatchback">Hatchback</option>
-                          <option value="SUV">SUV</option>
-                          <option value="Wagon">Wagon</option>
-                          <option value="Coupe">Coupe</option>
-                          <option value="Convertible">Convertible</option>
-                          <option value="Ute">Ute</option>
-                          <option value="Van">Van</option>
-                          <option value="Truck">Truck</option>
+                          {bodyTypeOptions.map(option => (
+                            <option key={option.value} value={option.value}>
+                              {option.display}
+                            </option>
+                          ))}
                         </select>
                       </div>
 
@@ -962,21 +1093,11 @@ const AddListing = () => {
                   </Button>
                   
                   <Button 
-                    type="submit"
-                    disabled={loading || uploadingImages}
+                    type="button"
+                    onClick={handleNextStep}
                     className="bg-[#007ac8] hover:bg-[#0069b4] px-8"
                   >
-                    {loading || uploadingImages ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        {uploadingImages ? 'Uploading Images...' : 'Submitting...'}
-                      </>
-                    ) : (
-                      'Submit Listing'
-                    )}
+                    Next Step <ArrowRight className="ml-2" />
                   </Button>
                 </div>
               </TabsContent>
