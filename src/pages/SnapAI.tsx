@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -8,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
-import { Camera, Upload, Check, Info, AlertCircle, ChevronRight, X } from "lucide-react";
+import { Camera, Upload, Check, Info, AlertCircle, ChevronRight, X, Code } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -60,6 +59,8 @@ const SnapAI = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentEditingCategory, setCurrentEditingCategory] = useState<string | null>(null);
   const [yearInputDialogOpen, setYearInputDialogOpen] = useState<boolean>(false);
+  const [rawApiResponse, setRawApiResponse] = useState<string>("");
+  const [showRawApiResponse, setShowRawApiResponse] = useState<boolean>(false);
 
   // New state to store the full car name from API
   const [identifiedCarName, setIdentifiedCarName] = useState<string>("");
@@ -175,7 +176,7 @@ const SnapAI = () => {
     }
   };
 
-  // Real API call to identify car
+  // Real API call to identify car - UPDATED to show raw response
   const identifyCar = async () => {
     if (!selectedImage) {
       toast({
@@ -190,6 +191,7 @@ const SnapAI = () => {
     setLoading(true);
     setLoadingDetails(true); // Show loading container
     setError(null);
+    setRawApiResponse("");
     
     try {
       // Create form data for the API call
@@ -201,11 +203,20 @@ const SnapAI = () => {
         method: 'POST',
         body: formData
       });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to identify car');
+      
+      // Get the raw text response first
+      const rawText = await response.text();
+      setRawApiResponse(rawText);
+      
+      // Try to parse as JSON
+      let data;
+      try {
+        data = JSON.parse(rawText);
+      } catch (parseError) {
+        console.error("Failed to parse response as JSON:", parseError);
+        setShowRawApiResponse(true);
+        throw new Error("Failed to parse response from server. See raw response for details.");
       }
-      const data = await response.json();
 
       // Log the API response to console
       console.log("Car identification API response:", data);
@@ -254,13 +265,14 @@ const SnapAI = () => {
         description: error.message || "An unexpected error occurred",
         variant: "destructive"
       });
+      setShowRawApiResponse(true);
     } finally {
       setLoading(false);
       setLoadingDetails(false);
     }
   };
 
-  // Real API call to get car details
+  // Real API call to get car details - UPDATED to show raw response
   const getCarDetails = async () => {
     if (!carIdentification) {
       toast({
@@ -283,6 +295,7 @@ const SnapAI = () => {
     setLoading(true);
     setLoadingDetails(true); // Show the loading container with longer duration
     setError(null);
+    setRawApiResponse("");
     
     try {
       // Create form data for the API call
@@ -302,11 +315,20 @@ const SnapAI = () => {
         method: 'POST',
         body: formData
       });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to get car details');
+      
+      // Get the raw text response
+      const rawText = await response.text();
+      setRawApiResponse(rawText);
+      
+      // Try to parse as JSON
+      let data;
+      try {
+        data = JSON.parse(rawText);
+      } catch (parseError) {
+        console.error("Failed to parse response as JSON:", parseError);
+        setShowRawApiResponse(true);
+        throw new Error("Failed to parse response from server. See raw response for details.");
       }
-      const data = await response.json();
 
       // Log the car details response
       console.log("Car details API response:", data);
@@ -340,6 +362,7 @@ const SnapAI = () => {
         description: error.message || "An unexpected error occurred",
         variant: "destructive"
       });
+      setShowRawApiResponse(true);
     } finally {
       setLoading(false);
       setTimeout(() => {
@@ -486,6 +509,11 @@ const SnapAI = () => {
     });
   };
 
+  // Toggle raw API response visibility
+  const toggleRawApiResponse = () => {
+    setShowRawApiResponse(!showRawApiResponse);
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -505,7 +533,32 @@ const SnapAI = () => {
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
+              {rawApiResponse && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={toggleRawApiResponse} 
+                  className="mt-2"
+                >
+                  {showRawApiResponse ? 'Hide' : 'Show'} Raw API Response
+                  <Code className="ml-2 h-4 w-4" />
+                </Button>
+              )}
             </Alert>
+          )}
+          
+          {/* Raw API Response Display */}
+          {showRawApiResponse && rawApiResponse && (
+            <div className="mb-6">
+              <Card>
+                <CardContent className="pt-6">
+                  <h3 className="text-lg font-semibold mb-2">Raw API Response</h3>
+                  <div className="bg-gray-100 p-4 rounded-md overflow-x-auto">
+                    <pre className="text-sm whitespace-pre-wrap">{rawApiResponse}</pre>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           )}
           
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -574,6 +627,21 @@ const SnapAI = () => {
                         Complete car details retrieved
                       </p>
                     </div>
+                    
+                    {/* Button to view raw API response */}
+                    {rawApiResponse && (
+                      <div className="flex justify-center">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={toggleRawApiResponse} 
+                          className="mb-4"
+                        >
+                          {showRawApiResponse ? 'Hide' : 'Show'} Raw API Response
+                          <Code className="ml-2 h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
                     
                     <Separator />
                     
