@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
-import { Camera, Upload, Check, Info, AlertCircle, ChevronRight, X, Code } from "lucide-react";
+import { Camera, Upload, Check, Info, AlertCircle, ChevronRight, X, Code, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -17,6 +17,9 @@ import { processCarFeatures } from "@/lib/feature-utils";
 import { LoadingContainer } from "@/components/LoadingContainer";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter, DrawerDescription } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { supabase } from "@/integrations/supabase/client";
+import { v4 as uuidv4 } from "uuid";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface CarIdentification {
   make: string;
@@ -63,6 +66,7 @@ const SnapAI = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
 
   // State management
   const [activeTab, setActiveTab] = useState<string>("image-upload");
@@ -82,6 +86,11 @@ const SnapAI = () => {
   const [yearInputDialogOpen, setYearInputDialogOpen] = useState<boolean>(false);
   const [rawApiResponse, setRawApiResponse] = useState<string>("");
   const [showRawApiResponse, setShowRawApiResponse] = useState<boolean>(false);
+
+  // New state for direct submission
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [price, setPrice] = useState<string>("");
+  const [priceDialogOpen, setPriceDialogOpen] = useState<boolean>(false);
 
   // New state to store the full car name from API
   const [identifiedCarName, setIdentifiedCarName] = useState<string>("");
@@ -197,7 +206,7 @@ const SnapAI = () => {
     }
   };
 
-  // Real API call to identify car - UPDATED to handle markdown-wrapped JSON
+  // Real API call to identify car
   const identifyCar = async () => {
     if (!selectedImage) {
       toast({
@@ -296,7 +305,7 @@ const SnapAI = () => {
     }
   };
 
-  // Real API call to get car details - UPDATED to handle markdown-wrapped JSON
+  // Real API call to get car details
   const getCarDetails = async () => {
     if (!carIdentification) {
       toast({
@@ -460,105 +469,154 @@ const SnapAI = () => {
     return description;
   };
 
-  // Create listing with car details - UPDATED to include more URL parameters
-  const createListing = () => {
-    if (!carDetails || !carIdentification || !modelYear) {
+  // NEW FUNCTION: Upload image to Supabase storage
+  const uploadImageToSupabase = async (file: File): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${uuidv4()}.${fileExt}`;
+      const filePath = `car_listings/${fileName}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('car_images')
+        .upload(filePath, file);
+        
+      if (uploadError) {
+        console.error('Error uploading image:', uploadError);
+        throw new Error(`Image upload failed: ${uploadError.message}`);
+      }
+      
+      // Get public URL for the uploaded image
+      const { data: urlData } = supabase.storage
+        .from('car_images')
+        .getPublicUrl(filePath);
+        
+      return urlData.publicUrl;
+    } catch (error: any) {
+      console.error('Error in uploadImageToSupabase:', error);
       toast({
-        title: "Missing information",
-        description: "Please complete all previous steps first.",
+        title: "Image Upload Failed",
+        description: error.message || "Failed to upload image",
+        variant: "destructive"
+      });
+      return null;
+    }
+  };
+
+  // NEW FUNCTION: Submit car listing directly to Supabase
+  const submitCarListing = async () => {
+    if (!carDetails || !carIdentification || !modelYear || !user || !price || isNaN(Number(price)) || Number(price) <= 0) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide all required information including a valid price",
         variant: "destructive"
       });
       return;
     }
-
-    // Generate a well-formatted description with specifications and tags
-    const description = generateDescription(carDetails.specifications, carDetails.tags);
-
-    // Get the car title from car_name in carDetails or construct it
-    const carTitle = carDetails.car_name || `${carIdentification.make} ${carIdentification.model} ${modelYear}`;
-
-    // Prepare specifications as a formatted string to be stored in the description field
-    const specsFormatted = Object.entries(carDetails.specifications)
-      .map(([key, value]) => `${key}: ${value}`)
-      .join('\n');
-
-    // Extract field values with better fallbacks
-    const specs = carDetails.specifications || {};
     
-    // Extract body type from specifications if available with multiple options
-    const bodyType = specs["Body style"] || specs["Body Style"] || specs["Body Type"] || "";
+    setSubmitting(true);
     
-    // Extract transmission from specifications if available
-    const transmission = specs["Transmission"] || "";
-    
-    // Extract fuel type from specifications with multiple options
-    const fuelType = specs["Fuel Type"] || specs["Engine"] || specs["Fuel type"] || "";
-    
-    // Extract color if available in specifications with multiple options
-    const color = specs["Color"] || specs["Exterior Color"] || specs["colour"] || specs["Colour"] || "";
-    
-    // Log the data being passed to ensure it's correct
-    console.log("Data being passed to AddListing:", {
-      make: carIdentification.make,
-      model: carIdentification.model,
-      title: carTitle,
-      year: modelYear,
-      description,
-      bodyType,
-      transmission,
-      fuelType,
-      color,
-      features: carDetails.features,
-      specifications: carDetails.specifications,
-    });
-
-    // Create a serializable subset of features for URL parameters
-    const featuresCount = Object.values(carDetails.features || {}).reduce(
-      (count, featureList) => count + featureList.length, 0
-    );
-
-    // Build URL with more parameters
-    const queryParams = new URLSearchParams({
-      make: encodeURIComponent(carIdentification.make),
-      model: encodeURIComponent(carIdentification.model),
-      title: encodeURIComponent(carTitle),
-      year: encodeURIComponent(modelYear),
-      body_type: encodeURIComponent(bodyType),
-      transmission: encodeURIComponent(transmission),
-      fuel_type: encodeURIComponent(fuelType),
-      color: encodeURIComponent(color),
-      features_count: encodeURIComponent(featuresCount.toString()),
-    });
-    
-    // Navigate to add-listing with enhanced query params for simple data
-    // and state for complex data and formatted strings
-    navigate(`/add-listing?${queryParams.toString()}`, {
-      state: {
-        car_name: carTitle,
-        title: carTitle,
+    try {
+      // Upload the image to Supabase storage
+      let imageUrl = null;
+      if (selectedImage) {
+        imageUrl = await uploadImageToSupabase(selectedImage);
+        if (!imageUrl) {
+          throw new Error("Failed to upload image");
+        }
+      }
+      
+      // Extract field values with better fallbacks
+      const specs = carDetails.specifications || {};
+      
+      // Extract fields from specifications
+      const bodyType = specs["Body style"] || specs["Body Style"] || specs["Body Type"] || "";
+      const transmission = specs["Transmission"] || "";
+      const fuelType = specs["Fuel Type"] || specs["Engine"] || specs["Fuel type"] || "";
+      const color = specs["Color"] || specs["Exterior Color"] || specs["colour"] || specs["Colour"] || "";
+      const mileage = specs["Mileage"] || specs["Odometer"] || specs["Kilometers"] || "";
+      
+      // Format features as JSONB
+      const featuresObject = carDetails.features || {};
+      
+      // Generate a well-formatted description
+      const description = generateDescription(carDetails.specifications, carDetails.tags);
+      
+      // Prepare the listing data
+      const listingData = {
+        user_id: user.id,
+        title: carDetails.car_name || `${carIdentification.make} ${carIdentification.model} ${modelYear}`,
         make: carIdentification.make,
         model: carIdentification.model,
-        year: modelYear,
-        description,
-        features: carDetails.features,
-        specifications: carDetails.specifications,
-        tags: carDetails.tags,
-        specsFormatted,
-        bodyType,
-        body_type: bodyType,
-        transmission,
-        fuelType,
-        fuel_type: fuelType,
-        color,
-        preFilledFromApi: true
+        year: parseInt(modelYear),
+        price: parseFloat(price),
+        mileage: mileage ? parseInt(mileage) : null,
+        body_type: bodyType || null,
+        transmission: transmission || null,
+        fuel_type: fuelType || null,
+        color: color || null,
+        description: description,
+        features: featuresObject, // Store as JSONB
+        images: imageUrl ? [imageUrl] : [],
+        car_name: carDetails.car_name || `${carIdentification.make} ${carIdentification.model} ${modelYear}`,
+        status: 'pending', // Default status for new listings
+        contact_email: user.email || null,
+        location: null // Can be updated later
+      };
+      
+      console.log("Submitting car listing to Supabase:", listingData);
+      
+      // Insert the listing into Supabase
+      const { data: newListing, error } = await supabase
+        .from('car_listings')
+        .insert(listingData)
+        .select()
+        .single();
+        
+      if (error) {
+        console.error("Error inserting car listing:", error);
+        throw new Error(`Failed to create listing: ${error.message}`);
       }
-    });
+      
+      console.log("Listing created successfully:", newListing);
+      
+      // Show success notification
+      toast({
+        title: "Listing Created Successfully",
+        description: "Your car listing has been created",
+        variant: "success"
+      });
+      
+      // Navigate to the listing or dashboard
+      navigate(`/listing/${newListing.id}`);
+      
+    } catch (error: any) {
+      console.error("Error submitting car listing:", error);
+      toast({
+        title: "Error Creating Listing",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive"
+      });
+      setError(error.message || "Failed to create listing");
+    } finally {
+      setSubmitting(false);
+      setPriceDialogOpen(false);
+    }
+  };
+
+  // NEW FUNCTION: Start the submission process
+  const startSubmission = () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to create a listing",
+        variant: "destructive"
+      });
+      navigate('/auth', { state: { returnTo: '/snap-ai' } });
+      return;
+    }
     
-    toast({
-      title: "Data transferred",
-      description: "Car details have been transferred to the listing form",
-      variant: "default"
-    });
+    // Open the price dialog to get price input from user
+    setPriceDialogOpen(true);
   };
 
   // Toggle raw API response visibility
@@ -759,9 +817,30 @@ const SnapAI = () => {
                       </div>
                     </div>
                     
-                    <div className="flex justify-end mt-6">
-                      <Button onClick={createListing} className="bg-[#007ac8] hover:bg-[#0069b4]">
-                        Create Listing with These Details
+                    <div className="flex flex-col sm:flex-row justify-end gap-4 mt-6">
+                      {/* Create listing button (navigates to AddListing) */}
+                      <Button 
+                        variant="outline" 
+                        onClick={() => createListing()} 
+                        className="order-2 sm:order-1"
+                      >
+                        Create Listing Manually
+                      </Button>
+                      
+                      {/* New Direct Submit button */}
+                      <Button 
+                        onClick={startSubmission} 
+                        className="bg-[#007ac8] hover:bg-[#0069b4] order-1 sm:order-2"
+                        disabled={submitting}
+                      >
+                        {submitting ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Creating...
+                          </>
+                        ) : (
+                          "Create Listing Now"
+                        )}
                       </Button>
                     </div>
                   </CardContent>
@@ -931,6 +1010,54 @@ const SnapAI = () => {
                 </div>
               </>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* NEW: Price Input Dialog */}
+      <Dialog open={priceDialogOpen} onOpenChange={setPriceDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Set Your Asking Price</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="price">Price ($)</Label>
+              <Input 
+                id="price" 
+                value={price} 
+                onChange={e => setPrice(e.target.value)} 
+                placeholder="Enter price" 
+                type="number"
+                min="1"
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                Enter your asking price for the vehicle
+              </p>
+            </div>
+            
+            <div className="flex justify-end mt-4 gap-2">
+              <Button 
+                variant="outline"
+                onClick={() => setPriceDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={submitCarListing} 
+                disabled={!price || submitting} 
+                className="bg-[#007ac8] hover:bg-[#0069b4]"
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating Listing...
+                  </>
+                ) : (
+                  "Create Listing"
+                )}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
