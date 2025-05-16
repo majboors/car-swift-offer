@@ -37,6 +37,27 @@ const FEATURE_CATEGORIES = ["Factory fitted", "Audio, Visual & Communication", "
 
 const API_BASE_URL = "https://car.applytocollege.pk";
 
+// Helper function to extract JSON from potentially markdown-wrapped responses
+const extractJSON = (response: string): any => {
+  try {
+    // First try parsing directly as JSON
+    return JSON.parse(response);
+  } catch (e) {
+    // If that fails, try to extract JSON from markdown code blocks
+    try {
+      // Look for content between triple backticks and json
+      const jsonMatch = response.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+      if (jsonMatch && jsonMatch[1]) {
+        return JSON.parse(jsonMatch[1].trim());
+      }
+      throw new Error("No JSON found in response");
+    } catch (innerError) {
+      console.error("Failed to extract JSON from response:", innerError);
+      throw new Error("Failed to parse response data");
+    }
+  }
+};
+
 const SnapAI = () => {
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -176,7 +197,7 @@ const SnapAI = () => {
     }
   };
 
-  // Real API call to identify car - UPDATED to show raw response
+  // Real API call to identify car - UPDATED to handle markdown-wrapped JSON
   const identifyCar = async () => {
     if (!selectedImage) {
       toast({
@@ -210,10 +231,11 @@ const SnapAI = () => {
       
       console.log("Raw API response text:", rawText);
       
-      // Try to parse as JSON
+      // Try to parse using our helper function
       let data;
       try {
-        data = JSON.parse(rawText);
+        data = extractJSON(rawText);
+        console.log("Extracted JSON data:", data);
       } catch (parseError) {
         console.error("Failed to parse response as JSON:", parseError);
         setShowRawApiResponse(true);
@@ -274,7 +296,7 @@ const SnapAI = () => {
     }
   };
 
-  // Real API call to get car details - UPDATED to show raw response
+  // Real API call to get car details - UPDATED to handle markdown-wrapped JSON
   const getCarDetails = async () => {
     if (!carIdentification) {
       toast({
@@ -322,10 +344,11 @@ const SnapAI = () => {
       const rawText = await response.text();
       setRawApiResponse(rawText);
       
-      // Try to parse as JSON
+      // Try to parse with our helper function
       let data;
       try {
-        data = JSON.parse(rawText);
+        data = extractJSON(rawText);
+        console.log("Extracted car details JSON data:", data);
       } catch (parseError) {
         console.error("Failed to parse response as JSON:", parseError);
         setShowRawApiResponse(true);
