@@ -458,16 +458,16 @@ const SnapAI = () => {
       .join('\n');
 
     // Extract body type from specifications if available
-    const bodyType = carDetails.specifications["Body style"] || "";
+    const bodyType = carDetails.specifications["Body style"] || carDetails.specifications["Body Style"] || "";
     
     // Extract transmission from specifications if available
     const transmission = carDetails.specifications["Transmission"] || "";
     
     // Extract fuel type from specifications if available
-    const fuelType = carDetails.specifications["Engine"] || "";
+    const fuelType = carDetails.specifications["Fuel Type"] || carDetails.specifications["Engine"] || "";
     
     // Extract color if available in specifications
-    const color = carDetails.specifications["Color"] || "";
+    const color = carDetails.specifications["Color"] || carDetails.specifications["Exterior Color"] || "";
     
     // Log the data being passed to ensure it's correct
     console.log("Data being passed to AddListing:", {
@@ -489,6 +489,11 @@ const SnapAI = () => {
     // and state for complex data and formatted strings
     navigate(`/add-listing?make=${encodeURIComponent(carIdentification.make)}&model=${encodeURIComponent(carIdentification.model)}&title=${encodeURIComponent(carTitle)}&year=${encodeURIComponent(modelYear)}`, {
       state: {
+        car_name: carTitle,
+        title: carTitle,
+        make: carIdentification.make,
+        model: carIdentification.model,
+        year: modelYear,
         description,
         features: carDetails.features,
         specifications: carDetails.specifications,

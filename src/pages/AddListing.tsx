@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -130,9 +130,26 @@ const AddListing = () => {
     // Log all the props coming from navigation state
     if (locationState) {
       console.log("All location state data:", locationState);
+      
+      // Update form data with values from location state
+      setFormData(prevState => ({
+        ...prevState,
+        car_name: titleParam || locationState?.car_name || '',
+        title: titleParam || locationState?.title || '',
+        make: makeParam || locationState?.make || '',
+        model: modelParam || locationState?.model || '',
+        year: parseInt(yearParam) || locationState?.year || new Date().getFullYear(),
+        price: locationState?.price || '',
+        mileage: locationState?.mileage || '',
+        color: locationState?.color || '',
+        transmission: locationState?.transmission || '',
+        fuel_type: locationState?.fuelType || '',
+        body_type: locationState?.bodyType || '',
+        description: locationState?.description || '',
+      }));
     }
     
-  }, [user, navigate, authLoading, locationState]);
+  }, [user, navigate, authLoading, locationState, makeParam, modelParam, titleParam, yearParam]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
