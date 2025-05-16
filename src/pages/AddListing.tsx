@@ -127,6 +127,17 @@ const extractFeaturesFromText = (text: string | undefined, categories: Record<st
   return result;
 };
 
+// Helper function to decode URL parameter safely
+const getUrlParam = (params: URLSearchParams, name: string): string => {
+  try {
+    const value = params.get(name);
+    return value ? decodeURIComponent(value) : '';
+  } catch (e) {
+    console.error(`Error decoding URL parameter: ${name}`, e);
+    return '';
+  }
+};
+
 const AddListing = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -142,12 +153,32 @@ const AddListing = () => {
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
   const [selectedPackageLevel, setSelectedPackageLevel] = useState<number>(0);
   
-  // Parse URL parameters
+  // Parse URL parameters - Enhanced to handle more parameters
   const queryParams = new URLSearchParams(location.search);
-  const makeParam = queryParams.get('make') || '';
-  const modelParam = queryParams.get('model') || '';
-  const titleParam = queryParams.get('title') || '';
-  const yearParam = queryParams.get('year') || new Date().getFullYear().toString();
+  
+  // Use safe parameter extraction to avoid decoding errors
+  const makeParam = getUrlParam(queryParams, 'make');
+  const modelParam = getUrlParam(queryParams, 'model');
+  const titleParam = getUrlParam(queryParams, 'title');
+  const yearParam = getUrlParam(queryParams, 'year');
+  const bodyTypeParam = getUrlParam(queryParams, 'body_type');
+  const transmissionParam = getUrlParam(queryParams, 'transmission');
+  const fuelTypeParam = getUrlParam(queryParams, 'fuel_type');
+  const colorParam = getUrlParam(queryParams, 'color');
+  const featuresCountParam = getUrlParam(queryParams, 'features_count');
+  
+  // Log URL parameters for debugging
+  console.log("URL parameters:", { 
+    make: makeParam, 
+    model: modelParam, 
+    title: titleParam, 
+    year: yearParam,
+    bodyType: bodyTypeParam,
+    transmission: transmissionParam,
+    fuelType: fuelTypeParam,
+    color: colorParam,
+    featuresCount: featuresCountParam
+  });
   
   // Get state from navigation if available
   const locationState = location.state as any;
@@ -160,10 +191,10 @@ const AddListing = () => {
     year: parseInt(yearParam) || new Date().getFullYear(),
     price: '',
     mileage: '',
-    color: locationState?.color || '',
-    transmission: locationState?.transmission || '',
-    fuel_type: locationState?.fuelType || locationState?.fuel_type || '',
-    body_type: locationState?.bodyType || locationState?.body_type || '',
+    color: colorParam || locationState?.color || '',
+    transmission: transmissionParam || locationState?.transmission || '',
+    fuel_type: fuelTypeParam || locationState?.fuelType || locationState?.fuel_type || '',
+    body_type: bodyTypeParam || locationState?.bodyType || locationState?.body_type || '',
     description: locationState?.description || '',
     location: '',
     contact_email: '',
@@ -175,6 +206,10 @@ const AddListing = () => {
   
   useEffect(() => {
     console.log("AddListing component mounted, locationState:", locationState);
+    console.log("URL params processed:", {
+      makeParam, modelParam, titleParam, yearParam,
+      bodyTypeParam, transmissionParam, fuelTypeParam, colorParam
+    });
     
     // Wait for auth to finish loading before checking
     if (!authLoading && !user) {
@@ -200,28 +235,46 @@ const AddListing = () => {
     // Set active tab to details when component mounts
     setActiveTab("details");
     
-    // Process the incoming data
-    if (locationState) {
-      console.log("All location state data:", locationState);
-
-      // Extract features from locationState if available
-      if (locationState.features) {
-        console.log("Features from navigation state:", locationState.features);
-        setSelectedFeatures(locationState.features);
-      } else if (locationState.description) {
+    // Process data from either URL parameters or location state
+    // Always prefer URL parameters first (they're more reliable when sharing links)
+    const processData = () => {
+      // Create combined data source prioritizing URL params over state
+      const dataSource = {
+        make: makeParam || locationState?.make || '',
+        model: modelParam || locationState?.model || '',
+        title: titleParam || locationState?.title || locationState?.car_name || '',
+        car_name: titleParam || locationState?.car_name || locationState?.title || '',
+        year: yearParam ? parseInt(yearParam) : locationState?.year || new Date().getFullYear(),
+        body_type: bodyTypeParam || locationState?.bodyType || locationState?.body_type || '',
+        transmission: transmissionParam || locationState?.transmission || '',
+        fuel_type: fuelTypeParam || locationState?.fuelType || locationState?.fuel_type || '',
+        color: colorParam || locationState?.color || '',
+        description: locationState?.description || '',
+        features: locationState?.features || {},
+        specifications: locationState?.specifications || {},
+        mileage: locationState?.mileage || '',
+      };
+      
+      console.log("Combined data source:", dataSource);
+      
+      // Extract features from location state or try from description
+      if (dataSource.features && Object.keys(dataSource.features).length > 0) {
+        console.log("Features from data source:", dataSource.features);
+        setSelectedFeatures(dataSource.features);
+      } else if (dataSource.description) {
         // Try to extract features from description if no features are provided
-        const extractedFeatures = extractFeaturesFromText(locationState.description, featureCategories);
+        const extractedFeatures = extractFeaturesFromText(dataSource.description, featureCategories);
         if (Object.keys(extractedFeatures).length > 0) {
           console.log("Extracted features from description:", extractedFeatures);
           setSelectedFeatures(extractedFeatures);
         }
       }
       
-      // More robust approach to extract data from specifications
-      const specs = locationState.specifications || {};
+      // Process specifications for additional data
+      const specs = dataSource.specifications || {};
       
       // Process body type
-      let bodyType = locationState.bodyType || locationState.body_type || '';
+      let bodyType = dataSource.body_type;
       if (!bodyType) {
         bodyType = specs["Body style"] || specs["Body Style"] || specs["Body Type"] || specs["body type"] || '';
         // Check for partial matches in specs
@@ -236,7 +289,7 @@ const AddListing = () => {
       }
       
       // Process transmission
-      let transmission = locationState.transmission || '';
+      let transmission = dataSource.transmission;
       if (!transmission) {
         transmission = specs["Transmission"] || specs["transmission"] || '';
         // Look for PDK, DCT, etc. in specifications
@@ -258,7 +311,7 @@ const AddListing = () => {
       }
       
       // Process fuel type
-      let fuelType = locationState.fuelType || locationState.fuel_type || '';
+      let fuelType = dataSource.fuel_type;
       if (!fuelType) {
         fuelType = specs["Fuel Type"] || specs["fuel type"] || specs["Engine"] || '';
         // Extract fuel type from engine description if needed
@@ -269,13 +322,13 @@ const AddListing = () => {
       }
       
       // Process color
-      let color = locationState.color || '';
+      let color = dataSource.color;
       if (!color) {
         color = specs["Color"] || specs["Exterior Color"] || specs["color"] || '';
       }
 
       // Process mileage (could be in km or odometer)
-      let mileage = locationState.mileage || '';
+      let mileage = dataSource.mileage;
       if (!mileage) {
         mileage = specs["Mileage"] || specs["Odometer"] || specs["KM"] || specs["Kilometers"] || '';
         // Convert to numeric value if it's a string with units
@@ -298,32 +351,35 @@ const AddListing = () => {
         bodyType: mappedBodyType
       });
       
-      // Update form data with values from location state with better fallbacks
+      // Update form data with the processed values
       setFormData(prevState => ({
         ...prevState,
-        car_name: titleParam || locationState.car_name || locationState.title || '',
-        title: titleParam || locationState.title || locationState.car_name || '',
-        make: makeParam || locationState.make || '',
-        model: modelParam || locationState.model || '',
-        year: parseInt(yearParam) || locationState.year || new Date().getFullYear(),
-        price: locationState.price || '',
-        mileage: mileage || locationState.mileage || '',
+        car_name: dataSource.car_name,
+        title: dataSource.title,
+        make: dataSource.make,
+        model: dataSource.model,
+        year: dataSource.year,
+        price: locationState?.price || '',
+        mileage: mileage || '',
         color: color,
         transmission: mappedTransmission,
         fuel_type: mappedFuelType,
         body_type: mappedBodyType,
-        description: locationState.description || '',
+        description: dataSource.description || '',
       }));
-      
-      console.log("Form data after processing:", {
-        bodyType: mappedBodyType,
-        transmission: mappedTransmission,
-        fuelType: mappedFuelType,
-        color
-      });
+    };
+    
+    // Process data if we have params or state data
+    if (makeParam || modelParam || locationState) {
+      processData();
     }
     
-  }, [user, navigate, authLoading, locationState, makeParam, modelParam, titleParam, yearParam]);
+  }, [
+    user, navigate, authLoading, locationState, 
+    makeParam, modelParam, titleParam, yearParam,
+    bodyTypeParam, transmissionParam, fuelTypeParam, colorParam,
+    featuresCountParam
+  ]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

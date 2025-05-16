@@ -437,7 +437,7 @@ const SnapAI = () => {
     return description;
   };
 
-  // Create listing with car details - UPDATED to ensure all data is passed correctly
+  // Create listing with car details - UPDATED to include more URL parameters
   const createListing = () => {
     if (!carDetails || !carIdentification || !modelYear) {
       toast({
@@ -482,19 +482,34 @@ const SnapAI = () => {
       year: modelYear,
       description,
       bodyType,
-      body_type: bodyType,
       transmission,
       fuelType,
-      fuel_type: fuelType,
       color,
       features: carDetails.features,
       specifications: carDetails.specifications,
-      tags: carDetails.tags,
     });
 
-    // Navigate to add-listing with query params for simple data
+    // Create a serializable subset of features for URL parameters
+    const featuresCount = Object.values(carDetails.features || {}).reduce(
+      (count, featureList) => count + featureList.length, 0
+    );
+
+    // Build URL with more parameters
+    const queryParams = new URLSearchParams({
+      make: encodeURIComponent(carIdentification.make),
+      model: encodeURIComponent(carIdentification.model),
+      title: encodeURIComponent(carTitle),
+      year: encodeURIComponent(modelYear),
+      body_type: encodeURIComponent(bodyType),
+      transmission: encodeURIComponent(transmission),
+      fuel_type: encodeURIComponent(fuelType),
+      color: encodeURIComponent(color),
+      features_count: encodeURIComponent(featuresCount.toString()),
+    });
+    
+    // Navigate to add-listing with enhanced query params for simple data
     // and state for complex data and formatted strings
-    navigate(`/add-listing?make=${encodeURIComponent(carIdentification.make)}&model=${encodeURIComponent(carIdentification.model)}&title=${encodeURIComponent(carTitle)}&year=${encodeURIComponent(modelYear)}`, {
+    navigate(`/add-listing?${queryParams.toString()}`, {
       state: {
         car_name: carTitle,
         title: carTitle,

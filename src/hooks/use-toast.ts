@@ -19,7 +19,7 @@ const useToast = () => {
 type ToastProps = {
   title?: string;
   description?: string;
-  variant?: "default" | "destructive";
+  variant?: "default" | "destructive" | "success" | "warning";
   duration?: number;
   action?: {
     label: string;
@@ -38,6 +38,24 @@ const toast = ({
   // Use conditionals instead of bracket notation for toast types
   if (variant === "destructive") {
     return sonnerToast.error(title, {
+      description,
+      duration,
+      action: action ? {
+        label: action.label,
+        onClick: action.onClick,
+      } : undefined,
+    });
+  } else if (variant === "success") {
+    return sonnerToast.success(title, {
+      description,
+      duration,
+      action: action ? {
+        label: action.label,
+        onClick: action.onClick,
+      } : undefined,
+    });
+  } else if (variant === "warning") {
+    return sonnerToast.warning(title, {
       description,
       duration,
       action: action ? {
