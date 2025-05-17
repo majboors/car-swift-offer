@@ -57,13 +57,13 @@ const SnapAIPromotionDialog: React.FC = () => {
           >
             Maybe Later
           </Button>
-          <Button
-            as={Link}
-            to="/snap-ai"
-            onClick={() => setIsOpen(false)}
-          >
-            Try SnapAI
-          </Button>
+          
+          {/* Fixed Button by using Link component correctly */}
+          <Link to="/snap-ai" onClick={() => setIsOpen(false)}>
+            <Button>
+              Try SnapAI
+            </Button>
+          </Link>
         </div>
       </DialogContent>
     </Dialog>
