@@ -148,20 +148,35 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
 
   const handleApprove = async (id: string) => {
     try {
-      console.log(`Approving listing ${id}...`);
+      console.log(`Starting approval process for listing ${id}...`);
+      
+      // Get the current listing data for logging purposes
+      const { data: currentListing, error: fetchError } = await supabase
+        .from("car_listings")
+        .select("id, title, make, model, status")
+        .eq("id", id)
+        .single();
+        
+      if (fetchError) {
+        console.error("Error fetching current listing data:", fetchError);
+      } else {
+        console.log("Current listing before approval:", currentListing);
+      }
       
       // Update the status in the database
-      const { error } = await supabase
+      console.log(`Sending approval update to database for listing ${id}...`);
+      const { data: updatedData, error } = await supabase
         .from("car_listings")
         .update({ status: 'approved' })
-        .eq("id", id);
+        .eq("id", id)
+        .select();
 
       if (error) {
         console.error("Database error during approval:", error);
         throw error;
       }
 
-      console.log(`Database update successful for listing ${id}`);
+      console.log(`Database update successful for listing ${id}. Updated data:`, updatedData);
 
       // Update local state immediately after successful database update
       setListings(prev =>
@@ -170,6 +185,7 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
       
       // Update dashboard stats
       if (onListingStatusChange) {
+        console.log("Triggering parent dashboard refresh via onListingStatusChange callback");
         onListingStatusChange();
       }
 
@@ -179,7 +195,24 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
       });
       
       // Force a refresh of the listings to ensure UI is in sync with database
+      console.log("Refreshing listings after approval");
       await fetchListings();
+      
+      // Double-check that the listing now has the correct status
+      const { data: verifyListing, error: verifyError } = await supabase
+        .from("car_listings")
+        .select("id, title, make, model, status")
+        .eq("id", id)
+        .single();
+        
+      if (verifyError) {
+        console.error("Error verifying listing status:", verifyError);
+      } else {
+        console.log("Verified listing after approval:", verifyListing);
+        if (verifyListing.status !== 'approved') {
+          console.error("WARNING: Listing status is still not 'approved' after update!");
+        }
+      }
       
     } catch (err: any) {
       console.error("Error approving listing:", err);

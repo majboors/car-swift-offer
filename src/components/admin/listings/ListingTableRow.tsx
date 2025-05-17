@@ -64,7 +64,10 @@ export const ListingTableRow = ({
               variant="outline" 
               size="sm"
               className="bg-green-100 hover:bg-green-200 text-green-800 border-green-300"
-              onClick={() => onApprove(listing.id)}
+              onClick={() => {
+                console.log(`Approve button clicked for listing ${listing.id}`);
+                onApprove(listing.id);
+              }}
             >
               <Check className="h-4 w-4 mr-1" /> Approve
             </Button>
@@ -88,7 +91,10 @@ export const ListingTableRow = ({
               variant="outline" 
               size="sm"
               className="bg-green-100 hover:bg-green-200 text-green-800 border-green-300"
-              onClick={() => onApprove(listing.id)}
+              onClick={() => {
+                console.log(`Re-approve button clicked for rejected listing ${listing.id}`);
+                onApprove(listing.id);
+              }}
             >
               <Check className="h-4 w-4 mr-1" /> Approve
             </Button>
