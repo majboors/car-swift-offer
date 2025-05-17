@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { showErrorToast, showNetworkError } from '@/utils/toast-utils';
+import { showErrorToast } from '@/utils/toast-utils';
 
 interface Notification {
   id: string;
@@ -33,7 +33,6 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
   const [loading, setLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
-  const [networkErrorShown, setNetworkErrorShown] = useState(false);
   const maxRetries = 3;
 
   const fetchNotifications = async () => {
@@ -46,7 +45,6 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
 
     setLoading(true);
     setHasError(false);
-    
     try {
       const { data, error } = await supabase.rpc('get_user_notifications', { p_user_id: user.id });
       
@@ -56,24 +54,15 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
       
       setNotifications(data || []);
       setUnreadCount(data?.filter((n: Notification) => !n.read).length || 0);
-      
-      // Reset retry count and network error flag on success
+      // Reset retry count on success
       setRetryCount(0);
-      setNetworkErrorShown(false);
     } catch (error: any) {
       console.error("Error fetching notifications:", error);
       setHasError(true);
       
-      // Only show toast error once per session, not on every retry
-      if (!networkErrorShown) {
-        setNetworkErrorShown(true);
-        
-        // Check if it's a network error
-        if (error.message && error.message.includes("NetworkError")) {
-          showNetworkError();
-        } else {
-          showErrorToast("Failed to load notifications. Will try again later.");
-        }
+      // Only show toast error once, not on every retry
+      if (retryCount === 0) {
+        showErrorToast("Failed to load notifications. Will try again later.");
       }
     } finally {
       setLoading(false);
@@ -131,24 +120,16 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
     setNotifications([]);
     setUnreadCount(0);
     setHasError(false);
-    setRetryCount(0);
-    setNetworkErrorShown(false);
   };
 
-  // Retry strategy for failed notifications with increased delay
+  // Retry strategy for failed notifications
   useEffect(() => {
     if (hasError && retryCount < maxRetries && user) {
-      // Exponential backoff with jitter for more reliable retries
-      const baseDelay = 3000; // 3 seconds base
-      const jitter = Math.random() * 1000; // Random value between 0-1000ms
-      const delay = Math.min(baseDelay * Math.pow(2, retryCount) + jitter, 30000); // Max 30s delay
-      
-      console.log(`Retrying notifications fetch (attempt ${retryCount + 1}/${maxRetries})...`);
-      
       const timer = setTimeout(() => {
+        console.log(`Retrying notifications fetch (attempt ${retryCount + 1}/${maxRetries})...`);
         setRetryCount(prev => prev + 1);
         fetchNotifications();
-      }, delay);
+      }, Math.min(2000 * Math.pow(2, retryCount), 30000)); // Exponential backoff with max 30s delay
       
       return () => clearTimeout(timer);
     }
@@ -159,14 +140,13 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
     if (user) {
       fetchNotifications();
       
-      // Poll for new notifications less frequently (every 2 minutes)
-      // to reduce network requests that might fail
+      // Set up a polling mechanism to check for new notifications every minute
       const interval = setInterval(() => {
-        // Only poll if we haven't had persistent errors
-        if (!(hasError && retryCount >= maxRetries)) {
+        // Only poll for count if we haven't had errors fetching notifications
+        if (!hasError) {
           fetchUnreadCount();
         }
-      }, 120000); // 2 minutes
+      }, 60000);
       
       return () => clearInterval(interval);
     } else {

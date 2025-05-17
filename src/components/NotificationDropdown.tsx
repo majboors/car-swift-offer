@@ -7,7 +7,7 @@ import {
   PopoverTrigger 
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { Bell, BellDot, AlertTriangle, RefreshCw, WifiOff } from 'lucide-react';
+import { Bell, BellDot, AlertTriangle, RefreshCw } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { format } from 'date-fns';
 import { Separator } from '@/components/ui/separator';
@@ -23,7 +23,6 @@ export default function NotificationDropdown() {
     fetchNotifications 
   } = useNotifications();
   const [open, setOpen] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleMarkAsRead = async (notificationId: string) => {
     await markAsRead(notificationId);
@@ -31,12 +30,9 @@ export default function NotificationDropdown() {
 
   const handleRefresh = async () => {
     try {
-      setIsRefreshing(true);
       await fetchNotifications();
     } catch (error) {
       showErrorToast("Failed to refresh notifications");
-    } finally {
-      setIsRefreshing(false);
     }
   };
 
@@ -46,11 +42,6 @@ export default function NotificationDropdown() {
     const expirationDate = new Date(expiresAt);
     const now = new Date();
     const diffMs = expirationDate.getTime() - now.getTime();
-    
-    if (diffMs <= 0) {
-      return "Expired";
-    }
-    
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     
     if (diffHours < 1) {
@@ -97,24 +88,23 @@ export default function NotificationDropdown() {
               size="icon" 
               className="h-8 w-8" 
               onClick={handleRefresh}
-              disabled={loading || isRefreshing}
+              disabled={loading}
             >
-              <RefreshCw className={`h-4 w-4 ${(loading || isRefreshing) ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               <span className="sr-only">Refresh</span>
             </Button>
           </div>
         </div>
         <Separator />
         <ScrollArea className="max-h-[300px] overflow-y-auto">
-          {loading || isRefreshing ? (
+          {loading ? (
             <div className="flex justify-center items-center p-4">
               <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full" />
             </div>
           ) : hasError ? (
             <div className="p-6 flex flex-col items-center justify-center text-center space-y-2">
-              <WifiOff className="h-8 w-8 text-amber-500" />
+              <AlertTriangle className="h-8 w-8 text-amber-500" />
               <p className="text-muted-foreground">Unable to load notifications</p>
-              <p className="text-xs text-muted-foreground">There seems to be a network issue</p>
               <Button 
                 variant="outline" 
                 size="sm" 
