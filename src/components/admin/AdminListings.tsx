@@ -144,6 +144,7 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
 
   const handleApprove = async (id: string) => {
     try {
+      // First update the status in the database
       const { error } = await supabase
         .from("car_listings")
         .update({ status: 'approved' })
@@ -151,7 +152,7 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
 
       if (error) throw error;
 
-      // Update local state
+      // Update local state immediately after successful database update
       setListings(prev =>
         prev.map(l => (l.id === id ? { ...l, status: 'approved' } : l))
       );
@@ -165,6 +166,10 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
         title: "Success",
         description: "Listing approved successfully"
       });
+      
+      // Force a refresh of the listings to ensure UI is in sync with database
+      await fetchListings();
+      
     } catch (err: any) {
       console.error("Error approving listing:", err);
       toast({
@@ -177,6 +182,7 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
   
   const handleReject = async (id: string) => {
     try {
+      // First update the status in the database
       const { error } = await supabase
         .from("car_listings")
         .update({ status: 'rejected' })
@@ -184,7 +190,7 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
 
       if (error) throw error;
 
-      // Update local state
+      // Update local state immediately after successful database update
       setListings(prev =>
         prev.map(l => (l.id === id ? { ...l, status: 'rejected' } : l))
       );
@@ -198,6 +204,10 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
         title: "Success",
         description: "Listing rejected successfully"
       });
+      
+      // Force a refresh of the listings to ensure UI is in sync with database
+      await fetchListings();
+      
     } catch (err: any) {
       console.error("Error rejecting listing:", err);
       toast({
@@ -252,6 +262,10 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
         title: "Success",
         description: "Listing updated successfully"
       });
+      
+      // Force a refresh of the listings
+      await fetchListings();
+      
     } catch (err: any) {
       console.error("Error updating listing:", err);
       toast({
@@ -287,6 +301,10 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
         title: "Success",
         description: `Listing ${value ? 'added to' : 'removed from'} showcase successfully`
       });
+      
+      // Force a refresh of the listings
+      await fetchListings();
+      
     } catch (err: any) {
       console.error("Error updating showcase status:", err);
       toast({
