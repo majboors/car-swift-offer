@@ -36,3 +36,21 @@ export const showListingCreationSuccess = (listingId: string) => {
     },
   });
 };
+
+export const showSnapAISuccess = (carDetails: { make: string; model: string; year: string | number }) => {
+  return toast({
+    title: "Car Identified Successfully",
+    description: `We've identified your car as a ${carDetails.year} ${carDetails.make} ${carDetails.model}`,
+    variant: "success",
+    duration: 5000,
+  });
+};
+
+export const showNetworkError = () => {
+  return toast({
+    title: "Network Error",
+    description: "Could not connect to the server. Please check your internet connection and try again.",
+    variant: "destructive",
+    duration: 7000,
+  });
+};
