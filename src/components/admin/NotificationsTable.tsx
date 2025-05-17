@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, Trash, AlertTriangle, Globe, MapPin } from "lucide-react";
+import { Trash, AlertTriangle, Globe, MapPin } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -83,7 +83,8 @@ export default function NotificationsTable({ onNotificationDeleted }: Notificati
     }
   };
 
-  useState(() => {
+  // Fix: Change from useState to useEffect
+  useEffect(() => {
     fetchNotifications();
   }, []);
 
