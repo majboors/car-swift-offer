@@ -7,17 +7,33 @@ import {
   PopoverTrigger 
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { Bell, BellDot } from 'lucide-react';
+import { Bell, BellDot, AlertTriangle, RefreshCw } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { format } from 'date-fns';
 import { Separator } from '@/components/ui/separator';
+import { showErrorToast } from '@/utils/toast-utils';
 
 export default function NotificationDropdown() {
-  const { notifications, unreadCount, loading, markAsRead } = useNotifications();
+  const { 
+    notifications, 
+    unreadCount, 
+    loading, 
+    hasError, 
+    markAsRead,
+    fetchNotifications 
+  } = useNotifications();
   const [open, setOpen] = useState(false);
 
   const handleMarkAsRead = async (notificationId: string) => {
     await markAsRead(notificationId);
+  };
+
+  const handleRefresh = async () => {
+    try {
+      await fetchNotifications();
+    } catch (error) {
+      showErrorToast("Failed to refresh notifications");
+    }
   };
 
   const formatExpirationTime = (expiresAt: string | null) => {
@@ -61,17 +77,42 @@ export default function NotificationDropdown() {
       <PopoverContent className="w-80 p-0" align="end">
         <div className="flex items-center justify-between p-4 font-medium">
           <h3>Notifications</h3>
-          {unreadCount > 0 && (
-            <span className="text-xs bg-red-100 text-red-600 rounded-full px-2 py-1">
-              {unreadCount} unread
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {unreadCount > 0 && (
+              <span className="text-xs bg-red-100 text-red-600 rounded-full px-2 py-1">
+                {unreadCount} unread
+              </span>
+            )}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8" 
+              onClick={handleRefresh}
+              disabled={loading}
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              <span className="sr-only">Refresh</span>
+            </Button>
+          </div>
         </div>
         <Separator />
         <ScrollArea className="max-h-[300px] overflow-y-auto">
           {loading ? (
             <div className="flex justify-center items-center p-4">
               <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full" />
+            </div>
+          ) : hasError ? (
+            <div className="p-6 flex flex-col items-center justify-center text-center space-y-2">
+              <AlertTriangle className="h-8 w-8 text-amber-500" />
+              <p className="text-muted-foreground">Unable to load notifications</p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRefresh}
+                className="mt-2"
+              >
+                Try Again
+              </Button>
             </div>
           ) : notifications.length === 0 ? (
             <div className="p-4 text-center text-muted-foreground">

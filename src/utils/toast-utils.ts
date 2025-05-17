@@ -1,6 +1,5 @@
 
 import { toast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 
 export const showSuccessToast = (message: string) => {
   return toast({
@@ -12,6 +11,9 @@ export const showSuccessToast = (message: string) => {
 };
 
 export const showErrorToast = (message: string) => {
+  // Log the error to console for debugging
+  console.error(`Toast Error: ${message}`);
+  
   return toast({
     title: "Error",
     description: message,

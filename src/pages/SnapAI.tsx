@@ -1243,9 +1243,9 @@ const SnapAI = () => {
             <DialogTitle>Listing Created Successfully!</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <Alert variant="success">
-              <Check className="h-4 w-4" />
-              <AlertTitle>Success</AlertTitle>
+            <Alert>
+              <Check className="h-4 w-4 text-green-500" />
+              <AlertTitle className="text-green-600">Success</AlertTitle>
               <AlertDescription>
                 Your car listing has been created and is pending review.
               </AlertDescription>
