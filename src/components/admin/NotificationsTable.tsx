@@ -63,12 +63,15 @@ export default function NotificationsTable({ onNotificationDeleted }: Notificati
   const fetchNotifications = async () => {
     setLoading(true);
     try {
+      // Using the fixed database function
       const { data, error } = await supabase.rpc('get_all_notifications');
       
       if (error) {
+        console.error("Notification fetch error details:", error);
         throw error;
       }
       
+      console.log("Notifications fetched successfully:", data);
       setNotifications(data || []);
       setTotalCount(data.length);
     } catch (error: any) {
