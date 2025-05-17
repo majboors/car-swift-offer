@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -996,7 +997,7 @@ const SearchResults = () => {
                                     className="absolute top-2 right-2 z-10"
                                   >
                                     {getListingType(car)?.Icon && (
-                                      <getListingType(car)!.Icon className="w-3 h-3 mr-1" />
+                                      <getListingType(car)?.Icon className="w-3 h-3 mr-1" />
                                     )}
                                     {getListingType(car)?.name}
                                   </Badge>
@@ -1053,7 +1054,7 @@ const SearchResults = () => {
                                 className="absolute top-2 right-2 z-10"
                               >
                                 {getListingType(car)?.Icon && (
-                                  <getListingType(car)!.Icon className="w-3 h-3 mr-1" />
+                                  <getListingType(car)?.Icon className="w-3 h-3 mr-1" />
                                 )}
                                 {getListingType(car)?.name}
                               </Badge>
