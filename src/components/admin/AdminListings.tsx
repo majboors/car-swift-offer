@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -182,7 +181,7 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
         description: "Listing approved successfully"
       });
       
-      // Force a refresh of the listings to ensure UI is in sync with database
+      // Force a refresh of the listings after approval
       console.log("Refreshing listings after approval");
       await fetchListings();
       
@@ -374,6 +373,57 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
     }
   };
 
+  const handleFeaturedToggle = async (id: string, value: boolean) => {
+    try {
+      console.log(`Setting listing ${id} featured to ${value} using admin_toggle_featured function...`);
+      
+      // Call the admin_toggle_featured function to bypass RLS
+      const { data, error } = await supabase
+        .rpc('admin_toggle_featured', { 
+          listing_id: id,
+          featured_value: value 
+        });
+
+      if (error) {
+        console.error("Database error during featured toggle:", error);
+        throw error;
+      }
+      
+      if (data === false) {
+        console.warn("Admin function returned false - no rows updated");
+        throw new Error("Failed to update featured status");
+      }
+
+      console.log(`Database update successful for listing ${id} featured status using admin function`);
+
+      // Update local state
+      setListings(prev =>
+        prev.map(l => (l.id === id ? { ...l, featured: value } : l))
+      );
+      
+      // Update dashboard stats
+      if (onListingStatusChange) {
+        onListingStatusChange();
+      }
+
+      toast({
+        title: "Success",
+        description: `Listing ${value ? 'added to' : 'removed from'} featured vehicles successfully`
+      });
+      
+      // Force a refresh of the listings
+      await fetchListings();
+      
+    } catch (err: any) {
+      console.error("Error updating featured status:", err);
+      toast({
+        title: "Error",
+        description: err.message || "Failed to update featured status",
+        variant: "destructive"
+      });
+    }
+  };
+
   // Filter listings based on tab and search term
   const getFilteredListings = () => {
     let filtered = listings;
@@ -432,6 +482,7 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
             onApprove={handleApprove}
             onReject={handleReject}
             onShowcaseToggle={handleShowcaseToggle}
+            onFeaturedToggle={handleFeaturedToggle}
           />
         </TabsContent>
         
@@ -471,6 +522,7 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
             onApprove={handleApprove}
             onReject={handleReject}
             onShowcaseToggle={handleShowcaseToggle}
+            onFeaturedToggle={handleFeaturedToggle}
           />
         </TabsContent>
       </Tabs>

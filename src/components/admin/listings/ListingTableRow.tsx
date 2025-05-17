@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +14,7 @@ interface ListingTableRowProps {
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;
   onShowcaseToggle?: (id: string, value: boolean) => void;
+  onFeaturedToggle?: (id: string, value: boolean) => void;
 }
 
 export const ListingTableRow = ({ 
@@ -23,16 +23,19 @@ export const ListingTableRow = ({
   onDelete,
   onApprove,
   onReject,
-  onShowcaseToggle
+  onShowcaseToggle,
+  onFeaturedToggle
 }: ListingTableRowProps) => {
   const [isLoading, setIsLoading] = useState<{
     approve: boolean;
     reject: boolean;
     showcase: boolean;
+    featured: boolean;
   }>({
     approve: false,
     reject: false,
-    showcase: false
+    showcase: false,
+    featured: false
   });
 
   const getStatusBadge = () => {
@@ -50,6 +53,7 @@ export const ListingTableRow = ({
 
   const isPremium = listing.package_level === 3;
   const isShowcase = listing.showcase === true;
+  const isFeatured = listing.featured === true;
   
   const handleApprove = async (id: string) => {
     try {
@@ -111,6 +115,26 @@ export const ListingTableRow = ({
     }
   };
 
+  const handleFeaturedToggle = async (id: string, value: boolean) => {
+    try {
+      setIsLoading(prev => ({ ...prev, featured: true }));
+      console.log(`Featured toggle clicked for listing ${id}, value: ${value}`);
+      
+      if (onFeaturedToggle) {
+        await onFeaturedToggle(id, value);
+      }
+    } catch (error) {
+      console.error("Error in featured toggle handler:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update featured status. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(prev => ({ ...prev, featured: false }));
+    }
+  };
+
   return (
     <TableRow key={listing.id}>
       <TableCell>
@@ -119,6 +143,7 @@ export const ListingTableRow = ({
           <div className="flex gap-1">
             {isPremium && <Badge variant="premium">Premium</Badge>}
             {isShowcase && <Badge variant="showcase">Showcase</Badge>}
+            {isFeatured && <Badge variant="secondary">Featured</Badge>}
           </div>
         </div>
       </TableCell>
@@ -169,22 +194,46 @@ export const ListingTableRow = ({
             </Button>
           )}
           
-          {/* Showcase toggle - only for approved listings */}
-          {listing.status === 'approved' && onShowcaseToggle && (
-            <div className="flex items-center gap-1 ml-1">
-              <Switch 
-                id={`showcase-${listing.id}`}
-                checked={isShowcase} 
-                onCheckedChange={(checked) => handleShowcaseToggle(listing.id, checked)}
-                className="data-[state=checked]:bg-[#007ac8]"
-                disabled={isLoading.showcase}
-              />
-              <label 
-                htmlFor={`showcase-${listing.id}`} 
-                className="text-xs whitespace-nowrap cursor-pointer"
-              >
-                {isLoading.showcase ? 'Updating...' : 'Showcase'}
-              </label>
+          {/* Toggles - only for approved listings */}
+          {listing.status === 'approved' && (
+            <div className="flex flex-col gap-1 ml-1">
+              {/* Showcase toggle */}
+              {onShowcaseToggle && (
+                <div className="flex items-center gap-1">
+                  <Switch 
+                    id={`showcase-${listing.id}`}
+                    checked={isShowcase} 
+                    onCheckedChange={(checked) => handleShowcaseToggle(listing.id, checked)}
+                    className="data-[state=checked]:bg-[#007ac8]"
+                    disabled={isLoading.showcase}
+                  />
+                  <label 
+                    htmlFor={`showcase-${listing.id}`} 
+                    className="text-xs whitespace-nowrap cursor-pointer"
+                  >
+                    {isLoading.showcase ? 'Updating...' : 'Showcase'}
+                  </label>
+                </div>
+              )}
+              
+              {/* Featured toggle */}
+              {onFeaturedToggle && (
+                <div className="flex items-center gap-1">
+                  <Switch 
+                    id={`featured-${listing.id}`}
+                    checked={isFeatured} 
+                    onCheckedChange={(checked) => handleFeaturedToggle(listing.id, checked)}
+                    className="data-[state=checked]:bg-[#e9542f]"
+                    disabled={isLoading.featured}
+                  />
+                  <label 
+                    htmlFor={`featured-${listing.id}`} 
+                    className="text-xs whitespace-nowrap cursor-pointer"
+                  >
+                    {isLoading.featured ? 'Updating...' : 'Featured'}
+                  </label>
+                </div>
+              )}
             </div>
           )}
           

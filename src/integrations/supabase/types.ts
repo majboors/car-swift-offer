@@ -294,6 +294,10 @@ export type Database = {
         Args: { listing_id: string }
         Returns: boolean
       }
+      admin_toggle_featured: {
+        Args: { listing_id: string; featured_value: boolean }
+        Returns: boolean
+      }
       admin_toggle_showcase: {
         Args: { listing_id: string; showcase_value: boolean }
         Returns: boolean
