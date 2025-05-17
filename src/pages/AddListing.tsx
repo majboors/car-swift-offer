@@ -9,13 +9,15 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ArrowRight, ArrowLeft, Check } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Check, Camera } from 'lucide-react';
 import TrustedBanner from '@/components/TrustedBanner';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from '@/contexts/AuthContext';
 import PackageSelection from '@/components/PackageSelection';
+import SnapAIPromotionDialog from '@/components/SnapAIPromotionDialog';
+import { showSuccessToast, showErrorToast, showListingCreationSuccess } from '@/utils/toast-utils';
 
 // Feature categories and options
 const featureCategories = {
@@ -776,8 +778,32 @@ const AddListing = () => {
       <TrustedBanner />
       <Navbar />
       
+      {/* Add SnapAI Promotion Dialog */}
+      <SnapAIPromotionDialog />
+      
       <div className="flex-grow container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
+          {/* Add SnapAI promotion section above the form */}
+          <div className="mb-10 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm">
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="bg-white p-3 rounded-full shadow-md">
+                <Camera className="h-10 w-10 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-xl font-bold mb-2">Sell Your Car Faster with AI</h2>
+                <p className="text-gray-700 mb-4">
+                  Skip the manual form filling! Just snap a photo of your car and let our AI identify make, model, and year automatically.
+                </p>
+                <Button 
+                  onClick={() => navigate('/snap-ai')}
+                  className="bg-[#007ac8] hover:bg-[#0069b4]"
+                >
+                  Try SnapAI Now <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+          
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold">Add a New Car Listing</h1>
             
