@@ -1,3 +1,4 @@
+
 // pages/index.tsx
 
 import React from "react";
@@ -10,6 +11,8 @@ import RecommendedCarsSection from "@/components/RecommendedCarsSection";
 import CarValuationSection from "@/components/CarValuationSection";
 import ShowroomSection from "@/components/ShowroomSection";
 import ReviewsSection from "@/components/ReviewsSection";
+import SnapAIShowcase from "@/components/SnapAIShowcase";
+import SnapAIPromotionDialog from "@/components/SnapAIPromotionDialog";
 import Footer from "@/components/Footer";
 
 const Index: React.FC = () => {
@@ -23,6 +26,9 @@ const Index: React.FC = () => {
         <Navbar />
       </div>
 
+      {/* SnapAI Promotion Dialog */}
+      <SnapAIPromotionDialog />
+
       {/* 3. Main content will take whatever space it needs */}
       <main className="flex-grow">
         <HeroSection />
@@ -34,6 +40,10 @@ const Index: React.FC = () => {
           </div>
           <CategoryStrip />
           <RecommendedCarsSection />
+          
+          {/* Add SnapAI showcase section */}
+          <SnapAIShowcase />
+          
           <CarValuationSection />
           <ShowroomSection />
           <ReviewsSection />

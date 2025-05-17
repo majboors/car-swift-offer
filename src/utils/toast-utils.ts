@@ -36,3 +36,31 @@ export const showListingCreationSuccess = (listingId: string) => {
     },
   });
 };
+
+export const showSnapAISuccess = (carDetails: { make: string; model: string; year: string | number }) => {
+  return toast({
+    title: "Car Identified Successfully",
+    description: `We've identified your car as a ${carDetails.year} ${carDetails.make} ${carDetails.model}`,
+    variant: "success",
+    duration: 5000,
+  });
+};
+
+export const showNetworkError = () => {
+  return toast({
+    title: "Network Connection Issue",
+    description: "We're having trouble connecting to our servers. Please check your internet connection and try again.",
+    variant: "destructive",
+    duration: 10000,
+  });
+};
+
+// Specific toast for notification errors to avoid overwhelming the user
+export const showNotificationError = () => {
+  return toast({
+    title: "Notification Error",
+    description: "Unable to fetch your notifications. We'll try again automatically.",
+    variant: "destructive",
+    duration: 5000,
+  });
+};
