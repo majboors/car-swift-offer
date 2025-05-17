@@ -92,6 +92,7 @@ const Admin = () => {
 
   const fetchDashboardData = async () => {
     try {
+      console.log("Fetching dashboard data...");
       const { data: listings, error: listingsError } = await supabase
         .from("car_listings")
         .select("*");
@@ -102,6 +103,15 @@ const Admin = () => {
 
       // Count pending listings
       const pendingListings = listings?.filter(listing => listing.status === 'pending').length || 0;
+      
+      // Log all listings to debug
+      console.log("All listings:", listings?.map(l => ({ 
+        id: l.id, 
+        title: l.title,
+        make: l.make,
+        model: l.model,
+        status: l.status 
+      })));
 
       // Process listings by make
       const makeCount: Record<string, number> = {};
@@ -173,6 +183,11 @@ const Admin = () => {
         totalUsers: users?.length || 0,
         totalListings: listings?.length || 0,
         activeUsers,
+        pendingListings,
+      });
+      
+      console.log("Dashboard data updated with:", {
+        totalListings: listings?.length || 0,
         pendingListings,
       });
     } catch (error) {

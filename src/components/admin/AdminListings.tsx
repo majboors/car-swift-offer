@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -94,7 +95,7 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
       }
 
       // Debug output to verify listing statuses
-      console.log("Fetched listings statuses:", result.map(l => ({ id: l.id, status: l.status })));
+      console.log("Fetched listings statuses:", result.map(l => ({ id: l.id, status: l.status, make: l.make, model: l.model })));
       
     } catch (err) {
       console.error("Unexpected error fetching listings:", err);
@@ -344,11 +345,17 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
     }
     
     // Then filter by search term
-    return filtered.filter(l =>
-      l.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      l.make?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      l.model?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    if (searchTerm) {
+      filtered = filtered.filter(l =>
+        l.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        l.make?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        l.model?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        `${l.make} ${l.model}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        l.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    return filtered;
   };
 
   return (
