@@ -1105,7 +1105,7 @@ const SearchResults = () => {
                         />
                       </PaginationItem>
                       
-                      {[...Array(totalPages)].map((_, i) => (
+                      {Array.from({length: totalPages}).map((_, i) => (
                         <PaginationItem key={i}>
                           <PaginationLink
                             onClick={() => updateSearchParam("page", (i + 1).toString())}
