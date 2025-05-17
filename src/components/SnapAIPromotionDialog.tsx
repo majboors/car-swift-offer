@@ -1,101 +1,69 @@
 
-import React, { useState, useEffect } from "react";
-import { Camera, ArrowRight } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import React from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
-const SnapAIPromotionDialog = () => {
-  const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
+const SnapAIPromotionDialog: React.FC = () => {
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    // Show the dialog when component mounts, with a slight delay for better UX
-    const timer = setTimeout(() => {
-      setOpen(true);
-    }, 1500);
-
-    return () => clearTimeout(timer);
+    // Check if we've shown this dialog before
+    const hasShownPromotionDialog = localStorage.getItem('hasShownSnapAIPromotionDialog');
+    
+    // Only show after 10 seconds and if not previously shown in this session
+    if (!hasShownPromotionDialog) {
+      const timer = setTimeout(() => {
+        setIsOpen(true);
+        localStorage.setItem('hasShownSnapAIPromotionDialog', 'true');
+      }, 10000);
+      
+      return () => clearTimeout(timer);
+    }
   }, []);
 
-  const handleNavigateToSnapAI = () => {
-    setOpen(false);
-    navigate("/snap-ai");
-  };
-
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-2xl font-bold">
-            <Camera className="h-6 w-6 text-primary" /> Instant Car Selling with AI
-          </DialogTitle>
-          <DialogDescription className="pt-2 text-base">
-            Sell your car in minutes with just a photo! Our AI technology identifies your car's
-            details automatically, making selling faster and easier than ever.
+          <DialogTitle>Try SnapAI - Instant Car Recognition</DialogTitle>
+          <DialogDescription>
+            Take a photo of any car and our AI will tell you exactly what it is. Identify any car in seconds!
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 pt-2">
-          <div className="rounded-md bg-muted p-4">
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-start">
-                <div className="mr-2 mt-0.5 rounded-full bg-primary p-1">
-                  <svg
-                    className="h-3 w-3 text-primary-foreground"
-                    fill="none"
-                    strokeWidth="3"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <span>Snap a photo of your car</span>
-              </li>
-              <li className="flex items-start">
-                <div className="mr-2 mt-0.5 rounded-full bg-primary p-1">
-                  <svg
-                    className="h-3 w-3 text-primary-foreground"
-                    fill="none"
-                    strokeWidth="3"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <span>AI instantly identifies make, model, and year</span>
-              </li>
-              <li className="flex items-start">
-                <div className="mr-2 mt-0.5 rounded-full bg-primary p-1">
-                  <svg
-                    className="h-3 w-3 text-primary-foreground"
-                    fill="none"
-                    strokeWidth="3"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <span>Get offers within hours</span>
-              </li>
+        
+        <div className="grid grid-cols-2 gap-4 py-4">
+          <img 
+            src="/lovable-uploads/001a79b1-6139-4ce7-8712-fe6057917e38.png" 
+            alt="SnapAI Demo" 
+            className="w-full h-auto rounded-lg"
+          />
+          <div className="flex flex-col space-y-2 justify-center">
+            <h4 className="font-medium">Benefits:</h4>
+            <ul className="list-disc pl-5 space-y-1 text-sm">
+              <li>Instant car identification</li>
+              <li>Get car specs immediately</li>
+              <li>Compare against similar models</li>
+              <li>Free to use!</li>
             </ul>
           </div>
-          <div className="flex justify-end">
-            <Button
-              className="gap-2"
-              onClick={handleNavigateToSnapAI}
-            >
-              Try SnapAI Now <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
+        </div>
+        
+        <div className="flex justify-end space-x-2 mt-4">
+          <Button
+            variant="outline"
+            onClick={() => setIsOpen(false)}
+          >
+            Maybe Later
+          </Button>
+          <Button
+            as={Link}
+            to="/snap-ai"
+            onClick={() => setIsOpen(false)}
+          >
+            Try SnapAI
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
