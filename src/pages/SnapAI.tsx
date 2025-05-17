@@ -624,6 +624,37 @@ const SnapAI = () => {
     setShowRawApiResponse(!showRawApiResponse);
   };
 
+  // Add the missing createListing function
+  const createListing = () => {
+    if (!carDetails || !carIdentification || !modelYear) {
+      toast({
+        title: "Missing information",
+        description: "Cannot create listing without car details",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Format the data to pass to the AddListing page
+    const formattedData = {
+      make: carIdentification.make,
+      model: carIdentification.model,
+      year: modelYear,
+      features: carDetails.features,
+      specifications: carDetails.specifications,
+      carName: carDetails.car_name || identifiedCarName,
+      imageFile: selectedImage
+    };
+
+    // Navigate to the AddListing page with the car details
+    navigate('/add-listing', { 
+      state: { 
+        carData: formattedData,
+        imagePreviewUrl: imagePreviewUrl
+      }
+    });
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
