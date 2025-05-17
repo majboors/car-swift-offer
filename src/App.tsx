@@ -17,8 +17,6 @@ import Dashboard from "./pages/Dashboard";
 import ThreadsPage from "./pages/ThreadsPage";
 import SearchResults from "./pages/SearchResults";
 import SnapAI from "./pages/SnapAI";
-import AboutUs from "./pages/AboutUs";
-import ContactUs from "./pages/ContactUs";
 
 const queryClient = new QueryClient();
 
@@ -41,8 +39,6 @@ const App = () => (
               <Route path="/dashboard/threads/:id" element={<ThreadsPage />} />
               <Route path="/search" element={<SearchResults />} />
               <Route path="/snap-ai" element={<SnapAI />} />
-              <Route path="/about-us" element={<AboutUs />} />
-              <Route path="/contact-us" element={<ContactUs />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
