@@ -9,13 +9,14 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ArrowRight, ArrowLeft, Check } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Check, Camera } from 'lucide-react';
 import TrustedBanner from '@/components/TrustedBanner';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from '@/contexts/AuthContext';
 import PackageSelection from '@/components/PackageSelection';
+import SnapAIPromotionDialog from '@/components/SnapAIPromotionDialog';
 
 // Feature categories and options
 const featureCategories = {
@@ -775,6 +776,34 @@ const AddListing = () => {
     <div className="flex flex-col min-h-screen">
       <TrustedBanner />
       <Navbar />
+      <SnapAIPromotionDialog />
+      
+      <div className="bg-blue-50 py-8">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-white rounded-lg shadow-sm p-6">
+            <div className="md:w-2/3">
+              <h2 className="text-2xl font-bold text-gray-900 mb-3">Try SnapAI - The Fastest Way to Sell Your Car</h2>
+              <p className="text-gray-600 mb-4">
+                Take a photo of your car and let our AI identify its make, model, and year automatically.
+                Skip the manual form filling and sell your car in minutes!
+              </p>
+              <Button 
+                onClick={() => navigate('/snap-ai')} 
+                className="bg-[#007ac8] hover:bg-[#0069b4] flex items-center gap-2"
+              >
+                <Camera size={18} /> Try SnapAI Now
+              </Button>
+            </div>
+            <div className="md:w-1/3 flex justify-center">
+              <img 
+                src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg" 
+                alt="SnapAI" 
+                className="h-32 w-auto object-contain"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
       
       <div className="flex-grow container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
