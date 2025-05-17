@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -79,14 +78,11 @@ const InstantOfferHero = () => {
     });
   };
 
-  // Handle instant offer form submission
+  // Handle instant offer form submission - navigates to Snap AI page
   const handleInstantOfferSubmit = (e) => {
     e.preventDefault();
-    // Process the registration and state data (this would normally submit to backend)
-    console.log("Registration:", registration, "State:", state);
-    
-    // For now, just show a success message and stay on page
-    alert(`Thank you! We'll review your vehicle with registration ${registration} and get back to you.`);
+    // Navigate to the Snap AI page
+    navigate('/snap-ai');
   };
 
   return (
