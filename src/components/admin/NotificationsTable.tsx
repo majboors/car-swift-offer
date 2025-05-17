@@ -83,7 +83,6 @@ export default function NotificationsTable({ onNotificationDeleted }: Notificati
     }
   };
 
-  // Fix: Change from useState to useEffect
   useEffect(() => {
     fetchNotifications();
   }, []);
