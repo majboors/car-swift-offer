@@ -98,6 +98,8 @@ const SnapAI = () => {
   const [yearInputDialogOpen, setYearInputDialogOpen] = useState<boolean>(false);
   const [rawApiResponse, setRawApiResponse] = useState<string>("");
   const [showRawApiResponse, setShowRawApiResponse] = useState<boolean>(false);
+  const [createdListingId, setCreatedListingId] = useState<string | null>(null);
+  const [creationSuccessDialogOpen, setCreationSuccessDialogOpen] = useState<boolean>(false);
 
   // New state for direct submission
   const [submitting, setSubmitting] = useState<boolean>(false);
@@ -591,22 +593,30 @@ const SnapAI = () => {
       
       console.log("Listing created successfully:", newListing);
       
-      // Show success notification
+      // Store the created listing ID and open success dialog
+      setCreatedListingId(newListing.id);
+      setCreationSuccessDialogOpen(true);
+      
+      // Show success notification with action button
       toast({
         title: "Listing Created Successfully",
         description: "Your car listing has been created",
-        variant: "success"
+        variant: "success",
+        action: {
+          label: "View Listing",
+          onClick: () => {
+            navigate(`/listing/${newListing.id}`);
+          },
+        }
       });
-      
-      // Navigate to the listing or dashboard
-      navigate(`/listing/${newListing.id}`);
       
     } catch (error: any) {
       console.error("Error submitting car listing:", error);
       toast({
         title: "Error Creating Listing",
         description: error.message || "An unexpected error occurred",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 7000
       });
       setError(error.message || "Failed to create listing");
     } finally {
@@ -1225,6 +1235,52 @@ const SnapAI = () => {
           </SheetContent>
         </Sheet>
       )}
+
+      {/* NEW: Listing Creation Success Dialog */}
+      <Dialog open={creationSuccessDialogOpen} onOpenChange={setCreationSuccessDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Listing Created Successfully!</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Alert variant="success">
+              <Check className="h-4 w-4" />
+              <AlertTitle>Success</AlertTitle>
+              <AlertDescription>
+                Your car listing has been created and is pending review.
+              </AlertDescription>
+            </Alert>
+            
+            <div className="mt-4 flex flex-col gap-3">
+              <p className="text-sm text-muted-foreground">
+                You can view your listing or go to your dashboard to manage all your listings.
+              </p>
+              
+              <div className="flex gap-3 mt-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setCreationSuccessDialogOpen(false);
+                    navigate('/dashboard');
+                  }}
+                  className="flex-1"
+                >
+                  Go to Dashboard
+                </Button>
+                <Button 
+                  onClick={() => {
+                    setCreationSuccessDialogOpen(false);
+                    navigate(`/listing/${createdListingId}`);
+                  }}
+                  className="bg-[#007ac8] hover:bg-[#0069b4] flex-1"
+                >
+                  View Listing
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>
