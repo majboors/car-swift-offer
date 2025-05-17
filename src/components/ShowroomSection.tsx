@@ -39,11 +39,13 @@ const ShowroomSection = () => {
     const fetchShowcaseListings = async () => {
       try {
         setLoading(true);
+        console.log("Fetching showcase listings...");
+        
         const { data, error } = await supabase
           .from("car_listings")
           .select("*")
-          .eq("showcase", true)  // Only fetch listings marked as showcase by admins
-          .eq("status", "approved")  // Only approved listings
+          .eq("status", "approved")
+          .eq("showcase", true)
           .order("created_at", { ascending: false })
           .limit(5);
 
@@ -53,14 +55,28 @@ const ShowroomSection = () => {
         }
 
         if (data) {
+          console.log(`Found ${data.length} showcase listings`);
+          
+          // Log each showcase listing for debugging
+          data.forEach((item, index) => {
+            console.log(`Showcase #${index + 1}:`, {
+              id: item.id,
+              title: item.title || "No title",
+              make: item.make || "No make", 
+              model: item.model || "No model",
+              price: item.price,
+              hasImages: item.images && Array.isArray(item.images) ? item.images.length > 0 : false
+            });
+          });
+          
           const formattedListings = data.map(item => ({
             id: item.id,
-            title: item.title || `${item.year} ${item.make} ${item.model}`,
-            year: item.year,
-            make: item.make,
-            model: item.model,
-            price: item.price,
-            // Convert images to string array
+            title: item.title || formatCarName(item.year, item.make, item.model),
+            year: item.year || new Date().getFullYear(),
+            make: item.make || "Car",
+            model: item.model || "Model",
+            price: item.price || 0,
+            // Convert images to string array and handle null/undefined
             images: Array.isArray(item.images) 
               ? item.images.map((img: any) => String(img))
               : [] as string[],
@@ -126,6 +142,17 @@ const ShowroomSection = () => {
       price: 33690
     }
   ];
+  
+  // Helper function to format car name consistently
+  const formatCarName = (year?: number, make?: string, model?: string): string => {
+    if (!year && !make && !model) return "Unlisted Vehicle";
+    
+    const yearStr = year ? `${year} ` : "";
+    const makeStr = make || "";
+    const modelStr = model || "";
+    
+    return `${yearStr}${makeStr} ${modelStr}`.trim();
+  };
 
   // Format price for display
   const formatPrice = (price: number) => {
@@ -225,7 +252,11 @@ const ShowroomSection = () => {
       </div>
 
       <div className="text-center">
-        <Button variant="outline" className="border-blue-500 text-blue-500 hover:bg-[#007ac8] hover:text-white">
+        <Button 
+          variant="outline" 
+          className="border-blue-500 text-blue-500 hover:bg-[#007ac8] hover:text-white"
+          onClick={() => navigate('/search?showFeatured=true')}
+        >
           Discover the new car showroom
         </Button>
       </div>

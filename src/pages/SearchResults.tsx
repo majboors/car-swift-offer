@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,6 +54,7 @@ const SearchResults = () => {
   const model = searchParams.get("model") || "";
   const bodyType = searchParams.get("bodyType") || "";
   const searchQuery = searchParams.get("query") || "";
+  const showFeatured = searchParams.get("showFeatured") !== "false"; // Default to true
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const currentSort = (searchParams.get("sort") as SortOption) || "newest";
   
@@ -60,12 +62,14 @@ const SearchResults = () => {
   const [loading, setLoading] = useState(true);
   const [totalResults, setTotalResults] = useState(0);
   const [carListings, setCarListings] = useState<any[]>([]);
+  const [showcaseListings, setShowcaseListings] = useState<any[]>([]);
   const [features, setFeatures] = useState<Record<string, string[]>>({});
   const [selectedFeatures, setSelectedFeatures] = useState<Record<string, string[]>>({});
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [carData, setCarData] = useState<any[]>([]);
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [availableBodyTypes, setAvailableBodyTypes] = useState<string[]>([]);
+  const [showFeaturedToggle, setShowFeaturedToggle] = useState(showFeatured);
 
   // Form for editing search queries
   const form = useForm({
@@ -129,7 +133,8 @@ const SearchResults = () => {
     form.setValue("modelInput", model);
     form.setValue("bodyTypeInput", bodyType);
     form.setValue("searchInput", searchQuery);
-  }, [make, model, bodyType, searchQuery, form]);
+    setShowFeaturedToggle(showFeatured);
+  }, [make, model, bodyType, searchQuery, showFeatured, form]);
   
   // Fetch available features from car listings
   const fetchAvailableFeatures = async () => {
@@ -177,34 +182,87 @@ const SearchResults = () => {
     }
   };
   
+  // Function to fetch showcase and featured listings separately
+  const fetchShowcaseListings = async () => {
+    try {
+      console.log("Fetching showcase listings separately");
+      const { data, error } = await supabase
+        .from("car_listings")
+        .select("*")
+        .eq("status", "approved")
+        .eq("showcase", true)
+        .order("created_at", { ascending: false });
+      
+      if (error) {
+        console.error("Error fetching showcase listings:", error);
+        return [];
+      }
+      
+      console.log(`Found ${data?.length || 0} showcase listings`);
+      
+      // Debug each showcase listing
+      data?.forEach((item, index) => {
+        console.log(`Showcase #${index + 1}:`, {
+          id: item.id,
+          title: item.title || "No title",
+          make: item.make || "No make",
+          model: item.model || "No model",
+          showcase: item.showcase,
+          featured: item.featured,
+          package_level: item.package_level
+        });
+      });
+      
+      return data || [];
+    } catch (error) {
+      console.error("Error fetching showcase listings:", error);
+      return [];
+    }
+  };
+
   // Fetch car listings matching search criteria
   const fetchListings = async () => {
     setLoading(true);
-    console.log("Fetching listings with package priority...");
+    console.log("Fetching listings with the following criteria:");
+    console.log("- Make:", make || "Any");
+    console.log("- Model:", model || "Any");
+    console.log("- Body type:", bodyType || "Any");
+    console.log("- Search query:", searchQuery || "None");
+    console.log("- Show featured:", showFeatured);
+    console.log("- Page:", currentPage);
+    console.log("- Sort:", currentSort);
     
     try {
+      // Get showcase listings separately (these will always be included)
+      const showcaseItems = await fetchShowcaseListings();
+      setShowcaseListings(showcaseItems);
+      
       // Force fresh data with cache-busting timestamp
       const timestamp = new Date().getTime();
       
-      // Directly select package_level to make sure we're getting it
+      // Main query for regular search results
       let query = supabase
         .from("car_listings")
-        .select("*, package_level", { count: "exact", head: false })
+        .select("*", { count: "exact", head: false })
         .eq("status", "approved"); // Only show approved listings
       
       console.log("Building search query with timestamp:", timestamp);
       
-      // Apply basic filters
+      // Apply basic filters (but more lenient than before)
       if (make) {
+        // Use ilike to match partial strings and be case insensitive
         query = query.ilike("make", `%${make}%`);
+        console.log(`Applied make filter: %${make}%`);
       }
       
       if (model) {
         query = query.ilike("model", `%${model}%`);
+        console.log(`Applied model filter: %${model}%`);
       }
       
       if (bodyType) {
         query = query.ilike("body_type", `%${bodyType}%`);
+        console.log(`Applied body_type filter: %${bodyType}%`);
       }
       
       // Enhanced text search implementation with better partial matching
@@ -237,10 +295,24 @@ const SearchResults = () => {
             console.log("Enhanced combined filter:", combinedFilter);
             query = query.or(combinedFilter);
           }
-          
-          console.log("Final query to be executed:", query);
         }
       }
+
+      // Include showcase/featured only if the toggle is on
+      if (!showFeaturedToggle) {
+        query = query.eq("showcase", false).eq("featured", false);
+        console.log("Excluding showcase and featured listings");
+      }
+      
+      // Execute query
+      const { data, count, error } = await query;
+      
+      if (error) {
+        console.error("Error details:", error);
+        throw error;
+      }
+      
+      console.log(`Query returned ${data?.length || 0} regular results`);
       
       // Handle feature filtering - completely client-side approach
       let shouldApplyFeatureFilters = false;
@@ -254,23 +326,6 @@ const SearchResults = () => {
           }
         }
       }
-
-      // Execute query
-      const { data, count, error } = await query;
-      
-      if (error) {
-        console.error("Error details:", error);
-        throw error;
-      }
-      
-      // Log raw data to inspect package_level values
-      console.log("Raw data from database:", data?.slice(0, 3).map(item => ({
-        id: item.id,
-        title: item.title,
-        package_level: item.package_level,
-        make: item.make,
-        model: item.model
-      })));
       
       // Post-process search for keywords in features - do this client-side since we can't reliably query JSON
       let filteredData = data || [];
@@ -338,34 +393,38 @@ const SearchResults = () => {
         });
       }
 
-      // Log data before sorting
-      console.log("Before sorting by package level - Items count:", filteredData.length);
-      console.log("Sample premium levels before sort:", 
-        filteredData.slice(0, 5).map(item => ({
-          title: item.title, 
-          package_level: item.package_level || 0
-        }))
-      );
+      // Combine regular listings with showcase listings if showFeatured is true and deduplicate
+      let combinedListings = [...filteredData];
       
-      // Custom sort that prioritizes package_level first, followed by the selected sort option
-      // Use normalized package_level values for consistency
-      filteredData.sort((a, b) => {
-        // Ensure package_level is treated as a number with default of 0
+      // Add showcase items if they're not already in the results
+      if (showFeaturedToggle && showcaseItems.length > 0) {
+        // Add all showcase items that aren't already in the results
+        showcaseItems.forEach(showcase => {
+          if (!combinedListings.some(item => item.id === showcase.id)) {
+            combinedListings.push(showcase);
+          }
+        });
+        
+        console.log(`Combined ${filteredData.length} regular listings with ${showcaseItems.length} showcase listings`);
+        console.log(`Total listings after combining: ${combinedListings.length}`);
+      }
+      
+      // Custom sort that prioritizes showcase, featured, and package_level
+      combinedListings.sort((a, b) => {
+        // Showcase items first
+        if (a.showcase && !b.showcase) return -1;
+        if (!a.showcase && b.showcase) return 1;
+        
+        // Featured items next
+        if (a.featured && !b.featured) return -1;
+        if (!a.featured && b.featured) return 1;
+        
+        // Then by package level
         const levelA = typeof a.package_level === 'number' ? a.package_level : 0;
         const levelB = typeof b.package_level === 'number' ? b.package_level : 0;
+        if (levelA !== levelB) return levelB - levelA;  // Higher package levels first
         
-        // Log the package levels to verify sorting for premium items only
-        if (levelA === 3 || levelB === 3) {
-          console.log(`Premium sorting: Item A: ${a.title} (level=${levelA}), Item B: ${b.title} (level=${levelB})`);
-        }
-        
-        // First prioritize by package level (higher levels first)
-        const packageDiff = levelB - levelA;
-        if (packageDiff !== 0) {
-          return packageDiff;
-        }
-        
-        // If same package level, apply the selected sort
+        // Then by the selected sort
         switch (currentSort) {
           case "price_low":
             return a.price - b.price;
@@ -381,39 +440,29 @@ const SearchResults = () => {
         }
       });
       
-      // Log data after sorting
-      console.log("After sorting by package level");
-      console.log("Top 5 listings after sort:", 
-        filteredData.slice(0, 5).map(item => ({
-          title: item.title, 
-          package_level: item.package_level || 0
-        }))
-      );
-      
       // Now paginate the sorted results
-      const total = filteredData.length;
+      const total = combinedListings.length;
       const start = (currentPage - 1) * itemsPerPage;
       const end = Math.min(start + itemsPerPage, total);
       
-      const paginatedData = filteredData.slice(start, end);
+      const paginatedData = combinedListings.slice(start, end);
       
-      // Debug log to check package levels in the paginated results
-      console.log("Final paginated results:");
-      paginatedData.forEach((item, index) => {
-        console.log(`Result ${index}: package_level = ${item.package_level || 0}, title = ${item.title}`);
-      });
+      // Debug what's in the final results
+      console.log("Final search results:");
+      console.log(`- Total results: ${total}`);
+      console.log(`- Page ${currentPage}: showing ${paginatedData.length} results (items ${start+1}-${end} of ${total})`);
+      
+      // Check for showcase and featured items in results
+      const showcaseInResults = paginatedData.filter(item => item.showcase).length;
+      const featuredInResults = paginatedData.filter(item => item.featured).length;
+      const premiumInResults = paginatedData.filter(item => item.package_level === 3).length;
+      
+      console.log(`- Showcase items in current page: ${showcaseInResults}`);
+      console.log(`- Featured items in current page: ${featuredInResults}`);
+      console.log(`- Premium items in current page: ${premiumInResults}`);
       
       setTotalResults(total);
       setCarListings(paginatedData);
-      
-      // Debug log to check the results
-      console.log("Search results:", {
-        totalResults: total,
-        displayedResults: paginatedData.length,
-        withPackageLevel3: paginatedData.filter(item => item.package_level === 3).length,
-        carListings: filteredData.length > 0 ? "Has data" : "No data"
-      });
-      
     } catch (error: any) {
       console.error("Error fetching listings:", error);
       toast({
@@ -434,7 +483,7 @@ const SearchResults = () => {
   // Fetch listings when search parameters change
   useEffect(() => {
     fetchListings();
-  }, [make, model, bodyType, currentPage, currentSort, selectedFeatures, searchQuery]);
+  }, [make, model, bodyType, currentPage, currentSort, selectedFeatures, searchQuery, showFeatured]);
   
   // Toggle feature selection
   const toggleFeature = (category: string, feature: string) => {
@@ -481,6 +530,13 @@ const SearchResults = () => {
     updateSearchParam("sort", option);
   };
   
+  // Toggle featured/showcase items
+  const toggleFeaturedItems = () => {
+    const newValue = !showFeaturedToggle;
+    setShowFeaturedToggle(newValue);
+    updateSearchParam("showFeatured", newValue.toString());
+  };
+  
   // Clear all filters
   const clearFilters = () => {
     setSelectedFeatures({});
@@ -490,6 +546,7 @@ const SearchResults = () => {
     if (bodyType) params.set("bodyType", bodyType);
     if (searchQuery) params.set("query", searchQuery);
     params.set("page", "1");
+    params.set("showFeatured", showFeaturedToggle.toString());
     setSearchParams(params);
   };
   
@@ -498,12 +555,13 @@ const SearchResults = () => {
     const params = new URLSearchParams();
     
     if (values.makeInput) params.set("make", values.makeInput);
-    if (values.modelInput) params.set("modelInput", values.modelInput);
+    if (values.modelInput) params.set("model", values.modelInput);
     if (values.bodyTypeInput) params.set("bodyType", values.bodyTypeInput);
     if (values.searchInput) params.set("query", values.searchInput);
     
     params.set("page", "1");
     params.set("sort", currentSort);
+    params.set("showFeatured", showFeaturedToggle.toString());
     
     setSearchParams(params);
   };
@@ -541,36 +599,34 @@ const SearchResults = () => {
   // Get unique car makes
   const carMakes = [...new Set(carData.map(item => item.car))].sort();
   
-  // Add debug logging to help identify the issue
-  console.log("Search results state:", {
-    loading,
-    totalResults,
-    carListingsLength: carListings.length,
-    currentPage,
-    totalPages
-  });
-  
-  // Get package level name
-  const getPackageName = (level: number | null | undefined): string => {
-    if (!level) return "";
-    switch(level) {
-      case 3: return "Premium";
-      case 2: return "Enhanced";
-      case 1: return "Standard";
-      default: return "";
-    }
+  // Get friendly listing type name and icon
+  const getListingType = (car: any) => {
+    if (car.showcase) return { name: "Showcase", Icon: Trophy, variant: "showcase" };
+    if (car.featured) return { name: "Featured", Icon: Star, variant: "featured" };
+    if (car.package_level === 3) return { name: "Premium", Icon: Trophy, variant: "premium" };
+    if (car.package_level === 2) return { name: "Enhanced", Icon: null, variant: "outline" };
+    return null;
   };
   
-  // Improve the isPremium function with better debug logging
-  const isPremium = (car: any): boolean => {
-    if (!car) return false;
+  // Helper function to get title text
+  const getCarTitle = (car: any): string => {
+    if (car.title) return car.title;
     
-    // Use strict === 3 comparison to check premium status
-    const packageLevel = car.package_level;
-    const isPremiumStatus = packageLevel === 3;
+    const year = car.year || "";
+    const make = car.make || "";
+    const model = car.model || "";
     
-    console.log(`Checking if premium: ${car.title}, package_level=${packageLevel}, result=${isPremiumStatus}`);
-    return isPremiumStatus;
+    if (year && make && model) {
+      return `${year} ${make} ${model}`;
+    } else if (make && model) {
+      return `${make} ${model}`;
+    } else if (make) {
+      return make;
+    } else if (model) {
+      return model;
+    }
+    
+    return "Unlisted Vehicle";
   };
   
   return (
@@ -770,13 +826,29 @@ const SearchResults = () => {
                 )}
               />
               
-              <Button 
-                type="submit" 
-                className="bg-[#007ac8] hover:bg-[#0069b4] text-white"
-              >
-                <Search className="h-4 w-4 mr-2" />
-                Update Search
-              </Button>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="showFeatured" 
+                    checked={showFeaturedToggle}
+                    onCheckedChange={toggleFeaturedItems}
+                  />
+                  <label 
+                    htmlFor="showFeatured" 
+                    className="text-sm font-medium leading-none cursor-pointer"
+                  >
+                    Show featured & showcase vehicles
+                  </label>
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  className="bg-[#007ac8] hover:bg-[#0069b4] text-white"
+                >
+                  <Search className="h-4 w-4 mr-2" />
+                  Update Search
+                </Button>
+              </div>
             </form>
           </Form>
         </div>
@@ -903,54 +975,123 @@ const SearchResults = () => {
               </div>
             ) : carListings.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {carListings.map((car) => (
-                    <Link to={`/listing/${car.id}`} key={car.id}>
-                      <Card className="h-full hover:shadow-lg transition-shadow overflow-hidden group">
-                        <div className="relative">
-                          {isPremium(car) && (
-                            <Badge variant="premium" className="absolute top-2 right-2 z-10">
-                              <Trophy className="w-3 h-3 mr-1" /> Premium
-                            </Badge>
-                          )}
-                          <div className="aspect-video bg-gray-100 overflow-hidden">
-                            {car.images && car.images.length > 0 ? (
-                              <img
-                                src={Array.isArray(car.images) ? car.images[0] : car.images}
-                                alt={car.title}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                                <span className="text-gray-400">No image available</span>
+                {/* Display showcase listings at the top if present */}
+                {showFeaturedToggle && showcaseListings.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="font-semibold text-lg mb-4 flex items-center">
+                      <Trophy className="w-5 h-5 mr-2 text-yellow-600" />
+                      Featured Vehicles
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {carListings
+                        .filter(car => car.showcase || car.featured)
+                        .slice(0, 3) // Show at most 3 featured listings
+                        .map((car) => (
+                          <Link to={`/listing/${car.id}`} key={car.id}>
+                            <Card className="h-full hover:shadow-lg transition-shadow overflow-hidden group bg-yellow-50 border-yellow-200">
+                              <div className="relative">
+                                {/* Show appropriate badge based on listing type */}
+                                {getListingType(car) && (
+                                  <Badge 
+                                    variant={getListingType(car)?.variant as any} 
+                                    className="absolute top-2 right-2 z-10"
+                                  >
+                                    {getListingType(car)?.Icon && (
+                                      <getListingType(car)!.Icon className="w-3 h-3 mr-1" />
+                                    )}
+                                    {getListingType(car)?.name}
+                                  </Badge>
+                                )}
+                                <div className="aspect-video bg-gray-100 overflow-hidden">
+                                  {car.images && car.images.length > 0 ? (
+                                    <img
+                                      src={Array.isArray(car.images) ? car.images[0] : car.images}
+                                      alt={getCarTitle(car)}
+                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                      onError={(e) => {
+                                        (e.target as HTMLImageElement).src = "/placeholder.svg";
+                                      }}
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                                      <span className="text-gray-400">No image available</span>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                            )}
-                          </div>
-                        </div>
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-start mb-2">
-                            <h3 className="font-semibold text-lg line-clamp-1">
-                              {car.title || `${car.year} ${car.make} ${car.model}`}
-                            </h3>
-                            {car.featured && (
-                              <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-                                <Star className="w-3 h-3 mr-1 fill-yellow-400 text-yellow-400" />
-                                Featured
+                              <CardContent className="p-4">
+                                <h3 className="font-semibold text-lg line-clamp-1">
+                                  {getCarTitle(car)}
+                                </h3>
+                                <p className="text-lg font-bold text-[#007ac8] mb-2">
+                                  {formatPrice(car.price)}
+                                </p>
+                                <div className="text-sm text-gray-600 space-y-1">
+                                  {car.year && <p>Year: {car.year}</p>}
+                                  {car.mileage && <p>Mileage: {car.mileage.toLocaleString()} km</p>}
+                                  {car.location && <p>Location: {car.location}</p>}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </Link>
+                        ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Regular search results */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                  {carListings
+                    .filter(car => !showcaseListings.some(s => s.id === car.id && (car.showcase || car.featured)))
+                    .map((car) => (
+                      <Link to={`/listing/${car.id}`} key={car.id}>
+                        <Card className="h-full hover:shadow-lg transition-shadow overflow-hidden group">
+                          <div className="relative">
+                            {/* Show appropriate badge based on listing type */}
+                            {getListingType(car) && (
+                              <Badge 
+                                variant={getListingType(car)?.variant as any} 
+                                className="absolute top-2 right-2 z-10"
+                              >
+                                {getListingType(car)?.Icon && (
+                                  <getListingType(car)!.Icon className="w-3 h-3 mr-1" />
+                                )}
+                                {getListingType(car)?.name}
                               </Badge>
                             )}
+                            <div className="aspect-video bg-gray-100 overflow-hidden">
+                              {car.images && car.images.length > 0 ? (
+                                <img
+                                  src={Array.isArray(car.images) ? car.images[0] : car.images}
+                                  alt={getCarTitle(car)}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = "/placeholder.svg";
+                                  }}
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                                  <span className="text-gray-400">No image available</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          <p className="text-lg font-bold text-[#007ac8] mb-2">
-                            {formatPrice(car.price)}
-                          </p>
-                          <div className="text-sm text-gray-600 space-y-1">
-                            <p>Year: {car.year}</p>
-                            {car.mileage && <p>Mileage: {car.mileage.toLocaleString()} km</p>}
-                            {car.location && <p>Location: {car.location}</p>}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  ))}
+                          <CardContent className="p-4">
+                            <h3 className="font-semibold text-lg line-clamp-1">
+                              {getCarTitle(car)}
+                            </h3>
+                            <p className="text-lg font-bold text-[#007ac8] mb-2">
+                              {formatPrice(car.price)}
+                            </p>
+                            <div className="text-sm text-gray-600 space-y-1">
+                              {car.year && <p>Year: {car.year}</p>}
+                              {car.mileage && <p>Mileage: {car.mileage.toLocaleString()} km</p>}
+                              {car.location && <p>Location: {car.location}</p>}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    ))}
                 </div>
                 
                 {/* Pagination */}
