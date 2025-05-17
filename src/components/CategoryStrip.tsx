@@ -80,6 +80,11 @@ const CategoryStrip = () => {
     });
   };
 
+  // Function to navigate to Snap AI page
+  const navigateToSnapAI = () => {
+    navigate('/snap-ai');
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 relative">
       <div className="relative">
@@ -132,8 +137,11 @@ const CategoryStrip = () => {
       </div>
 
       <div className="text-center mt-4">
-        <a href="#" className="text-[#007ac8] hover:text-[#0069b4] font-semibold">
-          New: Quiz for a car match
+        <a 
+          onClick={navigateToSnapAI}
+          className="text-[#007ac8] hover:text-[#0069b4] font-semibold cursor-pointer"
+        >
+          NEW: TRY AI NOW
         </a>
       </div>
     </div>
