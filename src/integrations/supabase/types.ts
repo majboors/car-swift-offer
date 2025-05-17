@@ -286,6 +286,18 @@ export type Database = {
         Args: { user_id_input: string }
         Returns: undefined
       }
+      admin_approve_listing: {
+        Args: { listing_id: string }
+        Returns: boolean
+      }
+      admin_reject_listing: {
+        Args: { listing_id: string }
+        Returns: boolean
+      }
+      admin_toggle_showcase: {
+        Args: { listing_id: string; showcase_value: boolean }
+        Returns: boolean
+      }
       delete_notification: {
         Args: { p_notification_id: string; p_admin_id: string }
         Returns: boolean

@@ -148,35 +148,23 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
 
   const handleApprove = async (id: string) => {
     try {
-      console.log(`Starting approval process for listing ${id}...`);
+      console.log(`Starting approval process for listing ${id} using admin_approve_listing function...`);
       
-      // Get the current listing data for logging purposes
-      const { data: currentListing, error: fetchError } = await supabase
-        .from("car_listings")
-        .select("id, title, make, model, status")
-        .eq("id", id)
-        .single();
-        
-      if (fetchError) {
-        console.error("Error fetching current listing data:", fetchError);
-      } else {
-        console.log("Current listing before approval:", currentListing);
-      }
-      
-      // Update the status in the database
-      console.log(`Sending approval update to database for listing ${id}...`);
-      const { data: updatedData, error } = await supabase
-        .from("car_listings")
-        .update({ status: 'approved' })
-        .eq("id", id)
-        .select();
+      // Call the admin_approve_listing function to bypass RLS
+      const { data, error } = await supabase
+        .rpc('admin_approve_listing', { listing_id: id });
 
       if (error) {
         console.error("Database error during approval:", error);
         throw error;
       }
 
-      console.log(`Database update successful for listing ${id}. Updated data:`, updatedData);
+      if (data === false) {
+        console.warn("Admin function returned false - no rows updated");
+        throw new Error("Failed to update listing status");
+      }
+
+      console.log(`Database update successful for listing ${id} using admin function. Result:`, data);
 
       // Update local state immediately after successful database update
       setListings(prev =>
@@ -211,6 +199,11 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
         console.log("Verified listing after approval:", verifyListing);
         if (verifyListing.status !== 'approved') {
           console.error("WARNING: Listing status is still not 'approved' after update!");
+          toast({
+            title: "Warning",
+            description: "The listing may not have been updated correctly. Please check the status.",
+            variant: "destructive"
+          });
         }
       }
       
@@ -226,20 +219,23 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
   
   const handleReject = async (id: string) => {
     try {
-      console.log(`Rejecting listing ${id}...`);
+      console.log(`Rejecting listing ${id} using admin_reject_listing function...`);
       
-      // Update the status in the database
-      const { error } = await supabase
-        .from("car_listings")
-        .update({ status: 'rejected' })
-        .eq("id", id);
+      // Call the admin_reject_listing function to bypass RLS
+      const { data, error } = await supabase
+        .rpc('admin_reject_listing', { listing_id: id });
 
       if (error) {
         console.error("Database error during rejection:", error);
         throw error;
       }
 
-      console.log(`Database update successful for listing ${id}`);
+      if (data === false) {
+        console.warn("Admin function returned false - no rows updated");
+        throw new Error("Failed to update listing status");
+      }
+
+      console.log(`Database update successful for listing ${id} using admin function`);
 
       // Update local state immediately after successful database update
       setListings(prev =>
@@ -329,14 +325,26 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
 
   const handleShowcaseToggle = async (id: string, value: boolean) => {
     try {
-      console.log(`Setting listing ${id} showcase to ${value}`);
+      console.log(`Setting listing ${id} showcase to ${value} using admin_toggle_showcase function...`);
       
-      const { error } = await supabase
-        .from("car_listings")
-        .update({ showcase: value })
-        .eq("id", id);
+      // Call the admin_toggle_showcase function to bypass RLS
+      const { data, error } = await supabase
+        .rpc('admin_toggle_showcase', { 
+          listing_id: id,
+          showcase_value: value 
+        });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Database error during showcase toggle:", error);
+        throw error;
+      }
+      
+      if (data === false) {
+        console.warn("Admin function returned false - no rows updated");
+        throw new Error("Failed to update showcase status");
+      }
+
+      console.log(`Database update successful for listing ${id} showcase status using admin function`);
 
       // Update local state
       setListings(prev =>

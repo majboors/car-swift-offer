@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Listing } from "@/types/admin";
 import { Check, X, Star } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { useState } from "react";
+import { toast } from "@/hooks/use-toast";
 
 interface ListingTableRowProps {
   listing: Listing;
@@ -23,6 +25,16 @@ export const ListingTableRow = ({
   onReject,
   onShowcaseToggle
 }: ListingTableRowProps) => {
+  const [isLoading, setIsLoading] = useState<{
+    approve: boolean;
+    reject: boolean;
+    showcase: boolean;
+  }>({
+    approve: false,
+    reject: false,
+    showcase: false
+  });
+
   const getStatusBadge = () => {
     switch(listing.status) {
       case 'pending':
@@ -38,6 +50,66 @@ export const ListingTableRow = ({
 
   const isPremium = listing.package_level === 3;
   const isShowcase = listing.showcase === true;
+  
+  const handleApprove = async (id: string) => {
+    try {
+      setIsLoading(prev => ({ ...prev, approve: true }));
+      console.log(`Approve button clicked for listing ${id}`);
+      
+      if (onApprove) {
+        await onApprove(id);
+      }
+    } catch (error) {
+      console.error("Error in approve handler:", error);
+      toast({
+        title: "Error",
+        description: "Failed to approve listing. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(prev => ({ ...prev, approve: false }));
+    }
+  };
+  
+  const handleReject = async (id: string) => {
+    try {
+      setIsLoading(prev => ({ ...prev, reject: true }));
+      console.log(`Reject button clicked for listing ${id}`);
+      
+      if (onReject) {
+        await onReject(id);
+      }
+    } catch (error) {
+      console.error("Error in reject handler:", error);
+      toast({
+        title: "Error",
+        description: "Failed to reject listing. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(prev => ({ ...prev, reject: false }));
+    }
+  };
+  
+  const handleShowcaseToggle = async (id: string, value: boolean) => {
+    try {
+      setIsLoading(prev => ({ ...prev, showcase: true }));
+      console.log(`Showcase toggle clicked for listing ${id}, value: ${value}`);
+      
+      if (onShowcaseToggle) {
+        await onShowcaseToggle(id, value);
+      }
+    } catch (error) {
+      console.error("Error in showcase toggle handler:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update showcase status. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(prev => ({ ...prev, showcase: false }));
+    }
+  };
 
   return (
     <TableRow key={listing.id}>
@@ -64,12 +136,10 @@ export const ListingTableRow = ({
               variant="outline" 
               size="sm"
               className="bg-green-100 hover:bg-green-200 text-green-800 border-green-300"
-              onClick={() => {
-                console.log(`Approve button clicked for listing ${listing.id}`);
-                onApprove(listing.id);
-              }}
+              onClick={() => handleApprove(listing.id)}
+              disabled={isLoading.approve}
             >
-              <Check className="h-4 w-4 mr-1" /> Approve
+              <Check className="h-4 w-4 mr-1" /> {isLoading.approve ? 'Processing...' : 'Approve'}
             </Button>
           )}
           
@@ -79,9 +149,10 @@ export const ListingTableRow = ({
               variant="outline" 
               size="sm"
               className="bg-red-100 hover:bg-red-200 text-red-800 border-red-300"
-              onClick={() => onReject(listing.id)}
+              onClick={() => handleReject(listing.id)}
+              disabled={isLoading.reject}
             >
-              <X className="h-4 w-4 mr-1" /> Reject
+              <X className="h-4 w-4 mr-1" /> {isLoading.reject ? 'Processing...' : 'Reject'}
             </Button>
           )}
           
@@ -91,12 +162,10 @@ export const ListingTableRow = ({
               variant="outline" 
               size="sm"
               className="bg-green-100 hover:bg-green-200 text-green-800 border-green-300"
-              onClick={() => {
-                console.log(`Re-approve button clicked for rejected listing ${listing.id}`);
-                onApprove(listing.id);
-              }}
+              onClick={() => handleApprove(listing.id)}
+              disabled={isLoading.approve}
             >
-              <Check className="h-4 w-4 mr-1" /> Approve
+              <Check className="h-4 w-4 mr-1" /> {isLoading.approve ? 'Processing...' : 'Approve'}
             </Button>
           )}
           
@@ -106,14 +175,15 @@ export const ListingTableRow = ({
               <Switch 
                 id={`showcase-${listing.id}`}
                 checked={isShowcase} 
-                onCheckedChange={(checked) => onShowcaseToggle(listing.id, checked)}
+                onCheckedChange={(checked) => handleShowcaseToggle(listing.id, checked)}
                 className="data-[state=checked]:bg-[#007ac8]"
+                disabled={isLoading.showcase}
               />
               <label 
                 htmlFor={`showcase-${listing.id}`} 
                 className="text-xs whitespace-nowrap cursor-pointer"
               >
-                Showcase
+                {isLoading.showcase ? 'Updating...' : 'Showcase'}
               </label>
             </div>
           )}

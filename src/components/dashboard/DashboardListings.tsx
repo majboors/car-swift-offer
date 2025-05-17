@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, MessageSquareIcon } from 'lucide-react';
+import { Loader2, MessageSquareIcon, CheckCircle, AlertCircle, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Listing {
@@ -17,6 +17,7 @@ interface Listing {
   make: string;
   model: string;
   images: string[] | any; // Updated to accept any to handle JSON
+  status: string; // Added status field
 }
 
 interface UnreadCount {
@@ -109,6 +110,18 @@ const DashboardListings = () => {
     return () => clearInterval(interval);
   }, [user]);
 
+  const getListingStatusIcon = (status: string) => {
+    switch (status) {
+      case 'approved':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'rejected':
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
+      case 'pending':
+      default:
+        return <Clock className="h-4 w-4 text-amber-500" />;
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -140,13 +153,17 @@ const DashboardListings = () => {
         {listings.map(listing => {
           // Check if this listing has unread messages
           const hasUnread = unreadCounts[listing.id] && unreadCounts[listing.id] > 0;
+          const isPending = listing.status === 'pending';
+          const isRejected = listing.status === 'rejected';
           
           return (
             <Card 
               key={listing.id} 
               className={cn(
                 "overflow-hidden hover:shadow-lg transition-shadow border",
-                hasUnread ? "border-primary border-2" : "border-border"
+                hasUnread ? "border-primary border-2" : 
+                isPending ? "border-amber-400 border-2" :
+                isRejected ? "border-red-400 border-2" : "border-border"
               )}
             >
               <div className="aspect-w-16 aspect-h-9 bg-gray-100">
@@ -168,22 +185,28 @@ const DashboardListings = () => {
               
               <CardHeader className={cn(
                 "pb-2",
-                hasUnread ? "bg-primary/5" : ""
+                hasUnread ? "bg-primary/5" : 
+                isPending ? "bg-amber-50" : 
+                isRejected ? "bg-red-50" : ""
               )}>
                 <CardTitle className="text-lg flex justify-between items-center">
                   <Link to={`/listing/${listing.id}`} className="hover:text-primary">
                     {listing.title || `${listing.year} ${listing.make} ${listing.model}`}
                   </Link>
                   
-                  {hasUnread && (
-                    <span 
-                      className="bg-red-500 text-white flex items-center gap-1 px-2 py-1 rounded-full text-xs"
-                      aria-label={`${unreadCounts[listing.id]} unread messages`}
-                    >
-                      <MessageSquareIcon className="h-3 w-3" />
-                      {unreadCounts[listing.id]}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {getListingStatusIcon(listing.status)}
+                    
+                    {hasUnread && (
+                      <span 
+                        className="bg-red-500 text-white flex items-center gap-1 px-2 py-1 rounded-full text-xs"
+                        aria-label={`${unreadCounts[listing.id]} unread messages`}
+                      >
+                        <MessageSquareIcon className="h-3 w-3" />
+                        {unreadCounts[listing.id]}
+                      </span>
+                    )}
+                  </div>
                 </CardTitle>
               </CardHeader>
               
@@ -191,6 +214,19 @@ const DashboardListings = () => {
                 <p className="font-semibold text-lg text-primary">
                   {formatCurrency(listing.price)}
                 </p>
+                
+                <div className="mt-2 mb-3">
+                  <div className={cn(
+                    "text-xs px-2 py-1 rounded-full inline-block",
+                    isPending ? "bg-amber-100 text-amber-800" : 
+                    isRejected ? "bg-red-100 text-red-800" :
+                    "bg-green-100 text-green-800"
+                  )}>
+                    {isPending ? "Pending Review" : 
+                     isRejected ? "Rejected" : 
+                     "Approved"}
+                  </div>
+                </div>
                 
                 <div className="mt-4 flex justify-between">
                   <Link 
