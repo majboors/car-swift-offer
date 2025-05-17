@@ -40,23 +40,23 @@ const sellDropdownItems = [
 ];
 
 const researchDropdownItems = [
-  { title: "Research all cars", href: "/" },
-  { title: "All news and reviews", href: "/" },
-  { title: "News", href: "/" },
-  { title: "Reviews", href: "/" },
-  { title: "Advice", href: "/" },
-  { title: "Best cars", href: "/" },
-  { title: "Owner reviews", href: "/" },
-  { title: "Compare cars", href: "/" },
-  { title: "Electric cars", href: "/" },
-  { title: "Car of the year", href: "/" },
+  { title: "Research all cars", href: "/search?researchType=all" },
+  { title: "All news and reviews", href: "/search?researchType=news-reviews" },
+  { title: "News", href: "/search?researchType=news" },
+  { title: "Reviews", href: "/search?researchType=reviews" },
+  { title: "Advice", href: "/search?researchType=advice" },
+  { title: "Best cars", href: "/search?researchType=best" },
+  { title: "Owner reviews", href: "/search?researchType=owner-reviews" },
+  { title: "Compare cars", href: "/search?researchType=compare" },
+  { title: "Electric cars", href: "/search?fuelType=electric" },
+  { title: "Car of the year", href: "/search?researchType=car-of-year" },
 ];
 
 const showroomDropdownItems = [
-  { title: "Showroom", href: "/" },
-  { title: "Electric cars", href: "/" },
-  { title: "Certified pre-owned", href: "/" },
-  { title: "New car calendar", href: "/" },
+  { title: "Showroom", href: "/search?showroom=all" },
+  { title: "Electric cars", href: "/search?fuelType=electric" },
+  { title: "Certified pre-owned", href: "/search?certified=true" },
+  { title: "New car calendar", href: "/search?calendar=new" },
 ];
 
 const popularMakes = [
@@ -115,8 +115,8 @@ export function Navbar() {
             <Link to="/" className="mr-6 flex items-center space-x-2">
               <img 
                 src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg" 
-                alt="CarTrade"
-                className="h-10 w-auto"
+                alt="Snap My Car"
+                className="h-12 w-auto" 
               />
             </Link>
             <nav className="hidden md:flex gap-6 items-center">
@@ -220,7 +220,7 @@ export function Navbar() {
                           <ul className="grid grid-cols-2 gap-2">
                             {popularMakes.map((make) => (
                               <li key={make}>
-                                <Link to="/" className="text-sm hover:text-primary">
+                                <Link to={`/search?make=${make}`} className="text-sm hover:text-primary">
                                   {make}
                                 </Link>
                               </li>
@@ -253,7 +253,7 @@ export function Navbar() {
                           <ul className="space-y-2">
                             {bodyTypes.map((type) => (
                               <li key={type}>
-                                <Link to="/" className="text-sm hover:text-primary">
+                                <Link to={`/search?bodyType=${type}`} className="text-sm hover:text-primary">
                                   {type}
                                 </Link>
                               </li>
@@ -271,7 +271,7 @@ export function Navbar() {
                     </Link>
                   </NavigationMenuItem>
                   
-                  {/* Snap-AI (renamed from AI Car ID) */}
+                  {/* Snap-AI */}
                   <NavigationMenuItem>
                     <Link to="/snap-ai" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
                       Snap-AI
@@ -288,8 +288,8 @@ export function Navbar() {
             <Link to="/" className="flex items-center">
               <img 
                 src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg" 
-                alt="CarTrade"
-                className="h-8 w-auto"
+                alt="Snap My Car"
+                className="h-10 w-auto" 
               />
             </Link>
           </div>
@@ -332,9 +332,11 @@ export function Navbar() {
                       Sign In
                     </Button>
                   </Link>
-                  <Button size="sm" variant="default" className="ml-2">
-                    Sell my car
-                  </Button>
+                  <Link to="/add-listing">
+                    <Button size="sm" variant="default" className="ml-2">
+                      Sell my car
+                    </Button>
+                  </Link>
                 </>
               )}
             </nav>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from "react-router-dom";
 import { Home, CarFront, Plus, LogOut, LogIn, ChevronDown, ChevronUp, Bell, ShoppingBag, Search, CircleHelp, User, Camera } from "lucide-react";
@@ -53,41 +54,41 @@ export function MobileSidebar({ onNavItemClick }: MobileSidebarProps) {
 
   // Navigation items for dropdown menus
   const buyDropdownItems = [
-    { title: "All cars for sale", href: "/" },
-    { title: "New cars", href: "/" },
-    { title: "Used cars", href: "/" },
-    { title: "Dealer cars", href: "/" },
-    { title: "Private seller cars", href: "/" },
-    { title: "Electric cars", href: "/" },
-    { title: "Finance", href: "/" },
-    { title: "Inspections", href: "/" },
+    { title: "All cars for sale", href: "/search" },
+    { title: "New cars", href: "/search?condition=new" },
+    { title: "Used cars", href: "/search?condition=used" },
+    { title: "Dealer cars", href: "/search?sellerType=dealer" },
+    { title: "Private seller cars", href: "/search?sellerType=private" },
+    { title: "Electric cars", href: "/search?fuelType=electric" },
+    { title: "Finance", href: "/search?financeAvailable=true" },
+    { title: "Inspections", href: "/search?inspected=true" },
   ];
 
   const sellDropdownItems = [
-    { title: "Create an ad", href: "/" },
-    { title: "Get an Instant Offer™", href: "/" },
-    { title: "Manage my ad", href: "/" },
+    { title: "Create an ad", href: "/add-listing" },
+    { title: "Get an Instant Offer™", href: "/add-listing" },
+    { title: "Manage my ad", href: "/add-listing" },
     { title: "Value my car", href: "/value-my-car" },
   ];
 
   const researchDropdownItems = [
-    { title: "Research all cars", href: "/" },
-    { title: "All news and reviews", href: "/" },
-    { title: "News", href: "/" },
-    { title: "Reviews", href: "/" },
-    { title: "Advice", href: "/" },
-    { title: "Best cars", href: "/" },
-    { title: "Owner reviews", href: "/" },
-    { title: "Compare cars", href: "/" },
-    { title: "Electric cars", href: "/" },
-    { title: "Car of the year", href: "/" },
+    { title: "Research all cars", href: "/search?researchType=all" },
+    { title: "All news and reviews", href: "/search?researchType=news-reviews" },
+    { title: "News", href: "/search?researchType=news" },
+    { title: "Reviews", href: "/search?researchType=reviews" },
+    { title: "Advice", href: "/search?researchType=advice" },
+    { title: "Best cars", href: "/search?researchType=best" },
+    { title: "Owner reviews", href: "/search?researchType=owner-reviews" },
+    { title: "Compare cars", href: "/search?researchType=compare" },
+    { title: "Electric cars", href: "/search?fuelType=electric" },
+    { title: "Car of the year", href: "/search?researchType=car-of-year" },
   ];
 
   const showroomDropdownItems = [
-    { title: "Showroom", href: "/" },
-    { title: "Electric cars", href: "/" },
-    { title: "Certified pre-owned", href: "/" },
-    { title: "New car calendar", href: "/" },
+    { title: "Showroom", href: "/search?showroom=all" },
+    { title: "Electric cars", href: "/search?fuelType=electric" },
+    { title: "Certified pre-owned", href: "/search?certified=true" },
+    { title: "New car calendar", href: "/search?calendar=new" },
   ];
 
   const popularMakes = [
@@ -127,7 +128,11 @@ export function MobileSidebar({ onNavItemClick }: MobileSidebarProps) {
     <div className="h-full bg-white overflow-y-auto touch-manipulation flex flex-col">
       <div className="border-b p-4 flex items-center justify-between">
         <Link to="/" onClick={() => handleNavItemClick('/')}>
-          <span className="font-bold inline-block">CarTrade</span>
+          <img 
+            src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg" 
+            alt="Snap My Car"
+            className="h-10 w-auto" 
+          />
         </Link>
         {user && (
           <div className="flex items-center gap-2">
@@ -189,8 +194,9 @@ export function MobileSidebar({ onNavItemClick }: MobileSidebarProps) {
                     {popularMakes.slice(0, 6).map((make) => (
                       <Link 
                         key={make} 
-                        to="/cars" 
+                        to={`/search?make=${make}`} 
                         className="block py-1.5 text-gray-700 active:text-[#007ac8] touch-manipulation"
+                        onClick={() => handleNavItemClick(`/search?make=${make}`)}
                       >
                         {make}
                       </Link>
@@ -201,8 +207,9 @@ export function MobileSidebar({ onNavItemClick }: MobileSidebarProps) {
                     {bodyTypes.slice(0, 5).map((type) => (
                       <Link 
                         key={type} 
-                        to="/cars" 
+                        to={`/search?bodyType=${type}`}
                         className="block py-1.5 text-gray-700 active:text-[#007ac8] touch-manipulation"
+                        onClick={() => handleNavItemClick(`/search?bodyType=${type}`)}
                       >
                         {type}
                       </Link>
@@ -213,8 +220,9 @@ export function MobileSidebar({ onNavItemClick }: MobileSidebarProps) {
                     {locations.slice(0, 5).map((location) => (
                       <Link 
                         key={location} 
-                        to="/cars" 
+                        to={`/search?location=${location}`} 
                         className="block py-1.5 text-gray-700 active:text-[#007ac8] touch-manipulation"
+                        onClick={() => handleNavItemClick(`/search?location=${location}`)}
                       >
                         {location}
                       </Link>
@@ -245,7 +253,11 @@ export function MobileSidebar({ onNavItemClick }: MobileSidebarProps) {
                 <div className="ml-8 mt-2 border-l pl-4 space-y-2">
                   {sellDropdownItems.map((item) => (
                     <div key={item.title}>
-                      <Link to={item.href} className="block py-1.5 text-gray-700 active:text-[#007ac8] touch-manipulation">
+                      <Link 
+                        to={item.href} 
+                        className="block py-1.5 text-gray-700 active:text-[#007ac8] touch-manipulation"
+                        onClick={() => handleNavItemClick(item.href)}
+                      >
                         {item.title}
                       </Link>
                     </div>
@@ -275,7 +287,11 @@ export function MobileSidebar({ onNavItemClick }: MobileSidebarProps) {
                 <div className="ml-8 mt-2 border-l pl-4 space-y-2">
                   {researchDropdownItems.map((item) => (
                     <div key={item.title}>
-                      <Link to={item.href} className="block py-1.5 text-gray-700 active:text-[#007ac8] touch-manipulation">
+                      <Link 
+                        to={item.href} 
+                        className="block py-1.5 text-gray-700 active:text-[#007ac8] touch-manipulation"
+                        onClick={() => handleNavItemClick(item.href)}
+                      >
                         {item.title}
                       </Link>
                     </div>
@@ -285,8 +301,9 @@ export function MobileSidebar({ onNavItemClick }: MobileSidebarProps) {
                     {popularMakes.slice(0, 4).map((make) => (
                       <Link 
                         key={make} 
-                        to="/research" 
+                        to={`/search?make=${make}`} 
                         className="block py-1.5 text-gray-700 active:text-[#007ac8] touch-manipulation"
+                        onClick={() => handleNavItemClick(`/search?make=${make}`)}
                       >
                         {make}
                       </Link>
@@ -317,7 +334,11 @@ export function MobileSidebar({ onNavItemClick }: MobileSidebarProps) {
                 <div className="ml-8 mt-2 border-l pl-4 space-y-2">
                   {showroomDropdownItems.map((item) => (
                     <div key={item.title}>
-                      <Link to={item.href} className="block py-1.5 text-gray-700 active:text-[#007ac8] touch-manipulation">
+                      <Link 
+                        to={item.href} 
+                        className="block py-1.5 text-gray-700 active:text-[#007ac8] touch-manipulation"
+                        onClick={() => handleNavItemClick(item.href)}
+                      >
                         {item.title}
                       </Link>
                     </div>
@@ -327,8 +348,9 @@ export function MobileSidebar({ onNavItemClick }: MobileSidebarProps) {
                     {bodyTypes.slice(0, 4).map((type) => (
                       <Link 
                         key={type} 
-                        to="/showroom" 
+                        to={`/search?bodyType=${type}`} 
                         className="block py-1.5 text-gray-700 active:text-[#007ac8] touch-manipulation"
+                        onClick={() => handleNavItemClick(`/search?bodyType=${type}`)}
                       >
                         {type}
                       </Link>
@@ -379,9 +401,9 @@ export function MobileSidebar({ onNavItemClick }: MobileSidebarProps) {
               
               <div>
                 <Link 
-                  to="/account" 
-                  className={`flex items-center gap-3 py-2 ${isCurrentPath('/account') ? 'text-[#007ac8] font-medium' : 'text-gray-700'} touch-manipulation`}
-                  onClick={() => handleNavItemClick('/account')}
+                  to="/dashboard" 
+                  className={`flex items-center gap-3 py-2 ${isCurrentPath('/dashboard') ? 'text-[#007ac8] font-medium' : 'text-gray-700'} touch-manipulation`}
+                  onClick={() => handleNavItemClick('/dashboard')}
                 >
                   <User className="h-5 w-5" />
                   <span className="text-base">My Account</span>
@@ -414,9 +436,9 @@ export function MobileSidebar({ onNavItemClick }: MobileSidebarProps) {
           
           <div>
             <Link 
-              to="/help" 
+              to="/contact-us" 
               className="flex items-center gap-3 py-2 text-gray-700 touch-manipulation"
-              onClick={() => handleNavItemClick('/help')}
+              onClick={() => handleNavItemClick('/contact-us')}
             >
               <CircleHelp className="h-5 w-5" />
               <span className="text-base">Help</span>

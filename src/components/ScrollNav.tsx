@@ -49,8 +49,8 @@ const ScrollNav: React.FC<{ visible: boolean }> = ({ visible }) => {
           <Link to="/" className="mr-6 flex items-center space-x-2">
             <img
               src="https://i.ibb.co/FqhBrfc1/Whats-App-Image-2025-04-24-at-16-33-19.jpg"
-              alt="CarTrade"
-              className="h-8 w-auto"
+              alt="Snap My Car"
+              className="h-10 w-auto"
             />
           </Link>
           <nav className="hidden md:flex gap-4 items-center">
@@ -101,10 +101,10 @@ const ScrollNav: React.FC<{ visible: boolean }> = ({ visible }) => {
                   </Link>
                 </NavigationMenuItem>
                 
-                {/* AI Car ID - Direct Link */}
+                {/* Snap-AI - Direct Link */}
                 <NavigationMenuItem>
-                  <Link to="/api-testing" className="text-sm block select-none rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                    AI Car ID
+                  <Link to="/snap-ai" className="text-sm block select-none rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                    Snap-AI
                   </Link>
                 </NavigationMenuItem>
               </NavigationMenuList>
@@ -162,9 +162,11 @@ const ScrollNav: React.FC<{ visible: boolean }> = ({ visible }) => {
                     Sign In
                   </Button>
                 </Link>
-                <Button size="sm" variant="default" className="h-8 px-3 py-0 text-xs">
-                  Sell my car
-                </Button>
+                <Link to="/add-listing">
+                  <Button size="sm" variant="default" className="h-8 px-3 py-0 text-xs">
+                    Sell my car
+                  </Button>
+                </Link>
               </>
             )}
           </nav>

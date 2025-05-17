@@ -19,6 +19,7 @@ import SearchResults from "./pages/SearchResults";
 import SnapAI from "./pages/SnapAI";
 import AboutUs from "./pages/AboutUs";
 import ContactUs from "./pages/ContactUs";
+import Account from "./pages/Account";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => (
               <Route path="/snap-ai" element={<SnapAI />} />
               <Route path="/about-us" element={<AboutUs />} />
               <Route path="/contact-us" element={<ContactUs />} />
+              <Route path="/account" element={<Account />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
