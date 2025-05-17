@@ -286,6 +286,23 @@ export type Database = {
         Args: { user_id_input: string }
         Returns: undefined
       }
+      delete_notification: {
+        Args: { p_notification_id: string; p_admin_id: string }
+        Returns: boolean
+      }
+      get_all_notifications: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          title: string
+          message: string
+          created_at: string
+          expires_at: string
+          is_global: boolean
+          target_locations: string[]
+          admin_email: string
+        }[]
+      }
       get_all_users: {
         Args: Record<PropertyKey, never>
         Returns: {

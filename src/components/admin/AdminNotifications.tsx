@@ -18,7 +18,9 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Bell, Send, Clock } from "lucide-react";
+import { Bell, Send, Clock, List } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import NotificationsTable from "./NotificationsTable";
 
 const locations = [
   'ACT', 'NSW', 'NT', 'QLD', 'SA', 'TAS', 'VIC', 'WA'
@@ -169,125 +171,150 @@ export default function AdminNotifications() {
     }
   };
 
+  // Handle notifications refresh when a notification is deleted
+  const handleNotificationDeleted = () => {
+    toast({
+      title: "Success",
+      description: "Notification deleted successfully",
+    });
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-2xl font-bold">Send Notifications</CardTitle>
+        <CardTitle className="text-2xl font-bold">Notifications Management</CardTitle>
         <Bell className="h-5 w-5 text-muted-foreground" />
       </CardHeader>
       
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="title">Notification Title</Label>
-            <Input
-              id="title"
-              placeholder="Enter notification title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-          </div>
+        <Tabs defaultValue="send" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="send" className="flex items-center gap-2">
+              <Send className="h-4 w-4" /> Send Notifications
+            </TabsTrigger>
+            <TabsTrigger value="manage" className="flex items-center gap-2">
+              <List className="h-4 w-4" /> Manage Notifications
+            </TabsTrigger>
+          </TabsList>
           
-          <div className="space-y-2">
-            <Label htmlFor="message">Notification Message</Label>
-            <Textarea
-              id="message"
-              placeholder="Enter notification message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              required
-              rows={4}
-            />
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <Switch 
-              id="global-notification" 
-              checked={isGlobal} 
-              onCheckedChange={handleGlobalChange} 
-            />
-            <Label htmlFor="global-notification">Send to all users (global notification)</Label>
-          </div>
-          
-          {!isGlobal && (
-            <div className="space-y-2">
-              <Label>Target Locations</Label>
-              <div className="grid grid-cols-4 gap-2">
-                {locations.map((location) => (
-                  <div key={location} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id={`location-${location}`}
-                      checked={selectedLocations.includes(location)}
-                      onChange={() => handleLocationChange(location)}
-                      className="rounded border-gray-300"
-                    />
-                    <label htmlFor={`location-${location}`}>{location}</label>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              <Label htmlFor="duration">Notification Duration</Label>
-            </div>
-            <Select value={duration} onValueChange={handleDurationChange}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select duration" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Duration Options</SelectLabel>
-                  {durationOptions.map(option => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                  <SelectItem value="custom">Custom duration (hours)</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            
-            {duration === "custom" && (
-              <div className="mt-2">
-                <Label htmlFor="custom-duration">Custom Duration (hours)</Label>
+          <TabsContent value="send" className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="title">Notification Title</Label>
                 <Input
-                  id="custom-duration"
-                  type="number"
-                  placeholder="Enter hours"
-                  min="1"
-                  value={customDuration}
-                  onChange={(e) => setCustomDuration(e.target.value)}
+                  id="title"
+                  placeholder="Enter notification title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
                 />
               </div>
-            )}
-            
-            {duration !== "0" && (
-              <div className="mt-2 text-sm text-muted-foreground">
-                <span className="font-medium">Expires at: </span>
-                {getExpirationPreview()}
+              
+              <div className="space-y-2">
+                <Label htmlFor="message">Notification Message</Label>
+                <Textarea
+                  id="message"
+                  placeholder="Enter notification message"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  required
+                  rows={4}
+                />
               </div>
-            )}
-          </div>
+              
+              <div className="flex items-center space-x-2">
+                <Switch 
+                  id="global-notification" 
+                  checked={isGlobal} 
+                  onCheckedChange={handleGlobalChange} 
+                />
+                <Label htmlFor="global-notification">Send to all users (global notification)</Label>
+              </div>
+              
+              {!isGlobal && (
+                <div className="space-y-2">
+                  <Label>Target Locations</Label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {locations.map((location) => (
+                      <div key={location} className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id={`location-${location}`}
+                          checked={selectedLocations.includes(location)}
+                          onChange={() => handleLocationChange(location)}
+                          className="rounded border-gray-300"
+                        />
+                        <label htmlFor={`location-${location}`}>{location}</label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <Label htmlFor="duration">Notification Duration</Label>
+                </div>
+                <Select value={duration} onValueChange={handleDurationChange}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select duration" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Duration Options</SelectLabel>
+                      {durationOptions.map(option => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="custom">Custom duration (hours)</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                
+                {duration === "custom" && (
+                  <div className="mt-2">
+                    <Label htmlFor="custom-duration">Custom Duration (hours)</Label>
+                    <Input
+                      id="custom-duration"
+                      type="number"
+                      placeholder="Enter hours"
+                      min="1"
+                      value={customDuration}
+                      onChange={(e) => setCustomDuration(e.target.value)}
+                    />
+                  </div>
+                )}
+                
+                {duration !== "0" && (
+                  <div className="mt-2 text-sm text-muted-foreground">
+                    <span className="font-medium">Expires at: </span>
+                    {getExpirationPreview()}
+                  </div>
+                )}
+              </div>
+              
+              <Button type="submit" disabled={loading} className="w-full">
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    Sending...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <Send className="h-4 w-4" />
+                    Send Notification
+                  </span>
+                )}
+              </Button>
+            </form>
+          </TabsContent>
           
-          <Button type="submit" disabled={loading} className="w-full">
-            {loading ? (
-              <span className="flex items-center gap-2">
-                <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                Sending...
-              </span>
-            ) : (
-              <span className="flex items-center gap-2">
-                <Send className="h-4 w-4" />
-                Send Notification
-              </span>
-            )}
-          </Button>
-        </form>
+          <TabsContent value="manage">
+            <NotificationsTable onNotificationDeleted={handleNotificationDeleted} />
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );
