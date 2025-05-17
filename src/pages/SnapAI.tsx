@@ -46,13 +46,25 @@ const extractJSON = (response: string): any => {
     // First try parsing directly as JSON
     return JSON.parse(response);
   } catch (e) {
-    // If that fails, try to extract JSON from markdown code blocks
     try {
-      // Look for content between triple backticks and json
+      // If that fails, try to extract JSON from markdown code blocks
       const jsonMatch = response.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
       if (jsonMatch && jsonMatch[1]) {
-        return JSON.parse(jsonMatch[1].trim());
+        // Try to parse the content inside the code block
+        const jsonContent = jsonMatch[1].trim();
+        return JSON.parse(jsonContent);
       }
+      
+      // If no code blocks are found, check if it's an error response with raw_response field
+      const errorObj = JSON.parse(response);
+      if (errorObj && errorObj.raw_response) {
+        // Try to extract JSON from the raw_response field which might contain markdown code blocks
+        const nestedJsonMatch = errorObj.raw_response.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+        if (nestedJsonMatch && nestedJsonMatch[1]) {
+          return JSON.parse(nestedJsonMatch[1].trim());
+        }
+      }
+      
       throw new Error("No JSON found in response");
     } catch (innerError) {
       console.error("Failed to extract JSON from response:", innerError);
@@ -774,8 +786,7 @@ const SnapAI = () => {
                       <div className="flex justify-center">
                         <Button 
                           variant="outline" 
-                          size="sm" 
-                          onClick={toggleRawApiResponse} 
+                          onClick={() => toggleRawApiResponse()} 
                           className="mb-4"
                         >
                           {showRawApiResponse ? 'Hide' : 'Show'} Raw API Response

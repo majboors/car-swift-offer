@@ -1,5 +1,4 @@
 
-
 // Re-export from our custom toast implementation
 import { toast as sonnerToast } from "sonner";
 
@@ -77,4 +76,3 @@ const toast = ({
 };
 
 export { useToast, toast };
-
