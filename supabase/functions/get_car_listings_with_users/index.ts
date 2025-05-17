@@ -95,8 +95,7 @@ serve(async (req) => {
     }
 
     console.log("Successfully fetched listings, count:", listings?.length || 0);
-    // Log the package levels to verify they're being returned correctly
-    console.log("Package levels:", listings?.map(l => ({ id: l.id, title: l.title, package_level: l.package_level })));
+    console.log("Listing statuses:", listings?.map(l => ({ id: l.id, status: l.status })));
 
     // Get all users for adding email using admin.listUsers()
     const { data, error: usersError } = await adminClient.auth.admin.listUsers();

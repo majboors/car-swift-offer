@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -93,6 +92,10 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
       if (onListingStatusChange) {
         onListingStatusChange();
       }
+
+      // Debug output to verify listing statuses
+      console.log("Fetched listings statuses:", result.map(l => ({ id: l.id, status: l.status })));
+      
     } catch (err) {
       console.error("Unexpected error fetching listings:", err);
       setFetchError("An unexpected error occurred");
@@ -144,13 +147,20 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
 
   const handleApprove = async (id: string) => {
     try {
-      // First update the status in the database
+      console.log(`Approving listing ${id}...`);
+      
+      // Update the status in the database
       const { error } = await supabase
         .from("car_listings")
         .update({ status: 'approved' })
         .eq("id", id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Database error during approval:", error);
+        throw error;
+      }
+
+      console.log(`Database update successful for listing ${id}`);
 
       // Update local state immediately after successful database update
       setListings(prev =>
@@ -182,13 +192,20 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
   
   const handleReject = async (id: string) => {
     try {
-      // First update the status in the database
+      console.log(`Rejecting listing ${id}...`);
+      
+      // Update the status in the database
       const { error } = await supabase
         .from("car_listings")
         .update({ status: 'rejected' })
         .eq("id", id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Database error during rejection:", error);
+        throw error;
+      }
+
+      console.log(`Database update successful for listing ${id}`);
 
       // Update local state immediately after successful database update
       setListings(prev =>
