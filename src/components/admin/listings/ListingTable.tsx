@@ -42,8 +42,8 @@ export const ListingTable = ({
   return (
     <div className="space-y-4">
       {pendingCount > 0 && (
-        <Alert variant="warning">
-          <InfoIcon className="h-4 w-4" />
+        <Alert variant="default" className="bg-amber-50 border-amber-200">
+          <InfoIcon className="h-4 w-4 text-amber-500" />
           <AlertTitle>Pending Listings</AlertTitle>
           <AlertDescription>
             There {pendingCount === 1 ? 'is' : 'are'} {pendingCount} listing{pendingCount === 1 ? '' : 's'} pending approval. Review them to make them visible to users.

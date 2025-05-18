@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -203,8 +202,8 @@ export default function AdminNotifications() {
           
           <TabsContent value="send" className="space-y-4">
             {showInfoAlert && (
-              <Alert variant="info" className="mb-4">
-                <InfoIcon className="h-4 w-4" />
+              <Alert variant="default" className="mb-4 bg-blue-50 border-blue-200">
+                <InfoIcon className="h-4 w-4 text-blue-500" />
                 <AlertTitle>Notification System Updated</AlertTitle>
                 <AlertDescription>
                   The notification system now ensures all users receive notifications. Global notifications are sent to all users, 
