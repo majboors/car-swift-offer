@@ -22,6 +22,7 @@ interface NotificationsContextType {
   fetchNotifications: () => Promise<void>;
   markAsRead: (notificationId: string) => Promise<void>;
   clearNotifications: () => void;
+  ensureUserProfile: () => Promise<void>;
 }
 
 const NotificationsContext = createContext<NotificationsContextType | undefined>(undefined);
@@ -36,6 +37,19 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
   const [networkErrorShown, setNetworkErrorShown] = useState(false);
   const maxRetries = 3;
 
+  // New function to ensure user has a profile
+  const ensureUserProfile = async () => {
+    if (!user) return;
+    
+    try {
+      // Call the function we created in the SQL migration
+      await supabase.rpc('ensure_user_profile', { user_id_input: user.id });
+      console.log("User profile check completed");
+    } catch (error: any) {
+      console.error("Error ensuring user profile:", error);
+    }
+  };
+
   const fetchNotifications = async () => {
     if (!user) {
       setNotifications([]);
@@ -48,6 +62,10 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
     setHasError(false);
     
     try {
+      // First ensure user has a profile
+      await ensureUserProfile();
+      
+      // Then fetch notifications
       const { data, error } = await supabase.rpc('get_user_notifications', { p_user_id: user.id });
       
       if (error) {
@@ -157,7 +175,10 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
   // Initial fetch and set up event listeners
   useEffect(() => {
     if (user) {
-      fetchNotifications();
+      // Call ensureUserProfile first before fetching notifications
+      ensureUserProfile().then(() => {
+        fetchNotifications();
+      });
       
       // Poll for new notifications less frequently (every 2 minutes)
       // to reduce network requests that might fail
@@ -181,7 +202,8 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
     hasError,
     fetchNotifications,
     markAsRead,
-    clearNotifications
+    clearNotifications,
+    ensureUserProfile
   };
 
   return <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>;

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,7 +9,9 @@ import TrustedBanner from '@/components/TrustedBanner';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 const locations = ['ACT', 'NSW', 'NT', 'QLD', 'SA', 'TAS', 'VIC', 'WA'];
+
 const Auth = () => {
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
@@ -26,6 +29,7 @@ const Auth = () => {
       localStorage.setItem('authRedirect', redirect);
     }
   }, []);
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -44,6 +48,24 @@ const Auth = () => {
           }
         });
         if (error) throw error;
+
+        // Ensure user profile with location is created
+        try {
+          // The trigger should handle this automatically, but we'll make an additional call
+          // to ensure the user's location is set properly
+          const { data: userData } = await supabase.auth.getUser();
+          if (userData.user) {
+            await supabase.rpc('ensure_user_profile', { user_id_input: userData.user.id });
+            
+            // Update the user's location in their profile
+            await supabase.from('user_profiles').update({
+              location: location
+            }).eq('id', userData.user.id);
+          }
+        } catch (profileError) {
+          console.error("Error setting user profile:", profileError);
+        }
+
         toast({
           title: "Success!",
           description: "Check your email for the confirmation link."
@@ -62,6 +84,16 @@ const Auth = () => {
           throw error;
         }
         console.log("Login successful:", data);
+        
+        // Ensure user profile exists
+        if (data.user) {
+          try {
+            await supabase.rpc('ensure_user_profile', { user_id_input: data.user.id });
+          } catch (profileError) {
+            console.error("Error ensuring user profile:", profileError);
+          }
+        }
+
         toast({
           title: "Success!",
           description: "You've been logged in."
@@ -102,6 +134,7 @@ const Auth = () => {
       console.error("Error creating default admin:", error);
     }
   };
+
   return <div className="flex flex-col min-h-screen">
       <TrustedBanner />
       <Navbar />
@@ -137,7 +170,7 @@ const Auth = () => {
                   <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
                     Your Location
                   </label>
-                  <Select value={location} onValueChange={setLocation}>
+                  <Select value={location} onValueChange={setLocation} required>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select your location" />
                     </SelectTrigger>
@@ -179,4 +212,5 @@ const Auth = () => {
       <Footer />
     </div>;
 };
+
 export default Auth;

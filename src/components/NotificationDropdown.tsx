@@ -20,7 +20,8 @@ export default function NotificationDropdown() {
     loading, 
     hasError, 
     markAsRead,
-    fetchNotifications 
+    fetchNotifications,
+    ensureUserProfile
   } = useNotifications();
   const [open, setOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -32,6 +33,8 @@ export default function NotificationDropdown() {
   const handleRefresh = async () => {
     try {
       setIsRefreshing(true);
+      // Ensure user profile exists before fetching notifications
+      await ensureUserProfile();
       await fetchNotifications();
     } catch (error) {
       showErrorToast("Failed to refresh notifications");

@@ -302,9 +302,17 @@ export type Database = {
         Args: { listing_id: string; showcase_value: boolean }
         Returns: boolean
       }
+      create_missing_user_profiles: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       delete_notification: {
         Args: { p_notification_id: string; p_admin_id: string }
         Returns: boolean
+      }
+      ensure_user_profile: {
+        Args: { user_id_input: string }
+        Returns: undefined
       }
       get_all_notifications: {
         Args: Record<PropertyKey, never>
