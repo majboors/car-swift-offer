@@ -83,7 +83,7 @@ const PageLoader: React.FC<PageLoaderProps> = ({ onLoaded }) => {
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white">
       <div className="flex items-center justify-center mb-8">
         <Shield className="w-16 h-16 mr-4 text-[#007ac8]" />
-        <h1 className="text-4xl md:text-5xl font-bold">Car Swift Offer</h1>
+        <h1 className="text-4xl md:text-5xl font-bold">Snap My Car AI</h1>
       </div>
       
       <div className="w-64 mb-4">
