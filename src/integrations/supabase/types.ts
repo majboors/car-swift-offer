@@ -27,6 +27,53 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics: {
+        Row: {
+          avg_time_on_page: number | null
+          bounce_rate: number | null
+          created_at: string
+          id: string
+          instance_id: string
+          page_views: number | null
+          referrer_data: Json | null
+          slug: string | null
+          unique_visitors: number | null
+          updated_at: string
+        }
+        Insert: {
+          avg_time_on_page?: number | null
+          bounce_rate?: number | null
+          created_at?: string
+          id?: string
+          instance_id: string
+          page_views?: number | null
+          referrer_data?: Json | null
+          slug?: string | null
+          unique_visitors?: number | null
+          updated_at?: string
+        }
+        Update: {
+          avg_time_on_page?: number | null
+          bounce_rate?: number | null
+          created_at?: string
+          id?: string
+          instance_id?: string
+          page_views?: number | null
+          referrer_data?: Json | null
+          slug?: string | null
+          unique_visitors?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       car_listings: {
         Row: {
           body_type: string | null
@@ -117,6 +164,118 @@ export type Database = {
           updated_at?: string
           user_id?: string
           year?: number
+        }
+        Relationships: []
+      }
+      content: {
+        Row: {
+          body: string
+          created_at: string
+          html_content: string | null
+          id: string
+          meta_description: string | null
+          meta_tags: Json | null
+          slug: string
+          title: string
+          topic_id: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          html_content?: string | null
+          id?: string
+          meta_description?: string | null
+          meta_tags?: Json | null
+          slug: string
+          title: string
+          topic_id: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          html_content?: string | null
+          id?: string
+          meta_description?: string | null
+          meta_tags?: Json | null
+          slug?: string
+          title?: string
+          topic_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      instance_settings: {
+        Row: {
+          colors: Json | null
+          created_at: string
+          id: string
+          image_file_path: string | null
+          image_url: string | null
+          instance_id: string
+          setting_type: number
+          updated_at: string
+        }
+        Insert: {
+          colors?: Json | null
+          created_at?: string
+          id?: string
+          image_file_path?: string | null
+          image_url?: string | null
+          instance_id: string
+          setting_type: number
+          updated_at?: string
+        }
+        Update: {
+          colors?: Json | null
+          created_at?: string
+          id?: string
+          image_file_path?: string | null
+          image_url?: string | null
+          instance_id?: string
+          setting_type?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "instance_settings_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      instances: {
+        Row: {
+          created_at: string
+          id: string
+          project_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          project_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          project_name?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -223,6 +382,44 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      topics: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          instance_id: string
+          title: string
+          topic_index: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          instance_id: string
+          title: string
+          topic_index: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          instance_id?: string
+          title?: string
+          topic_index?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "topics_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "instances"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_notifications: {
         Row: {
